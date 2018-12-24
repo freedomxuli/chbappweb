@@ -151,6 +151,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                         logdr["updatetime"] = time;
                         logdr["SaleRecordBelongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
                         logdr["ValidHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
+                        logdr["SaleRecordDiscount"] = Convert.ToDecimal(jsr["discount"].ToString());
                         logdt.Rows.Add(logdr);
                         dbc.InsertTable(logdt);
 

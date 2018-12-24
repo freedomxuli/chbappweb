@@ -70,7 +70,7 @@ var mxstore = Ext.create('Ext.data.Store', {
 
 //************************************页面方法***************************************
 function getUser(nPage) {
-    CS('CZCLZ.CWBBMag.GetZXZFList', function (retVal) {
+    CS('CZCLZ.CWBBMag.GetHCQList', function (retVal) {
         store.setData({
             data: retVal.dt,
             pageSize: pageSize,
@@ -80,8 +80,8 @@ function getUser(nPage) {
     }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_sc").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
 }
 
-function CKXSZB(userId) {
-    userId = userId;
+function CKXSZB(id) {
+    userId = id;
     var win = new XSZBList({ userId: userId });
     win.show(null, function () {
         getXSZBList(1);
@@ -89,7 +89,7 @@ function CKXSZB(userId) {
 }
 
 function getXSZBList(nPage) {
-    CS('CZCLZ.CWBBMag.getXSZBList', function (retVal) {
+    CS('CZCLZ.CWBBMag.getHCQXSZBList', function (retVal) {
         xszbstore.setData({
             data: retVal.dt,
             pageSize: pageSize,
@@ -100,7 +100,7 @@ function getXSZBList(nPage) {
 }
 
 function CKXSMX(userId,rq) {
-    CS('CZCLZ.CWBBMag.getXSMXList', function (retVal) {
+    CS('CZCLZ.CWBBMag.getHCQXSMXList', function (retVal) {
         var win = new MXList({ userId: userId ,rq:rq});
         win.show(null, function () {
             mxstore.loadData(retVal);
@@ -119,7 +119,7 @@ Ext.define('XSZBList', {
     layout: {
         type: 'fit'
     },
-    title: '自发券销售总表',
+    title: '耗材券销售总表',
     modal: true,
 
     initComponent: function () {
@@ -259,7 +259,7 @@ Ext.define('XSZBList', {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.getXSZBListToFile", "自放券销售总表.xls", userId);
+                                                        DownloadFile("CZCLZ.CWBBMag.getHCQXSZBListToFile", "耗材券销售总表.xls", userId, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                     }
                                                 },
                                             ]
@@ -299,12 +299,12 @@ Ext.define('XSZBList', {
 Ext.define('MXList', {
     extend: 'Ext.window.Window',
 
-    height: 422,
-    width: 620,
+    height: document.documentElement.clientHeight,
+    width: document.documentElement.clientWidth,
     layout: {
         type: 'fit'
     },
-    title: '自放券明细',
+    title: '耗材券明细',
     modal: true,
 
     initComponent: function () {
@@ -333,10 +333,10 @@ Ext.define('MXList', {
                                     {
                                         xtype: 'datecolumn',
                                         dataIndex: 'AddTime',
-                                        format: 'Y-m-d',
+                                        format: 'Y-m-d h:m:s',
                                         sortable: false,
                                         menuDisabled: true,
-                                        width: 100,
+                                        flex:1,
                                         text: '销售日期'
                                     },
                                         {
@@ -344,7 +344,7 @@ Ext.define('MXList', {
                                             dataIndex: 'Points',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '销售电子券'
                                         },
                                         {
@@ -352,7 +352,7 @@ Ext.define('MXList', {
                                             dataIndex: 'xfje',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '消费（已使用）金额'
                                         },
                                         {
@@ -360,7 +360,7 @@ Ext.define('MXList', {
                                             dataIndex: 'gqje',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '过期金额'
                                         },
                                         {
@@ -368,7 +368,7 @@ Ext.define('MXList', {
                                             dataIndex: 'wsyje',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '未使用金额'
                                         },
                                         {
@@ -376,7 +376,7 @@ Ext.define('MXList', {
                                             dataIndex: 'SaleRecordDiscount',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '折扣'
                                         },
                                         {
@@ -384,7 +384,7 @@ Ext.define('MXList', {
                                             dataIndex: 'UserName',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '购买三方账号'
                                         },
                                         {
@@ -393,7 +393,7 @@ Ext.define('MXList', {
                                             format: 'Y-m-d',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            flex: 1,
                                             text: '消费日期'
                                         }
                                     ],
@@ -411,7 +411,7 @@ Ext.define('MXList', {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.getXSMXListToFile", "自放券销售名明细表.xls", userId, rq);
+                                                        DownloadFile("CZCLZ.CWBBMag.getHCQXSMXListToFile", "耗材券销售名明细表.xls", userId, rq);
                                                     }
                                                 },
                                             ]
@@ -617,7 +617,7 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetZXZFListToFile", "自放券总表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_sc").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        DownloadFile("CZCLZ.CWBBMag.GetHCQListToFile", "耗材券总表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_sc").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                     }
                                                 },
                                             ]
@@ -638,7 +638,6 @@ Ext.onReady(function () {
     });
 
     new YhView();
-
 
     cx_yhm = Ext.getCmp("cx_yhm").getValue();
     cx_xm = Ext.getCmp("cx_xm").getValue();
