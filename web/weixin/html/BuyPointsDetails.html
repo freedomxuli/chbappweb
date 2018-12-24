@@ -1,0 +1,137 @@
+﻿
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>购买运费券</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<!--App自定义的css-->
+		<link rel="stylesheet" type="text/css" href="../css/app.css"/>
+	</head>
+	<body>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+                <br />
+				<h4 id="title"></h4>
+                <br />
+				<!--<p>
+					每票货物最高可抵扣500分。
+				</p>-->
+                <p style="color:red;">
+                    请输入大于50的整数，如剩余数量小于50，需一次性购买全部剩余数量
+				</p>
+                <br />
+                <div class="mui-input-row">
+					<input id="points" type="number" class="mui-input-clear" placeholder="填写需要购买的运费券">
+				</div>
+                <br />
+                <button type="button" class="mui-btn mui-btn-primary mui-btn-block" id="Pay" onclick="Pay();">确认订单</button>
+                <button type="button" class="mui-btn mui-btn-danger mui-btn-block" id="Cancel" onclick="Cancel();">取消订单</button>
+			</div>
+		</div>
+	</body>
+	<script src="../js/mui.min.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/jquery.1.9.1.js"></script>
+    <script type="text/javascript">
+        var jQuery = jQuery.noConflict();
+	</script>
+	<script>
+	    var maxpoints = 10000000000;
+	    mui.ready(function () {
+	        var UserName = localStorage.getItem("mgps_UserName");
+	        var PlatToSaleId = localStorage.getItem("PlatToSaleId");
+	        mui.ajax(grobal_url, {
+	            dataType: "json",
+	            type: "post",
+	            data: {
+	                "action": "GetPlatToSaleDetail",
+	                "UserName": UserName,
+	                "PlatToSaleId": PlatToSaleId
+	            },
+	            success: function (data, status, xhr) {
+	                if (data.sign == '1') {
+	                    maxpoints = data.dt[0]["points"];
+	                    jQuery("#title").html(data.dt[0]["UserXM"] + " <font style='color:red;'>" + data.dt[0]["points"] + "券 " + data.dt[0]["discountmemo"] + "</font> 运费券");
+	                } else {
+	                    mui.alert("获取失败！");
+	                }
+	            }
+	        });
+	    });
+
+	    function Pay()
+	    {
+	        if (jQuery("#points").val()) {
+	            if (localStorage.getItem("PlatToSaleId")) {
+	                var ex = /^\d+$/;
+	                if (ex.test(jQuery("#points").val())) {
+	                    if (maxpoints >= 50) {
+	                        if (parseInt(jQuery("#points").val()) >= 50) {
+	                            mui.ajax(grobal_url, {
+	                                dataType: "json",
+	                                type: "post",
+	                                data: {
+	                                    "action": "OrderPlat",
+	                                    "UserName": localStorage.getItem("mgps_UserName"),
+	                                    "PlatToSaleId": localStorage.getItem("PlatToSaleId"),
+	                                    "Points": jQuery("#points").val()
+	                                },
+	                                success: function (data, status, xhr) {
+	                                    if (data.sign == '1') {
+	                                        localStorage.setItem("OrderID", data.OrderID);
+	                                        document.location.href = "BuyPointsStart.aspx";
+	                                    } else {
+	                                        mui.alert(data.msg);
+	                                    }
+	                                }
+	                            });
+	                        } else {
+	                            mui.alert("请输入整数数字,并运费券数量大于50！");
+	                        }
+	                    } else {
+	                        if (maxpoints == parseInt(jQuery("#points").val())) {
+	                            mui.ajax(grobal_url, {
+	                                dataType: "json",
+	                                type: "post",
+	                                data: {
+	                                    "action": "OrderPlat",
+	                                    "UserName": localStorage.getItem("mgps_UserName"),
+	                                    "PlatToSaleId": localStorage.getItem("PlatToSaleId"),
+	                                    "Points": jQuery("#points").val()
+	                                },
+	                                success: function (data, status, xhr) {
+	                                    if (data.sign == '1') {
+	                                        localStorage.setItem("OrderID", data.OrderID);
+	                                        document.location.href = "BuyPointsStart.aspx";
+	                                    } else {
+	                                        mui.alert(data.msg);
+	                                    }
+	                                }
+	                            });
+	                        } else {
+	                            mui.alert("剩余数量小于50，需一次性购买全部剩余数量！");
+	                        }
+	                    }
+	                } else {
+	                    mui.alert("请输入整数数字！");
+	                }
+	            } else {
+	                mui.alert("订单失效！");
+	            }
+	        } else {
+	            mui.alert("请输入需购买的运费券数量！");
+	        }
+	    }
+	    function Cancel()
+	    {
+	        document.location.href = "BuyPointsList.html";
+	    }
+	</script>
+</html>

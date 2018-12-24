@@ -1,0 +1,117 @@
+﻿
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>我的订单</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="../css/mui.min.css">
+	</head>
+
+	<body>
+		<!--下拉刷新容器-->
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<!--数据列表-->
+				<ul class="mui-table-view">
+					
+				</ul>
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+        <script src="../js/app.js"></script>
+		<script>
+		    mui.init({
+		        pullRefresh: {
+		            container: '#pullrefresh',
+		            up: {
+		                contentrefresh: '正在加载...',
+		                callback: pullupRefresh
+		            }
+		        }
+		    });
+
+		    var list;
+		    var pagnum = 1;
+		    var pagesize = 10;
+		    var totalcount = 0;
+		    var flag = false;
+		    /**
+			 * 上拉加载具体业务实现
+			 */
+		    function pullupRefresh() {
+		        mui.ajax(grobal_url, {
+		            dataType: "json",
+		            type: "post",
+		            data: {
+		                "action": "MyOrderList",
+		                "UserName": localStorage.getItem("mgps_UserName"),
+		                "pagnum": pagnum,
+		                "pagesize": pagesize
+		            },
+		            success: function (data, status, xhr) {
+		                if (data.sign == '1') {
+		                    if (localStorage.getItem("PlatToSaleId"))
+		                        localStorage.removeItem("PlatToSaleId");
+		                    if (localStorage.getItem("OrderID"))
+		                        localStorage.removeItem("OrderID");
+		                    list = data.value.dt;
+		                    pagnum = (data.value.cp + 1);
+		                    totalcount = data.value.ac;
+		                    if (totalcount <= (pagnum - 1) * pagesize) {
+		                        flag = true;
+		                    }
+		                    setTimeout(function () {
+		                        mui('#pullrefresh').pullRefresh().endPullupToRefresh(flag); //参数为true代表没有更多数据了。
+		                        var table = document.body.querySelector('.mui-table-view');
+		                        var cells = document.body.querySelectorAll('.mui-table-view-cell');
+		                        for (var i = 0; i < list.length; i++) {
+		                            var li = document.createElement('li');
+		                            li.className = 'mui-table-view-cell';
+		                            li.innerHTML = '<div class="mui-table">' +
+                                                        '<div class="mui-table-cell">' +
+                                                            '<h4 class="mui-ellipsis">' + list[i]["UserXM"] + '　　运费券　　<span style="color:red;">' + list[i]["Points"] + '券</span></h4>' +
+                                                            '<h5>购买金额：' + list[i]["Money"] + '元</h5>' +
+                                                            '<h5>购买日期：' + list[i]["sj"] + '</h5>' +
+                                                        '</div>' +
+                                                        '<div class="mui-table-cell mui-col-xs-2 mui-text-right">' +
+                                                            '<br /><button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" onClick="BuyPoints(\'' + list[i]["OrderID"] + '\');">' +
+                                                                '支付' +
+                                                            '</button>' +
+                                                        '</div>' +
+                                                   '</div>';
+		                            table.appendChild(li);
+		                        }
+		                    }, 1500);
+		                } else {
+		                    mui.alert(data.msg)
+		                }
+		            }
+		        });
+		    }
+
+		    function BuyPoints(val) {
+		        localStorage.setItem("OrderID", val);
+		        document.location.href = "BuyPointsStart.aspx";
+		    }
+
+		    if (mui.os.plus) {
+		        mui.plusReady(function () {
+		            setTimeout(function () {
+		                mui('#pullrefresh').pullRefresh().pullupLoading();
+		            }, 1000);
+
+		        });
+		    } else {
+		        mui.ready(function () {
+		            mui('#pullrefresh').pullRefresh().pullupLoading();
+		        });
+		    }
+		</script>
+	</body>
+
+</html>

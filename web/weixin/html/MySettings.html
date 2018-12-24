@@ -1,0 +1,104 @@
+﻿
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>我的设置</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<!--App自定义的css-->
+		<link rel="stylesheet" type="text/css" href="../css/app.css"/>
+		<style>
+			.title{
+				margin: 20px 15px 7px;
+				color: #6d6d72;
+				font-size: 15px;
+			}
+			
+		</style>
+	</head>
+	<body onload="StartFunc();">
+		<div class="mui-content">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" onclick="EditLoginPassword();" id="EditLoginPassword">
+					<a class="mui-navigate-right">
+						登录密码修改
+					</a>
+				</li>
+				<li class="mui-table-view-cell" onclick="PayLoginPassword();" id="PayLoginPassword">
+					<a class="mui-navigate-right">
+						支付密码修改
+					</a>
+				</li>
+                <li class="mui-table-view-cell" style="display:none;" onclick="MyPoints();" id="MyPoints">
+					<a class="mui-navigate-right">
+						我的专线运费券
+					</a>
+				</li>
+                <li class="mui-table-view-cell" style="display:none;" onclick="MyTest();" id="MyTest">
+					<a class="mui-navigate-right">
+						测试
+					</a>
+				</li>
+			</ul>
+            <div class="mui-content-padded">
+		        <button type="button" class="mui-btn mui-btn-primary mui-btn-block" onclick="tuichudenglu()">退出登录</button>
+		    </div>
+		</div>
+	</body>
+	<script src="../js/mui.min.js"></script>
+    <script src="../js/jquery.1.9.1.js"></script>
+    <script src="../js/app.js"></script>
+    <script type="text/javascript">
+        var jQuery = jQuery.noConflict();
+	</script>
+	<script>
+	    function StartFunc()
+	    {
+	        var UserName = localStorage.getItem("mgps_UserName");
+	        mui.ajax(grobal_url, {
+	            dataType: "json",
+	            type: "post",
+	            data: {
+	                "action": "JudgeIsZX",
+	                "UserName": UserName
+	            },
+	            success: function (data, status, xhr) {
+	                if (data.sign == '1') {
+	                    jQuery("#MyPoints").show();
+	                }
+	            }
+	        });
+	        if (UserName == '18136918998')
+	        {
+	            jQuery("#MyTest").show();
+	        }
+	    }
+
+	    function EditLoginPassword()
+	    {
+	        document.location.href = "EditLoginPassword.html";
+	    }
+
+	    function PayLoginPassword() {
+	        document.location.href = "PayLoginPassword.html";
+	    }
+
+	    function MyPoints() {
+	        document.location.href = "MyPoints.aspx";
+	    }
+
+	    function MyTest() {
+	        document.location.href = "BuyPointsListNew.html";
+	    }
+
+	    function tuichudenglu() {
+	        localStorage.setItem("tuichudenglu", "true");
+	        document.location.href = "MGps_login.html";
+	    }
+	</script>
+</html>
