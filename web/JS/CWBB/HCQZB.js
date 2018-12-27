@@ -23,6 +23,7 @@ var store = createSFW4Store({
        { name: 'sqcs' },
        { name: 'sxq' },
        { name: 'sxed' },
+       { name: 'zsq' },
        { name: 'rq' }
     ],
     onPageChange: function (sto, nPage, sorters) {
@@ -539,6 +540,15 @@ Ext.onReady(function () {
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "失效券（下架）"
+
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'zsq',
+                                width: 140,
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "在售券"
 
                             },
                             {

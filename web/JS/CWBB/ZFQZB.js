@@ -23,6 +23,7 @@ var store = createSFW4Store({
        { name: 'sqcs' },
        { name: 'sxq' },
        { name: 'sxed' },
+       { name: 'zsq' },
        { name: 'rq' }
     ],
     onPageChange: function (sto, nPage, sorters) {
@@ -62,7 +63,7 @@ var mxstore = Ext.create('Ext.data.Store', {
         { name: 'wsyje' },
         { name: 'SaleRecordDiscount' },
         { name: 'UserName' },
-        { name: 'xfsj' }
+        { name: 'xfrq' }
     ]
 });
 
@@ -80,9 +81,9 @@ function getUser(nPage) {
     }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_sc").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
 }
 
-function CKXSZB(userId) {
-    userId = userId;
-    var win = new XSZBList({ userId: userId });
+function CKXSZB(id) {
+    userId = id;
+    var win = new XSZBList({ userId: id });
     win.show(null, function () {
         getXSZBList(1);
     })
@@ -299,8 +300,8 @@ Ext.define('XSZBList', {
 Ext.define('MXList', {
     extend: 'Ext.window.Window',
 
-    height: 422,
-    width: 620,
+    height: document.documentElement.clientHeight/2,
+    width: document.documentElement.clientWidth/2,
     layout: {
         type: 'fit'
     },
@@ -539,6 +540,15 @@ Ext.onReady(function () {
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "失效券（下架）"
+
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'zsq',
+                                width: 140,
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "在售券"
 
                             },
                             {

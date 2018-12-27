@@ -56,15 +56,15 @@ public class CWBBMag
                                 (select sum(Points) as sykkf,UserID from tb_b_platpoints where status=0 group by UserID) b on a.UserID=b.UserID
                                 left join
                                 (select isNULL(a.points,0)+isnull(b.points,0) as zsyfq,a.UserID from 
-                                (select sum(Points) as points,UserID from tb_b_plattosale where   status=0 and pointkind=0 and DATEDIFF(HOUR,addtime,getDate())<=validHour group by UserID ) a left join (
+                                (select sum(Points) as points,UserID from tb_b_plattosale where   status=0 and pointkind=0 and (DATEDIFF(HOUR,addtime,getDate())<=validHour or validHour=null) group by UserID ) a left join (
                                 select sum(Points) as points,SaleUserID from [tb_b_order] where  ZhiFuZT=0 and status=0
                                 group by SaleUserID) b  on a.UserID=b.SaleUserID) c on a.UserID=c.UserID
                                 left join
-                                (select sum(Points) as sxyfq,SaleUserID from tb_b_order where [SaleRecordID] in
+                                (select sum(Points) as sxyfq,SaleUserID from tb_b_order where [SaleRecordID]=null or [SaleRecordID] in
                                 (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) d on a.UserID=d.SaleUserID
                                 left join
-                                (select count(OrderID) as sqcs,SaleUserID from tb_b_order where [SaleRecordID] in
+                                (select count(OrderID) as sqcs,SaleUserID from tb_b_order where [SaleRecordID]=null or [SaleRecordID] in
                                 (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join(select count(GZ_ID) as gzs,GZUserID from tb_b_user_gz group by GZUserID) f on a.UserID=f.GZUserID
@@ -1164,7 +1164,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '"+sjstr+@"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq from tb_b_user a left join 
+                string str = @"select '"+sjstr+@"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -1188,6 +1188,11 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @" and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour)
                             and status=0  and ZhiFuZT=1 group by SaleUserID) b on a.SaleRecordUserID=b.SaleUserID) f on a.UserID=f.SaleRecordUserID
+                            left join(
+							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
+                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
+                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
+							) g on a.UserID=g.UserID
                             where a.IsCanRelease=1 and a.ClientKind=1 ";
                 str += where;
 
@@ -1675,12 +1680,12 @@ public class CWBBMag
             {
                 string str = @"  select a.AddTime,a.Points, case when c.Points>0 then a.Money end as xfje,
 		                        case when g.gqje>0 then a.Money end as gqje,case when f.wsyje>0 then a.Money end as wsyje,
-                                d.SaleRecordDiscount,e.UserName,c.AddTime  from tb_b_order a 
+                                d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on c.PayUserID=e.UserID
-		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=1 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=f.OrderCode
+		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=f.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    ";
@@ -1918,7 +1923,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq from tb_b_user a left join 
+                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -1942,6 +1947,11 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @" and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour)
                             and status=0  and ZhiFuZT=1 group by SaleUserID) b on a.SaleRecordUserID=b.SaleUserID) f on a.UserID=f.SaleRecordUserID
+                            left join(
+							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
+                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
+                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
+							) g on a.UserID=g.UserID
                             where a.ClientKind=1 ";
                 str += where;
 

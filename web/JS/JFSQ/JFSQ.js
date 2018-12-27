@@ -44,7 +44,7 @@ function sq(id) {
                 CS('CZCLZ.JFSQMag.JFSQ', function (retVal) {
                     if (retVal) {
                         getList(1);
-                        Ext.Msg.alert("授权成功");
+                        Ext.MessageBox.alert('提示', '授权成功！');
                     }
                 }, CS.onError, id,1);
             }
@@ -52,7 +52,7 @@ function sq(id) {
                 CS('CZCLZ.JFSQMag.JFSQ', function (retVal) {
                     if (retVal) {
                         getList(1);
-                        Ext.Msg.alert("授权拒绝");
+                        Ext.MessageBox.alert('提示', '授权拒绝！');
                     }
                 }, CS.onError, id, 2);
             }

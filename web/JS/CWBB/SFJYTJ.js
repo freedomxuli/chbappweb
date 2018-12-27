@@ -78,10 +78,11 @@ Ext.onReady(function () {
                              text: "交易时间"
                          },
                           {
-                              xtype: 'gridcolumn',
+                              xtype: 'datecolumn',
                               dataIndex: 'xfsj',
                               sortable: false,
                               menuDisabled: true,
+                              format: 'Y-m-d',
                               width: 120,
                               text: "消费时间"
                           },
