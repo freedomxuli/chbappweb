@@ -12,6 +12,7 @@ using SmartFramework4v2.Data;
 using Aspose.Cells;
 using System.IO;
 using System.Security.Cryptography;
+using System.Net;
 
 /// <summary>
 ///KFGMMag 的摘要说明
@@ -197,7 +198,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                                 saledr["pointkind"] = 0;
                                 saledr["SaleRecordID"] = SaleRecordID;
                                 saledr["belongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
-                                saledr["validHour"] = Convert.ToDecimal(jsr["ValidHour"].ToString());
+                                saledr["validHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
                                 saledt.Rows.Add(saledr);
                                 dbc.UpdateTable(saledt, saledtt);
                             }
@@ -222,11 +223,12 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                             {
                                 try
                                 {
+                                    WebServiceApp("http://47.110.134.105:8010/api/yfq", "pcReleaseNotify", "您关注的" + wlmc + "已开放运费券，赶紧抢购哦，手慢无！");
                                     new Handler().SendWeText(gzdt.Rows[i]["OpenID"].ToString(), "您关注的" + wlmc + "已开放运费券，赶紧抢购哦，手慢无！");
                                 }
                                 catch (Exception ex)
                                 {
-
+                                    throw ex;
                                 }
                             }
                         }
@@ -242,6 +244,33 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 throw ex;
             }
         }
+    }
+
+    public static string WebServiceApp(string url, string method, string param)
+    {
+        //转换输入参数的编码类型，获取bytep[]数组 
+        byte[] byteArray = Encoding.UTF8.GetBytes(param);
+        //初始化新的webRequst
+        //1． 创建httpWebRequest对象
+        HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(new Uri(url + "/" + method));
+        //2． 初始化HttpWebRequest对象
+        webRequest.Method = "POST";
+        webRequest.ContentType = "application/x-www-form-urlencoded";
+        webRequest.ContentLength = byteArray.Length;
+        //3． 附加要POST给服务器的数据到HttpWebRequest对象(附加POST数据的过程比较特殊，它并没有提供一个属性给用户存取，需要写入HttpWebRequest对象提供的一个stream里面。)
+        Stream newStream = webRequest.GetRequestStream();//创建一个Stream,赋值是写入HttpWebRequest对象提供的一个stream里面
+        newStream.Write(byteArray, 0, byteArray.Length);
+        newStream.Close();
+        //4． 读取服务器的返回信息
+        string result = string.Empty;
+        HttpWebResponse response = webRequest.GetResponse() as HttpWebResponse;
+        Stream responseStream = response.GetResponseStream();
+        using (StreamReader reader = new StreamReader(responseStream, Encoding.GetEncoding("UTF-8")))
+        {
+            result = reader.ReadToEnd();
+        }
+        responseStream.Close();
+        return result;
     }
 
     [CSMethod("GetKFGMToFile", 2)]
