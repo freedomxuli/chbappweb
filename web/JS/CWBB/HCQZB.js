@@ -63,7 +63,7 @@ var mxstore = Ext.create('Ext.data.Store', {
         { name: 'wsyje' },
         { name: 'SaleRecordDiscount' },
         { name: 'UserName' },
-        { name: 'xfsj' }
+        { name: 'xfrq' }
     ]
 });
 
@@ -391,7 +391,7 @@ Ext.define('MXList', {
                                         {
                                             xtype: 'datecolumn',
                                             dataIndex: 'xfrq',
-                                            format: 'Y-m-d',
+                                            format: 'Y-m-d h:m:s',
                                             sortable: false,
                                             menuDisabled: true,
                                             flex: 1,
@@ -469,7 +469,7 @@ Ext.onReady(function () {
                             dataIndex: 'rq',
                             sortable: false,
                             menuDisabled: true,
-                            width: 200,
+                            flex:1,
                             text: '日期'
                         },
                          {
@@ -477,7 +477,7 @@ Ext.onReady(function () {
                              dataIndex: 'FromRoute',
                              sortable: false,
                              menuDisabled: true,
-                             width: 150,
+                             width: 60,
                              text: "市场"
                          },
                           {
@@ -500,7 +500,7 @@ Ext.onReady(function () {
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'sjdzq',
-                                width: 140,
+                                width: 100,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "上架电子券"
@@ -509,7 +509,7 @@ Ext.onReady(function () {
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'ysyq',
-                                width: 140,
+                                width: 100,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "已使用券"
@@ -518,7 +518,7 @@ Ext.onReady(function () {
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'gqwsy',
-                                width: 140,
+                                width: 100,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "过期未使用"
@@ -527,7 +527,7 @@ Ext.onReady(function () {
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'qxnwsy',
-                                width: 140,
+                                width: 120,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "在期限内未使用券"
@@ -536,7 +536,7 @@ Ext.onReady(function () {
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'sxq',
-                                width: 140,
+                                width: 100,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "失效券（下架）"
@@ -545,7 +545,7 @@ Ext.onReady(function () {
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'zsq',
-                                width: 140,
+                                width: 100,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "在售券"
@@ -554,7 +554,7 @@ Ext.onReady(function () {
                             {
                                 text: '操作',
                                 dataIndex: 'UserID',
-                                width: 250,
+                                width: 50,
                                 sortable: false,
                                 menuDisabled: true,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {

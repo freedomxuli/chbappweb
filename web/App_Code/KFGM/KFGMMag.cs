@@ -224,7 +224,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                                 try
                                 {
                                     WebServiceApp("http://47.110.134.105:8010/api/yfq", "pcReleaseNotify", "您关注的" + wlmc + "已开放运费券，赶紧抢购哦，手慢无！");
-                                    new Handler().SendWeText(gzdt.Rows[i]["OpenID"].ToString(), "您关注的" + wlmc + "已开放运费券，赶紧抢购哦，手慢无！");
+                                    //new Handler().SendWeText(gzdt.Rows[i]["OpenID"].ToString(), "您关注的" + wlmc + "已开放运费券，赶紧抢购哦，手慢无！");
                                 }
                                 catch (Exception ex)
                                 {

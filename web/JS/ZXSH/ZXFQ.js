@@ -74,7 +74,7 @@ function sq(id,iscanrelease,str) {
                 CS('CZCLZ.ZXSHMag.ZXFQ', function (retVal) {
                     if (retVal) {
                         getUser(1);
-                        Ext.Msg.alert(str+"成功");
+                        Ext.MessageBox.alert('提示', str + "成功");
                     }
                 }, CS.onError, id,iscanrelease);
             }

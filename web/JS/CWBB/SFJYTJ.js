@@ -71,7 +71,7 @@ Ext.onReady(function () {
                          {
                              xtype: 'datecolumn',
                              dataIndex: 'jysj',
-                             format: 'Y-m-d',
+                             format: 'Y-m-d h:m:s',
                              sortable: false,
                              menuDisabled: true,
                              width: 150,
@@ -82,8 +82,8 @@ Ext.onReady(function () {
                               dataIndex: 'xfsj',
                               sortable: false,
                               menuDisabled: true,
-                              format: 'Y-m-d',
-                              width: 120,
+                              format: 'Y-m-d h:m:s',
+                              width: 150,
                               text: "消费时间"
                           },
                             {
@@ -178,7 +178,7 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetZXSJListToFile", "专线用户统计表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                     }
                                                 },
                                             ]

@@ -20,6 +20,7 @@ var store = createSFW4Store({
        { name: 'gmcs' },
        { name: 'gzs' },
        { name: 'syyfq' },
+       { name: 'gqwsy' },
        { name: 'Addtime' }
     ],
     onPageChange: function (sto, nPage, sorters) {
@@ -501,13 +502,13 @@ Ext.onReady(function () {
                                 dataIndex: 'UserName',
                                 sortable: false,
                                 menuDisabled: true,
-                                width:120,
+                                flex:1,
                                 text: "三方账号"
                             },
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'syyfq',
-                                width: 140,
+                                flex: 1,
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "剩余运费券",
@@ -518,10 +519,22 @@ Ext.onReady(function () {
                             },
                             {
                                 xtype: 'gridcolumn',
+                                dataIndex: 'gqwsy',
+                                flex: 1,
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "过期未使用",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return "<a onclick='SY(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
+                                }
+
+                            },
+                            {
+                                xtype: 'gridcolumn',
                                 dataIndex: 'gmyfq',
                                 sortable: false,
                                 menuDisabled: true,
-                                width: 140,
+                                flex: 1,
                                 text: "购买运费券",
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     return "<a onclick='GM(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
@@ -532,7 +545,7 @@ Ext.onReady(function () {
                                  dataIndex: 'ysyyfq',
                                  sortable: false,
                                  menuDisabled: true,
-                                 width: 140,
+                                 flex: 1,
                                  text: "已使用运费券",
                                  renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                      return "<a onclick='YSY(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
@@ -543,7 +556,7 @@ Ext.onReady(function () {
                                 dataIndex: 'gmcs',
                                 sortable: false,
                                 menuDisabled: true,
-                                width: 140,
+                                flex: 1,
                                 text: "购买次数"
                             },
                              {
@@ -551,7 +564,7 @@ Ext.onReady(function () {
                                  dataIndex: 'gzs',
                                  sortable: false,
                                  menuDisabled: true,
-                                 width: 140,
+                                 flex: 1,
                                  text: "关注数"
                              },
                              {
@@ -560,7 +573,7 @@ Ext.onReady(function () {
                                  format: 'Y-m-d',
                                  sortable: false,
                                  menuDisabled: true,
-                                 width: 110,
+                                 flex: 1,
                                  text: '注册时间'
                              }
                     ],
