@@ -285,13 +285,13 @@ Ext.define('addWin', {
                          //decimalPrecision: 2,    // 精确的位数
                          allowNegative: false,
                          minValue: 72,
-                         maxValue: 168,
+                         maxValue: 360,
                          allowBlank: false,
                          anchor: '100%'
                      },
                     {
                         xtype: "label",
-                        text: "*有效期限必须为介于72-168小时！",
+                        text: "*有效期限必须为介于72-360小时！",
                         style: "color:red;padding-left:100px;"
                     },
                     {
