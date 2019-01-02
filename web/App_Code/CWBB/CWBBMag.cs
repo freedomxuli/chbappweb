@@ -1958,7 +1958,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
+                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq,h.wsj from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -1987,6 +1987,7 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
 							) g on a.UserID=g.UserID
+                            left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
@@ -2070,6 +2071,9 @@ public class CWBBMag
                 cells[0, 9].PutValue("在售券");
                 cells[0, 9].SetStyle(style2);
                 cells.SetColumnWidth(9, 20);
+                cells[0, 10].PutValue("未上架");
+                cells[0, 10].SetStyle(style2);
+                cells.SetColumnWidth(10, 20);
 
 
                 string where = "";
@@ -2146,7 +2150,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
+                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq,h.wsj from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -2175,6 +2179,7 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
 							) g on a.UserID=g.UserID
+                            left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
@@ -2221,6 +2226,11 @@ public class CWBBMag
                         cells[i + 1, 9].PutValue(dt.Rows[i]["zsq"]);
                     }
                     cells[i + 1, 9].SetStyle(style4);
+                    if (dt.Rows[i]["wsj"] != null && dt.Rows[i]["wsj"].ToString() != "")
+                    {
+                        cells[i + 1, 10].PutValue(dt.Rows[i]["wsj"]);
+                    }
+                    cells[i + 1, 10].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
