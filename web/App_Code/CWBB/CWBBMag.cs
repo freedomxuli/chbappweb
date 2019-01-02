@@ -1495,7 +1495,7 @@ public class CWBBMag
                             (select sum(c.Money) as xfje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_pay a left join tb_b_mycard b on a.mycardId=b.mycardId
 		                    left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 and " + sjwhere + @"
+		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and 
 		                    d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) c on a.rq=c.rq
 		                    left join 
@@ -1624,7 +1624,7 @@ public class CWBBMag
                             (select sum(c.Money) as xfje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_pay a left join tb_b_mycard b on a.mycardId=b.mycardId
 		                    left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 and " + sjwhere + @"
+		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and 
 		                    d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) c on a.rq=c.rq
 		                    left join 
@@ -2270,7 +2270,7 @@ public class CWBBMag
                             (select sum(c.Money) as xfje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_pay a left join tb_b_mycard b on a.mycardId=b.mycardId
 		                    left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 and " + sjwhere + @"
+		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and 
 		                    d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) c on a.rq=c.rq
 		                    left join 
@@ -2399,7 +2399,7 @@ public class CWBBMag
                             (select sum(c.Money) as xfje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_pay a left join tb_b_mycard b on a.mycardId=b.mycardId
 		                    left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 and " + sjwhere + @"
+		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and 
 		                    d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) c on a.rq=c.rq
 		                    left join 
@@ -2684,12 +2684,12 @@ public class CWBBMag
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1  "+where+@"
+                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  "+where+@"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                 where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
+                                 where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
                                  select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
@@ -2794,12 +2794,12 @@ public class CWBBMag
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1  " + where + @"
+                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + @"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                 where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
+                                 where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
                                  select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
