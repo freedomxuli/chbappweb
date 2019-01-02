@@ -412,7 +412,7 @@ Ext.onReady(function() {
                             menuDisabled: true,
                             renderer: function(value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str;
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a>　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
                                 return str;
                             }
                         }

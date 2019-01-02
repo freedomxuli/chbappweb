@@ -69,7 +69,7 @@ public class CWBBMag
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join(select count(GZ_ID) as gzs,GZUserID from tb_b_user_gz group by GZUserID) f on a.UserID=f.GZUserID
                                 left join(select sum(sqjf) as sxed,userId  from tb_b_jfsq where  issq=1 group by userId) g on a.UserID=g.userId
-                                where 1=1 and a.ClientKind=1";
+                                where 1=1 and a.ClientKind=1 and g.sxed>0";
                 str += where;
 
                 //开始取分页数据
@@ -204,7 +204,7 @@ public class CWBBMag
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join(select count(GZ_ID) as gzs,GZUserID from tb_b_user_gz group by GZUserID) f on a.UserID=f.GZUserID
                                 left join(select sum(sqjf) as sxed,userId  from tb_b_jfsq where  issq=1 group by userId) g on a.UserID=g.userId
-                                where 1=1 and a.ClientKind=1" + where + " order by a.AddTime desc,a.UserName,a.UserXM";
+                                where 1=1 and a.ClientKind=1 and g.sxed>0 " + where + " order by a.AddTime desc,a.UserName,a.UserXM";
                 //开始取分页数据
                 System.Data.DataTable dt = new System.Data.DataTable();
                 dt = dbc.ExecuteDataTable(str);
@@ -1716,9 +1716,9 @@ public class CWBBMag
                                 d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
-		                        left join tb_b_user e on c.PayUserID=e.UserID
+		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=f.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -1805,9 +1805,9 @@ public class CWBBMag
                                 d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
-		                        left join tb_b_user e on c.PayUserID=e.UserID
+		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=f.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -1987,7 +1987,7 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
 							) g on a.UserID=g.UserID
-                            where a.ClientKind=1 ";
+                            where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
                 //开始取分页数据
@@ -2175,7 +2175,7 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
 							) g on a.UserID=g.UserID
-                            where a.ClientKind=1 ";
+                            where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
                 //开始取分页数据
@@ -2491,9 +2491,9 @@ public class CWBBMag
                                 d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq  from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
-		                        left join tb_b_user e on c.PayUserID=e.UserID
+		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=f.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -2580,9 +2580,9 @@ public class CWBBMag
                                 d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq  from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
-		                        left join tb_b_user e on c.PayUserID=e.UserID
+		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=f.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.Status=0 and a.ZhiFuZT=1
 		                    ";
