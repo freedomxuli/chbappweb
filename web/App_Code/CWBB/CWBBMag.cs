@@ -1194,7 +1194,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
-                            and a.PointsEndTime<getDate() group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
@@ -1211,7 +1211,7 @@ public class CWBBMag
                             left join(
 							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
-                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
+                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             where a.IsCanRelease=1 and a.ClientKind=1 ";
                 str += where;
@@ -1382,7 +1382,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
-                            and a.PointsEndTime<getDate() group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
@@ -1399,7 +1399,7 @@ public class CWBBMag
                             left join(
 							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
-                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
+                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             where a.IsCanRelease=1 and a.ClientKind=1  ";
                 str += where;
@@ -1968,7 +1968,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                            and a.PointsEndTime<getDate() group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.status=0
@@ -1985,7 +1985,7 @@ public class CWBBMag
                             left join(
 							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
-                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
+                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
@@ -2160,7 +2160,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                            and a.PointsEndTime<getDate() group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.status=0
@@ -2177,7 +2177,7 @@ public class CWBBMag
                             left join(
 							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' 
-                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<validHour) group by UserID
+                            and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
