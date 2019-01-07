@@ -14,10 +14,18 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using Aspose.Cells;
+using System.Net;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 /// <summary>
 ///UserMag 的摘要说明
 /// </summary>
-
+public class FJ
+{
+    public string fjId { get; set; }
+    public string fileName { get; set; }
+    public string fileFullUrl { get; set; }
+}
 [CSClass("YHGLClass")]
 public class UserMag
 {
@@ -69,23 +77,57 @@ public class UserMag
     [CSMethod("UploadPicForProduct", 1)]
     public object UploadPicForProduct(FileData[] fds, string UserID)
     {
-        var sqlStr = "insert into tb_b_FJ (fj_id,fj_mc,fj_pid,fj_nr,addtime,updatetime,status,xgyh_id)"
-                    + "values (@fj_id,@fj_mc,@fj_pid,@fj_nr,getdate(),getdate(),0,@xgyh_id)";
-        using (DBConnection dbc = new DBConnection())
+        WebRequest request = (HttpWebRequest)WebRequest.Create("http://jeremyda.cn:8010/api/yfq/uploadMultipleFiles");
+        MsMultiPartFormData form = new MsMultiPartFormData();
+        form.AddFormField("devilField", "中国人");
+        form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
+        form.PrepareFormData();
+        request.ContentType = "multipart/form-data; boundary=" + form.Boundary;
+        request.Method = "POST";
+        Stream stream = request.GetRequestStream();
+        foreach (var b in form.GetFormData())
         {
-            string FJID = Guid.NewGuid().ToString();
-            SqlCommand cmd = new SqlCommand(sqlStr);
-            cmd.Parameters.AddWithValue("@fj_id", FJID);
-            cmd.Parameters.AddWithValue("@fj_mc", fds[0].FileName);
-            cmd.Parameters.AddWithValue("@fj_pid", UserID);
-            cmd.Parameters.AddWithValue("@fj_nr", KiResizeImage(fds[0].FileBytes));
-            cmd.Parameters.AddWithValue("@xgyh_id", DBNull.Value);
-            int retInt = dbc.ExecuteNonQuery(cmd);
-            if (retInt > 0)
-                return new { fileurl = "files/" + FJID + "/" + fds[0].FileName, isdefault = 0, fileid = FJID };
-            return null;
+            stream.WriteByte(b);
         }
+        stream.Close();
+        string responseContent = "";
+        using (HttpWebResponse res = (HttpWebResponse)request.GetResponse())
+        {
+            using (Stream resStream = res.GetResponseStream())
+            {
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = resStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    responseContent += Encoding.UTF8.GetString(buffer, 0, read);
+                }
+            }
+            res.Close();
+        }
+        JavaScriptSerializer js = new JavaScriptSerializer();
+        List<FJ> list = js.Deserialize<List<FJ>>(responseContent);
+        string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserphoto.update";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            userid = UserID,
+            userphotogltype = 6,
+            fileList = list
+        });
+        var request1 = (HttpWebRequest)WebRequest.Create(_url);
+        request1.Method = "POST";
+        request1.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request1.ContentLength = length;
+        var writer = request1.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request1.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+        return new { fileurl = list[0].fileFullUrl, isdefault = 0, fileid = list[0].fjId };
+
     }
+
 
     [CSMethod("DelProductImageByPicID")]
     public bool DelProductImageByPicID(string fj_id)
@@ -112,26 +154,29 @@ public class UserMag
     }
 
     [CSMethod("GetProductImages")]
-    public DataTable GetProductImages(string pid)
+    public object GetProductImages(string pid)
     {
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        sb.Append(" select 'files/'+cast(t.fj_id as nvarchar(50))+'/'+t.fj_mc as FILEURL,");
-        sb.Append(" case");
-        sb.Append(" when exists");
-        sb.Append(" (select * from tb_b_User where tb_b_User.UserID =@FJ_PID) then");
-        sb.Append(" 1");
-        sb.Append("  else");
-        sb.Append(" 0");
-        sb.Append("  end as isdefault,t.fj_id");
-        sb.Append(" from tb_b_FJ t");
-        sb.Append(" where  t.FJ_PID = @FJ_PID and t.STATUS = 0");
-        sb.Append(" order by t.ADDTIME desc");
-        using (DBConnection dbc = new DBConnection())
+        string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserphoto.selectUserphoto";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
         {
-            SqlCommand cmd = new SqlCommand(sb.ToString());
-            cmd.Parameters.AddWithValue("@FJ_PID", pid);
-            return dbc.ExecuteDataTable(cmd);
-        }
+            tradeCode = "tbbuserphoto.selectUserphoto",
+            userid = pid,
+            userphotogltype = 6
+        });
+        var request1 = (HttpWebRequest)WebRequest.Create(_url);
+        request1.Method = "POST";
+        request1.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request1.ContentLength = length;
+        var writer = request1.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request1.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+        return responseString;
+        
     }
 
     /// <summary>
@@ -1970,7 +2015,7 @@ public class UserMag
                     cmd.Parameters.AddWithValue("@userId", jsr.ToArray()[i].ToString());
                     dbc.ExecuteNonQuery(cmd);
 
-                    string str = "delete from tb_b_user where UserID=@UserID";
+                    string str = "delete from tb_b_user where UserID=@UserID and (ClientKind<>1 and ClientKind<>2)";
                     SqlCommand ucmd = new SqlCommand(str);
                     ucmd.Parameters.AddWithValue("@UserID", jsr.ToArray()[i].ToString());
                     dbc.ExecuteNonQuery(ucmd);

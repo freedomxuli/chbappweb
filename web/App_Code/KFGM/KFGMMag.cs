@@ -75,7 +75,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 }
 
                 string str = @"  select a.*,b.UserName,b.UserXM from tb_b_platpoints a left join tb_b_user b on a.UserID=b.UserID
-                        where a.status=0 ";
+                        where a.status=0 and b.UserXM is not null";
                 str += where;
 
                 //开始取分页数据

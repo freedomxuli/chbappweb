@@ -14,6 +14,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using Aspose.Cells;
+using System.Web.Script.Serialization;
+using System.Net;
 /// <summary>
 ///ZXSHMag 的摘要说明
 /// </summary>
@@ -107,4 +109,91 @@ public class ZXSHMag
     }
 
 
+    [CSMethod("GetZXList2")]
+    public object GetZXList2(int pagnum, int pagesize, string yhm, string xm, string ispass)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+
+                string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserapply.selectApply";
+                string jsonParam = new JavaScriptSerializer().Serialize(new
+                {
+                    tradeCode="tbbuserapply.selectApply",
+                    status = ispass,
+                    userid="",
+                    username=yhm,
+                    userxm=xm
+                });
+                var request = (HttpWebRequest)WebRequest.Create(_url);
+                request.Method = "POST";
+                request.ContentType = "application/json;charset=UTF-8";
+                var byteData = Encoding.UTF8.GetBytes(jsonParam);
+                var length = byteData.Length;
+                request.ContentLength = length;
+                var writer = request.GetRequestStream();
+                writer.Write(byteData, 0, length);
+                writer.Close();
+                var response = (HttpWebResponse)request.GetResponse();
+                var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+                return responseString;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+
+    [CSMethod("SHJJCG")]
+    public object SHJJCG(string userId)
+    {
+            string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserapply.pass";
+            string jsonParam = new JavaScriptSerializer().Serialize(new
+            {
+                tradeCode = "tbbuserapply.pass",
+                id = userId
+            });
+            var request = (HttpWebRequest)WebRequest.Create(_url);
+            request.Method = "POST";
+            request.ContentType = "application/json;charset=UTF-8";
+            var byteData = Encoding.UTF8.GetBytes(jsonParam);
+            var length = byteData.Length;
+            request.ContentLength = length;
+            var writer = request.GetRequestStream();
+            writer.Write(byteData, 0, length);
+            writer.Close();
+            var response = (HttpWebResponse)request.GetResponse();
+            var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+            return responseString;
+    }
+    [CSMethod("SHJJSB")]
+    public object SHJJSB(string userId,string yj)
+    {
+        string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserapply.reject";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            tradeCode="tbbuserapply.pass",
+	        id=userId,
+            reviewreason = yj
+        });
+        var request = (HttpWebRequest)WebRequest.Create(_url);
+        request.Method = "POST";
+        request.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request.ContentLength = length;
+        var writer = request.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+        return responseString;
+    }
 }

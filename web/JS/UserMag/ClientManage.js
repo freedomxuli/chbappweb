@@ -158,17 +158,22 @@ function EditUser(id) {
 function AddPhoto(v) {
     var picItem = [];
     CS('CZCLZ.YHGLClass.GetProductImages', function (retVal) {
-        for (var i = 0; i < retVal.length; i++) {
-            var isDefault = false;
-            if (retVal[i].ISDEFAULT == 1)
-                isDefault = true;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
+        console.log(retVal);
 
+        var result = retVal.evalJSON();
+        //for (var i = 0; i < result.length; i++) {
+            var isDefault = false;
+        //    //if (result[i].ISDEFAULT == 1)
+        //    //    isDefault = true;
+        if (result.data.length > 0) {
+            console.log(result.data[0].photoUrl);
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
                 isSelected: isDefault,
-                src: retVal[i].FILEURL,
-                fileid: retVal[i].fj_id
+                src: result.data[0].photoUrl,
+                fileid: result.data[0].fjId
             }));
         }
+        //}
     }, CS.onError, v);
 
     var win = new phWin({ UserID: v });
@@ -802,7 +807,7 @@ Ext.onReady(function () {
                                 menuDisabled: true,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
-                                    str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>　
+                                    str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a> 　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
                                     return str;
                                 }
                             }
@@ -870,44 +875,44 @@ Ext.onReady(function () {
                                                         getUser(1);
                                                     }
                                                 },
-                                                {
-                                                    xtype: 'button',
-                                                    iconCls: 'delete',
-                                                    text: '删除',
-                                                    handler: function () {
-                                                        var idlist = [];
-                                                        var grid = Ext.getCmp("usergrid");
-                                                        var rds = grid.getSelectionModel().getSelection();
-                                                        if (rds.length == 0) {
-                                                            Ext.Msg.show({
-                                                                title: '提示',
-                                                                msg: '请选择至少一条要删除的记录!',
-                                                                buttons: Ext.MessageBox.OK,
-                                                                icon: Ext.MessageBox.INFO
-                                                            });
-                                                            return;
-                                                        }
+                                                //{
+                                                //    xtype: 'button',
+                                                //    iconCls: 'delete',
+                                                //    text: '删除',
+                                                //    handler: function () {
+                                                //        var idlist = [];
+                                                //        var grid = Ext.getCmp("usergrid");
+                                                //        var rds = grid.getSelectionModel().getSelection();
+                                                //        if (rds.length == 0) {
+                                                //            Ext.Msg.show({
+                                                //                title: '提示',
+                                                //                msg: '请选择至少一条要删除的记录!',
+                                                //                buttons: Ext.MessageBox.OK,
+                                                //                icon: Ext.MessageBox.INFO
+                                                //            });
+                                                //            return;
+                                                //        }
 
-                                                        Ext.MessageBox.confirm('删除提示', '是否要删除数据!', function (obj) {
-                                                            if (obj == "yes") {
-                                                                for (var n = 0, len = rds.length; n < len; n++) {
-                                                                    var rd = rds[n];
+                                                //        Ext.MessageBox.confirm('删除提示', '是否要删除数据!', function (obj) {
+                                                //            if (obj == "yes") {
+                                                //                for (var n = 0, len = rds.length; n < len; n++) {
+                                                //                    var rd = rds[n];
 
-                                                                    idlist.push(rd.get("UserID"));
-                                                                }
+                                                //                    idlist.push(rd.get("UserID"));
+                                                //                }
 
-                                                                CS('CZCLZ.YHGLClass.DelUser', function (retVal) {
-                                                                    if (retVal) {
-                                                                        getUser(1);
-                                                                    }
-                                                                }, CS.onError, idlist);
-                                                            }
-                                                            else {
-                                                                return;
-                                                            }
-                                                        });
-                                                    }
-                                                },
+                                                //                CS('CZCLZ.YHGLClass.DelUser', function (retVal) {
+                                                //                    if (retVal) {
+                                                //                        getUser(1);
+                                                //                    }
+                                                //                }, CS.onError, idlist);
+                                                //            }
+                                                //            else {
+                                                //                return;
+                                                //            }
+                                                //        });
+                                                //    }
+                                                //},
                                                 {
                                                     xtype: 'button',
                                                     iconCls: 'view',
