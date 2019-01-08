@@ -23,7 +23,7 @@ using System.Net;
 [CSClass("ZXSHMag")]
 public class ZXSHMag
 {
-   
+    string ServiceURL=System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
 
     [CSMethod("GetZXList")]
     public object GetZXList(int pagnum, int pagesize, string yhm, string xm,string isrelease)
@@ -117,14 +117,16 @@ public class ZXSHMag
             try
             {
 
-                string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserapply.selectApply";
+                string _url = ServiceURL+"tbbuserapply.selectApply";
                 string jsonParam = new JavaScriptSerializer().Serialize(new
                 {
                     tradeCode="tbbuserapply.selectApply",
                     status = ispass,
                     userid="",
                     username=yhm,
-                    userxm=xm
+                    userxm=xm,
+                    currentPage=pagnum,
+                    pageSize = 10
                 });
                 var request = (HttpWebRequest)WebRequest.Create(_url);
                 request.Method = "POST";
@@ -152,7 +154,7 @@ public class ZXSHMag
     [CSMethod("SHJJCG")]
     public object SHJJCG(string userId)
     {
-            string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserapply.pass";
+        string _url = ServiceURL + "tbbuserapply.pass";
             string jsonParam = new JavaScriptSerializer().Serialize(new
             {
                 tradeCode = "tbbuserapply.pass",
@@ -175,7 +177,7 @@ public class ZXSHMag
     [CSMethod("SHJJSB")]
     public object SHJJSB(string userId,string yj)
     {
-        string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserapply.reject";
+        string _url = ServiceURL + "tbbuserapply.reject";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
             tradeCode="tbbuserapply.pass",

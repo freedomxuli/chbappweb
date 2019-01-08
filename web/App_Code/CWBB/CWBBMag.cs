@@ -1718,7 +1718,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -1807,7 +1807,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -1958,7 +1958,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq,h.wsj from tb_b_user a left join 
+                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq,h.wsj,i.xj from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -1988,6 +1988,7 @@ public class CWBBMag
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
+                            left join (select sum(Points) as xj,UserID from tb_b_xj where status=0 group by UserID) i on a.UserID=i.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
@@ -2074,6 +2075,9 @@ public class CWBBMag
                 cells[0, 10].PutValue("未上架");
                 cells[0, 10].SetStyle(style2);
                 cells.SetColumnWidth(10, 20);
+                cells[0, 11].PutValue("下架券");
+                cells[0, 11].SetStyle(style2);
+                cells.SetColumnWidth(11, 20);
 
 
                 string where = "";
@@ -2150,7 +2154,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq,h.wsj from tb_b_user a left join 
+                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq,h.wsj,i.xj from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -2180,6 +2184,7 @@ public class CWBBMag
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
+                            left join (select sum(Points) as xj,UserID from tb_b_xj where status=0 group by UserID) i on a.UserID=i.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
@@ -2231,6 +2236,11 @@ public class CWBBMag
                         cells[i + 1, 10].PutValue(dt.Rows[i]["wsj"]);
                     }
                     cells[i + 1, 10].SetStyle(style4);
+                    if (dt.Rows[i]["xj"] != null && dt.Rows[i]["xj"].ToString() != "")
+                    {
+                        cells[i + 1, 11].PutValue(dt.Rows[i]["xj"]);
+                    }
+                    cells[i + 1, 11].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -2503,7 +2513,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -2592,7 +2602,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=1 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -2643,6 +2653,345 @@ public class CWBBMag
                         cells[i + 1, 7].PutValue(Convert.ToDateTime(dt.Rows[i]["xfrq"]).ToString("yyyy-MM-dd"));
                     }
                     cells[i + 1, 7].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+
+    [CSMethod("getHCQSJQ")]
+    public object getHCQSJQ(string userId, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                    and status=0  ";
+                DataTable sjdt = dbc.ExecuteDataTable(sql);
+
+                string sjstr = "";
+
+                //上架时间
+                string sjwhere = ""; string sjwhere1 = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    sjwhere += " and  SaleRecordTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                    sjwhere1 += " and  b.SaleRecordTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                    sjstr += Convert.ToDateTime(beg).ToString("yyyy年MM月dd日");
+                }
+                else
+                {
+                    if (sjdt.Rows.Count > 0)
+                    {
+                        if (sjdt.Rows[0]["mintime"] != null && sjdt.Rows[0]["mintime"].ToString() != "")
+                        {
+                            sjstr += Convert.ToDateTime(sjdt.Rows[0]["mintime"]).ToString("yyyy年MM月dd日");
+                        }
+                        else
+                        {
+                            sjstr += DateTime.Now.ToString("yyyy年MM月dd日");
+                        }
+                    }
+                    else
+                    {
+                        sjstr += DateTime.Now.ToString("yyyy年MM月dd日");
+                    }
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    sjwhere += " and SaleRecordTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    sjwhere1 += " and b.SaleRecordTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    sjstr += "到" + Convert.ToDateTime(end).ToString("yyyy年MM月dd日");
+                }
+                else
+                {
+                    if (sjdt.Rows.Count > 0)
+                    {
+                        if (sjdt.Rows[0]["maxtime"] != null && sjdt.Rows[0]["maxtime"].ToString() != "")
+                        {
+                            sjstr += "到" + Convert.ToDateTime(sjdt.Rows[0]["maxtime"]).ToString("yyyy年MM月dd日");
+                        }
+                        else
+                        {
+                            sjstr += "到" + DateTime.Now.ToString("yyyy年MM月dd日");
+                        }
+                    }
+                    else
+                    {
+                        sjstr += "到" + DateTime.Now.ToString("yyyy年MM月dd日");
+                    }
+                }
+                string str = @" select * from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+                            and status=0 and  SaleRecordUserID=@UserID" + sjwhere + @" order by SaleRecordTime desc";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.Add("@UserID", userId);
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.ExecuteDataTable(cmd);
+
+                return dtPage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("getHCQSJQToFile", 2)]
+    public byte[] getHCQSJQToFile(string userId, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("上架时间");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("上架电子券");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("折扣");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("有效时长");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                    and status=0  ";
+                DataTable sjdt = dbc.ExecuteDataTable(sql);
+
+                string sjstr = "";
+
+                //上架时间
+                string sjwhere = ""; string sjwhere1 = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    sjwhere += " and  SaleRecordTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                    sjwhere1 += " and  b.SaleRecordTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                    sjstr += Convert.ToDateTime(beg).ToString("yyyy年MM月dd日");
+                }
+                else
+                {
+                    if (sjdt.Rows.Count > 0)
+                    {
+                        if (sjdt.Rows[0]["mintime"] != null && sjdt.Rows[0]["mintime"].ToString() != "")
+                        {
+                            sjstr += Convert.ToDateTime(sjdt.Rows[0]["mintime"]).ToString("yyyy年MM月dd日");
+                        }
+                        else
+                        {
+                            sjstr += DateTime.Now.ToString("yyyy年MM月dd日");
+                        }
+                    }
+                    else
+                    {
+                        sjstr += DateTime.Now.ToString("yyyy年MM月dd日");
+                    }
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    sjwhere += " and SaleRecordTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    sjwhere1 += " and b.SaleRecordTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    sjstr += "到" + Convert.ToDateTime(end).ToString("yyyy年MM月dd日");
+                }
+                else
+                {
+                    if (sjdt.Rows.Count > 0)
+                    {
+                        if (sjdt.Rows[0]["maxtime"] != null && sjdt.Rows[0]["maxtime"].ToString() != "")
+                        {
+                            sjstr += "到" + Convert.ToDateTime(sjdt.Rows[0]["maxtime"]).ToString("yyyy年MM月dd日");
+                        }
+                        else
+                        {
+                            sjstr += "到" + DateTime.Now.ToString("yyyy年MM月dd日");
+                        }
+                    }
+                    else
+                    {
+                        sjstr += "到" + DateTime.Now.ToString("yyyy年MM月dd日");
+                    }
+                }
+                string str = @" select * from tb_b_salerecord where SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+                            and status=0 and  SaleRecordUserID=@UserID" + sjwhere + @" order by SaleRecordTime desc";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.Add("@UserID", userId);
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(cmd);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["SaleRecordTime"] != null && dt.Rows[i]["SaleRecordTime"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(Convert.ToDateTime(dt.Rows[i]["SaleRecordTime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["SaleRecordPoints"] != null && dt.Rows[i]["SaleRecordPoints"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["SaleRecordPoints"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["SaleRecordDiscount"] != null && dt.Rows[i]["SaleRecordDiscount"].ToString() != "")
+                    {
+                        cells[i + 1, 2].PutValue(dt.Rows[i]["SaleRecordDiscount"]);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
+                    if (dt.Rows[i]["ValidHour"] != null && dt.Rows[i]["ValidHour"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(dt.Rows[i]["ValidHour"]);
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+
+    [CSMethod("getHCQXJQ")]
+    public object getHCQXJQ(string userId)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @" select * from tb_b_xj where status=0 and UserID=@UserID";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.Add("@UserID", userId);
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.ExecuteDataTable(cmd);
+
+                return dtPage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("getHCQXJQToFile", 2)]
+    public byte[] getHCQXJQToFile(string userId)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("下架时间");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("下架电子券");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("原因");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+
+                string str = @" select * from tb_b_xj where status=0 and UserID=@UserID";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.Add("@UserID", userId);
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(cmd);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["Points"] != null && dt.Rows[i]["Points"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["Points"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["Memo"] != null && dt.Rows[i]["Memo"].ToString() != "")
+                    {
+                        cells[i + 1, 2].PutValue(dt.Rows[i]["Memo"]);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();

@@ -77,7 +77,8 @@ public class UserMag
     [CSMethod("UploadPicForProduct", 1)]
     public object UploadPicForProduct(FileData[] fds, string UserID)
     {
-        WebRequest request = (HttpWebRequest)WebRequest.Create("http://jeremyda.cn:8010/api/yfq/uploadMultipleFiles");
+        string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
+        WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL+"uploadMultipleFiles");
         MsMultiPartFormData form = new MsMultiPartFormData();
         form.AddFormField("devilField", "中国人");
         form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
@@ -106,7 +107,7 @@ public class UserMag
         }
         JavaScriptSerializer js = new JavaScriptSerializer();
         List<FJ> list = js.Deserialize<List<FJ>>(responseContent);
-        string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserphoto.update";
+        string _url = ServiceURL + "tbbuserphoto.update";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
             userid = UserID,
@@ -156,7 +157,8 @@ public class UserMag
     [CSMethod("GetProductImages")]
     public object GetProductImages(string pid)
     {
-        string _url = "http://jeremyda.cn:8010/api/yfq/tbbuserphoto.selectUserphoto";
+
+        string _url =System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString()+ "tbbuserphoto.selectUserphoto";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
             tradeCode = "tbbuserphoto.selectUserphoto",

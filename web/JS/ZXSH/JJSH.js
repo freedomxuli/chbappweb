@@ -26,6 +26,12 @@ var store = createSFW4Store({
        { name: 'UserContent' },
        { name: 'DqBm' },
        { name: 'AddTime' },
+       { name: 'paramphoto0' },
+       { name: 'paramphoto1' },
+       { name: 'paramphoto2' },
+       { name: 'paramphoto3' },
+       { name: 'paramphoto4' },
+       { name: 'paramphoto5' },
        { name: 'status' }
     ],
     onPageChange: function (sto, nPage, sorters) {
@@ -61,10 +67,9 @@ var KindStore = Ext.create('Ext.data.Store', {
 
 //************************************页面方法***************************************
 function getUser(nPage) {
-    CS('CZCLZ.ZXSHMag.GetZXList2', function (retVal) {
+   CS('CZCLZ.ZXSHMag.GetZXList2', function (retVal) {
         if (retVal){
             var result = retVal.evalJSON();
-            console.log(result);
             store.setData({
                 data: result.list,
                 pageSize: result.pagination.pageSize,
@@ -81,6 +86,72 @@ function ck(id) {
     var win = new addWin({id:id});
     win.show(null, function () { })
     Ext.getCmp("UserContent").setValue(r.UserContent);
+    Ext.getCmp("Address").setValue(r.Address);
+    Ext.getCmp("UserTel").setValue(r.UserTel);
+    Ext.getCmp("UserXM").setValue(r.UserXM);
+    Ext.getCmp("FromRoute").setValue(r.FromRoute);
+    Ext.getCmp("ToRoute").setValue(r.ToRoute);
+    Ext.getCmp("ToRoute").setValue(r.ToRoute);
+    if (r.paramphoto0.fileList) {
+        if (r.paramphoto0.fileList.length > 0) {
+            var isDefault = false;
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
+                isSelected: isDefault,
+                src: r.paramphoto0.fileList[0].fileFullUrl,
+                fileid: r.paramphoto0.fileList[0].fjId
+            }));
+        }
+    }
+    if (r.paramphoto1.fileList) {
+        if (r.paramphoto1.fileList.length > 0) {
+            var isDefault = false;
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
+                isSelected: isDefault,
+                src: r.paramphoto1.fileList[0].fileFullUrl,
+                fileid: r.paramphoto1.fileList[0].fjId
+            }));
+        }
+    }
+    if (r.paramphoto2.fileList) {
+        if (r.paramphoto2.fileList.length > 0) {
+            var isDefault = false;
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
+                isSelected: isDefault,
+                src: r.paramphoto2.fileList[0].fileFullUrl,
+                fileid: r.paramphoto2.fileList[0].fjId
+            }));
+        }
+    }
+    if (r.paramphoto3.fileList) {
+        if (r.paramphoto3.fileList.length > 0) {
+            var isDefault = false;
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
+                isSelected: isDefault,
+                src: r.paramphoto3.fileList[0].fileFullUrl,
+                fileid: r.paramphoto3.fileList[0].fjId
+            }));
+        }
+    }
+    if (r.paramphoto4.fileList) {
+        if (r.paramphoto4.fileList.length > 0) {
+            var isDefault = false;
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
+                isSelected: isDefault,
+                src: r.paramphoto4.fileList[0].fileFullUrl,
+                fileid: r.paramphoto4.fileList[0].fjId
+            }));
+        }
+    }
+    if (r.paramphoto5.fileList) {
+        if (r.paramphoto5.fileList.length > 0) {
+            var isDefault = false;
+            Ext.getCmp('uploadproductpic').add(new SelectImg({
+                isSelected: isDefault,
+                src: r.paramphoto5.fileList[0].fileFullUrl,
+                fileid: r.paramphoto5.fileList[0].fjId
+            }));
+        }
+    }
     Ext.getCmp("btn1").hide();
     Ext.getCmp("btn2").hide();
     Ext.getCmp("btn3").show();
@@ -88,9 +159,77 @@ function ck(id) {
 
 function sh(id) {
     var r = store.findRecord("id", id).data;
+    console.log(r);
     var win = new addWin({ id: id });
     win.show(null, function () { })
     Ext.getCmp("UserContent").setValue(r.UserContent);
+    Ext.getCmp("Address").setValue(r.Address);
+    Ext.getCmp("UserTel").setValue(r.UserTel);
+    Ext.getCmp("UserXM").setValue(r.UserXM);
+    Ext.getCmp("FromRoute").setValue(r.FromRoute);
+    Ext.getCmp("ToRoute").setValue(r.ToRoute);
+        if (r.paramphoto0.fileList) {
+            if (r.paramphoto0.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto0.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto0.fileList[0].fjId
+                }));
+            }
+        }
+        if (r.paramphoto1.fileList) {
+            if (r.paramphoto1.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto1.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto1.fileList[0].fjId
+                }));
+            }
+        }
+        if (r.paramphoto2.fileList) {
+            if (r.paramphoto2.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto2.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto2.fileList[0].fjId
+                }));
+            }
+        }
+        if (r.paramphoto3.fileList) {
+            if (r.paramphoto3.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto3.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto3.fileList[0].fjId
+                }));
+            }
+        }
+        if (r.paramphoto4.fileList) {
+            if (r.paramphoto4.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto4.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto4.fileList[0].fjId
+                }));
+            }
+        }
+        if (r.paramphoto5.fileList) {
+            if (r.paramphoto5.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto5.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto5.fileList[0].fjId
+                }));
+            }
+        }
+
+   
     Ext.getCmp("btn1").show();
     Ext.getCmp("btn2").show();
     Ext.getCmp("btn3").hide();
@@ -99,11 +238,49 @@ function sh(id) {
 //************************************页面方法***************************************
 
 //************************************弹出界面***************************************
+Ext.define('SelectImg', {
+    extend: 'Ext.Img',
+
+    height: 80,
+    width: 120,
+    margin: 5,
+    padding: 2,
+    constructor: function (config) {
+        var me = this;
+        config = config || {};
+        config.cls = config.isSelected ? "clsSelected" : "clsUnselected";
+        me.callParent([config]);
+        me.on('render', function () {
+            Ext.fly(me.el).on('click', function () {
+                window.open(me.src);
+                var oldSelectImg = Ext.getCmp('uploadproductpic').query('image[isSelected=true]');
+                if (oldSelectImg.length < 0 || oldSelectImg[0] != me) {
+                    me.removeCls('clsUnselected');
+                    me.addCls('clsSelected');
+                    me.isSelected = true;
+                    if (oldSelectImg.length > 0) {
+                        oldSelectImg[0].removeCls('clsSelected');
+                        oldSelectImg[0].addCls('clsUnselected');
+                        oldSelectImg[0].isSelected = false;
+                    }
+                }
+            });
+        });
+
+    },
+
+    initComponent: function () {
+        var me = this;
+        me.callParent(arguments);
+    }
+});
+
+
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
     id:"addWin",
-    height: 150,
-    width: 400,
+    height: 550,
+    width: 600,
     layout: {
         type: 'fit'
     },
@@ -130,13 +307,60 @@ Ext.define('addWin', {
                         colspan: 2
                     },
                      {
+                         xtype: 'textfield',
+                         id: 'UserXM',
+                         name: 'UserXM',
+                         labelWidth: 70,
+                         fieldLabel: '物流名称',
+                         anchor: '100%'
+                     },
+                     {
+                         xtype: 'textfield',
+                         id: 'UserTel',
+                         name: 'UserTel',
+                         labelWidth: 70,
+                         fieldLabel: '联系电话',
+                         anchor: '100%'
+                     },
+                     {
+                         xtype: 'textfield',
+                         id: 'FromRoute',
+                         name: 'FromRoute',
+                         labelWidth: 70,
+                         fieldLabel: '起点',
+                         anchor: '100%'
+                     },
+                     {
+                         xtype: 'textfield',
+                         id: 'ToRoute',
+                         name: 'ToRoute',
+                         labelWidth: 70,
+                         fieldLabel: '终点',
+                         anchor: '100%'
+                     },
+                     {
                          xtype: 'textareafield',
                          id: 'UserContent',
                          name: 'UserContent',
                          labelWidth: 70,
                          fieldLabel: '简介',
                          anchor: '100%'
-                     }
+                     },
+                      {
+                          xtype: 'textareafield',
+                          id: 'Address',
+                          name: 'Address',
+                          labelWidth: 70,
+                          fieldLabel: '地址',
+                          anchor: '100%'
+                      },
+                      {
+                          xtype: 'UploaderPanel',
+                          id: 'uploadproductpic',
+                          region: 'center',
+                          autoScroll: true
+                      }
+
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -145,7 +369,7 @@ Ext.define('addWin', {
                         iconCls: 'dropyes',
                         id:"btn1",
                         handler: function () {
-                            if (privilege("专线审核_简介审核_编辑")) {
+                            if (privilege("专线审核_基础信息审核_编辑")) {
                                 Ext.MessageBox.confirm('提示', '是否通过!', function (obj) {
                                     if (obj == "yes") {
                                         CS('CZCLZ.ZXSHMag.SHJJCG', function (retVal) {
@@ -170,7 +394,7 @@ Ext.define('addWin', {
                          id: "btn2",
                          iconCls: 'delete',
                          handler: function () {
-                             if (privilege("专线审核_简介审核_编辑")) {
+                             if (privilege("专线审核_基础信息审核_编辑")) {
                                  this.up('window').close();
                                 var yjwin = new yjWin({ id: id });
                                 yjwin.show();
@@ -228,7 +452,7 @@ Ext.define('yjWin', {
                         text: '确认',
                         iconCls: 'dropyes',
                         handler: function () {
-                            if (privilege("专线审核_简介审核_编辑")) {
+                            if (privilege("专线审核_基础信息审核_编辑")) {
                                 CS('CZCLZ.ZXSHMag.SHJJSB', function (retVal) {
                                     if (retVal) {
                                         var result = retVal.evalJSON();

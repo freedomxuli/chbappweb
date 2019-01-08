@@ -25,6 +25,7 @@ var store = createSFW4Store({
        { name: 'sxed' },
        { name: 'zsq' },
        { name: 'wsj' },
+       { name: 'xj' },
        { name: 'rq' }
     ],
     onPageChange: function (sto, nPage, sorters) {
@@ -65,6 +66,36 @@ var mxstore = Ext.create('Ext.data.Store', {
         { name: 'SaleRecordDiscount' },
         { name: 'UserName' },
         { name: 'xfrq' }
+    ]
+});
+
+
+var sjstore = Ext.create('Ext.data.Store', {
+    fields: [
+     { name: 'SaleRecordID' },
+    { name: 'SaleRecordCode' },
+      { name: 'SaleRecordUserID' },
+      { name: 'SaleRecordUserXM' },
+      { name: 'SaleRecordPoints' },
+      { name: 'SaleRecordLX' },
+      { name: 'Status' },
+      { name: 'adduser' },
+      { name: 'updateuser' },
+      { name: 'updatetime' },
+      { name: 'SaleRecordBelongID' },
+      { name: 'ValidHour' },
+      { name: 'SaleRecordTime' },
+      { name: 'addtime' },
+      { name: 'SaleRecordDiscount' }
+    ]
+});
+
+var xjstore = Ext.create('Ext.data.Store', {
+    fields: [
+     { name: 'XJ_ID' },
+    { name: 'Points' },
+      { name: 'Memo' },
+      { name: 'addtime' }
     ]
 });
 
@@ -109,6 +140,24 @@ function CKXSMX(userId,rq) {
         })
     }, CS.onError, userId,rq);
 
+}
+
+function SJQ(id) {
+    CS('CZCLZ.CWBBMag.getHCQSJQ', function (retVal) {
+        var win = new SJList({ userId: id });
+        win.show(null, function () {
+            sjstore.loadData(retVal);
+        })
+    }, CS.onError, id, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+}
+
+function XJQ(id) {
+    CS('CZCLZ.CWBBMag.getHCQXJQ', function (retVal) {
+        var win = new XJList({ userId: id });
+        win.show(null, function () {
+            xjstore.loadData(retVal);
+        })
+    }, CS.onError, id);
 }
 //************************************页面方法***************************************
 
@@ -444,6 +493,224 @@ Ext.define('MXList', {
     }
 
 });
+
+Ext.define('SJList', {
+    extend: 'Ext.window.Window',
+
+    height: document.documentElement.clientHeight/2,
+    width: document.documentElement.clientWidth/3,
+    layout: {
+        type: 'fit'
+    },
+    title: '上架券明细',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userId = me.userId;
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: sjstore,
+                                    columns: [
+                                    {
+                                        xtype: 'datecolumn',
+                                        dataIndex: 'SaleRecordTime',
+                                        format: 'Y-m-d h:m:s',
+                                        sortable: false,
+                                        menuDisabled: true,
+                                        flex: 1,
+                                        text: '上架时间'
+                                    },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'SaleRecordPoints',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '上架电子券'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'SaleRecordDiscount',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '折扣'
+                                        },
+                                        {
+                                            xtype: 'numbercolumn',
+                                            dataIndex: 'ValidHour',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '有效时长'
+                                        }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CWBBMag.getHCQSJQToFile", "上架券明细表.xls", userId, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                    }
+                                                },
+                                            ]
+                                        }
+                                    ]
+                                }
+
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
+Ext.define('XJList', {
+    extend: 'Ext.window.Window',
+
+    height: document.documentElement.clientHeight / 2,
+    width: document.documentElement.clientWidth / 3,
+    layout: {
+        type: 'fit'
+    },
+    title: '下架券明细',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userId = me.userId;
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: xjstore,
+                                    columns: [
+                                    {
+                                        xtype: 'datecolumn',
+                                        dataIndex: 'addtime',
+                                        format: 'Y-m-d h:m:s',
+                                        sortable: false,
+                                        menuDisabled: true,
+                                        flex: 1,
+                                        text: '下架时间'
+                                    },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'Points',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '下架电子券'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'Memo',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '原因'
+                                        }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CWBBMag.getHCQXJQToFile", "下架券明细表.xls", userId);
+                                                    }
+                                                },
+                                            ]
+                                        }
+                                    ]
+                                }
+
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
@@ -504,7 +771,10 @@ Ext.onReady(function () {
                                 width: 100,
                                 sortable: false,
                                 menuDisabled: true,
-                                text: "上架电子券"
+                                text: "上架电子券",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return "<a onclick='SJQ(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
+                                }
 
                             },
                             {
@@ -551,6 +821,17 @@ Ext.onReady(function () {
                                 menuDisabled: true,
                                 text: "在售券"
 
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'xj',
+                                width: 100,
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "下架券",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return "<a onclick='XJQ(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
+                                }
                             },
                             {
                                 xtype: 'gridcolumn',

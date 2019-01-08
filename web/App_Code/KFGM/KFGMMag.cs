@@ -223,7 +223,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                             {
                                 try
                                 {
-                                    WebServiceApp("http://47.110.134.105:8010/api/yfq", "pcReleaseNotify", "userid=" + userid);
+                                    WebServiceApp(System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString(), "pcReleaseNotify", "userid=" + userid);
                                     //new Handler().SendWeText(gzdt.Rows[i]["OpenID"].ToString(), "您关注的" + wlmc + "已开放运费券，赶紧抢购哦，手慢无！");
                                 }
                                 catch (Exception ex)
@@ -252,7 +252,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
         byte[] byteArray = Encoding.UTF8.GetBytes(param);
         //初始化新的webRequst
         //1． 创建httpWebRequest对象
-        HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(new Uri(url + "/" + method));
+        HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(new Uri(url + method));
         //2． 初始化HttpWebRequest对象
         webRequest.Method = "POST";
         webRequest.ContentType = "application/x-www-form-urlencoded";
