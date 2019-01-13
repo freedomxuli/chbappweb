@@ -13,10 +13,15 @@ using Aspose.Cells;
 using System.IO;
 using System.Security.Cryptography;
 using System.Net;
+using System.Web.Script.Serialization;
 
 /// <summary>
 ///KFGMMag 的摘要说明
 /// </summary>
+public class sanfang
+{
+     public string sanfanguserid { get; set; }
+}
 [CSClass("KFGMMag")]
 public class KFGMMag
 {
@@ -26,7 +31,7 @@ public class KFGMMag
         //TODO: 在此处添加构造函数逻辑
         //
     }
-
+    string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
     [CSMethod("getHisSale")]
     public DataTable getHisSale(string UserID)
     {
@@ -362,4 +367,95 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
         }
     }
 
+
+    [CSMethod("UploadSF", 1)]
+    public object UploadSF(FileData[] fds)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                DataTable newdt = new DataTable();
+                newdt.Columns.Add("UserID");
+                newdt.Columns.Add("UserName");
+                string str = "";
+                if (fds[0].FileBytes.Length == 0)
+                {
+                    throw new Exception("你上传的文件可能已被打开，请关闭该文件！");
+                }
+                System.IO.MemoryStream ms = new System.IO.MemoryStream(fds[0].FileBytes);
+                Workbook workbook = new Workbook(ms);
+                Worksheet sheet = workbook.Worksheets[0];
+                Cells cells = sheet.Cells;
+                foreach (Cell cell in cells)
+                {
+                    if (cell.IsMerged == true)
+                    {
+                        Range range = cell.GetMergedRange();
+                        cell.Value = cells[range.FirstRow, range.FirstColumn].Value;
+                    }
+                    else
+                    {
+                        cell.Value = cell.Value;
+                    }
+                }
+                DataTable mydt = cells.ExportDataTableAsString(1, 0, cells.MaxRow + 1, cells.MaxColumn + 1);
+                string sql = "select * from tb_b_user where IsSHPass=1 and ClientKind=2";
+                DataTable sfdt = dbc.ExecuteDataTable(sql);
+
+                for (int i = 0; i < mydt.Rows.Count; i++)
+                {
+                    DataRow[] drs = sfdt.Select("UserName=" + dbc.ToSqlValue(mydt.Rows[i][0]));
+                    if (drs.Length > 0)
+                    {
+                        DataRow newdr = newdt.NewRow();
+                        newdr["UserID"] = drs[0]["UserID"];
+                        newdr["UserName"] = drs[0]["UserName"];
+                        newdt.Rows.Add(newdr);
+                    }
+                    else
+                    {
+                        str += mydt.Rows[i][0] + ",";
+                    }
+                }
+                if (!string.IsNullOrEmpty(str))
+                {
+                    str += "这些三方不存在！";
+                }
+                return new {dt=newdt,str=str };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("SavePS")]
+    public object SavePS(string platpointid,string carduserid,int points,int validhour,string sanfangList )
+    {
+        JavaScriptSerializer js = new JavaScriptSerializer();
+        List<sanfang> list = js.Deserialize<List<sanfang>>(sanfangList);
+        string _url = ServiceURL + "tbbpaisong.webpaisong";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            platpointid = platpointid,  
+            carduserid = carduserid, 
+            points = points, 
+            validhour=validhour,
+            sanfangList = list
+        });
+        var request1 = (HttpWebRequest)WebRequest.Create(_url);
+        request1.Method = "POST";
+        request1.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request1.ContentLength = length;
+        var writer = request1.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request1.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+        return responseString;
+    }
 }

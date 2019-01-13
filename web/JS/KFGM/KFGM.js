@@ -26,9 +26,17 @@ var hisStore = Ext.create('Ext.data.Store', {
         'PlatToSaleId', 'UserID', 'UserXM', 'points', 'discount', 'discountmemo'
     ]
 })
+
+var sfstore = Ext.create('Ext.data.Store', {
+    fields: [
+        'UserID', 'UserName'
+    ]
+})
+
 //************************************数据源*****************************************
 
 //************************************页面方法***************************************
+
 function getList(nPage) {
     CS('CZCLZ.KFGMMag.GetList', function (retVal) {
         store.setData({
@@ -37,14 +45,12 @@ function getList(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize,  Ext.getCmp("cx_yhm").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue());
 }
 
-function getHisSale(UserID)
-{
+function getHisSale(UserID) {
     CS('CZCLZ.KFGMMag.getHisSale', function (retVal) {
-        if (retVal)
-        {
+        if (retVal) {
             hisStore.loadData(retVal);
         }
     }, CS.onError, UserID);
@@ -90,8 +96,7 @@ function kfgm(id) {
     }, CS.onError, r.UserID);
 }
 
-function CXKF(PlatToSaleId, UserID, PlatPointId, MaxPoint, discount, discountmemo)
-{
+function CXKF(PlatToSaleId, UserID, PlatPointId, MaxPoint, discount, discountmemo) {
     var win = new addWin();
     win.show(null, function () {
         Ext.getCmp("UserId").setValue(UserID);
@@ -103,6 +108,21 @@ function CXKF(PlatToSaleId, UserID, PlatPointId, MaxPoint, discount, discountmem
         Ext.getCmp("discountmemo").setValue(discountmemo);
         Ext.getCmp("discountmemo").setDisabled(true);
     });
+}
+
+function ps(PlatToSaleId,UserID, points) {
+    if (points > 0) {
+        var win = new PSWin({ PlatToSaleId: PlatToSaleId, UserID: UserID, points: points });
+        win.show(null, function () {
+        });
+    } else {
+        Ext.Msg.show({
+            title: '错误',
+            msg: '暂无运费券可派送',
+            buttons: Ext.MessageBox.OK,
+            icon: Ext.MessageBox.ERROR
+        });
+    }
 }
 //************************************页面方法***************************************
 
@@ -161,8 +181,7 @@ Ext.define('KFList', {
                             menuDisabled: true,
                             flex: 1,
                             text: '操作',
-                            renderer: function(value, cellmeta, record, rowIndex, columnIndex, store)
-                            {
+                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 return "<a href='javascsript:void(0);' onclick='CXKF(\"" + value + "\",\"" + record.data.UserID + "\",\"" + me.PlatPointId + "\",\"" + me.MaxPoint + "\",\"" + record.data.discount + "\",\"" + record.data.discountmemo + "\");'>重新开放</a>";
                             }
                         }
@@ -257,24 +276,24 @@ Ext.define('addWin', {
                         minValue: 1,
                         anchor: '100%'
                     },
-                    
+
                     {
                         xtype: 'numberfield',
                         fieldLabel: '优惠折扣',
                         id: 'discount',
                         name: 'discount',
-                        allowDecimals : true,    //是否允许小数
-                        decimalPrecision : 2,    // 精确的位数
-                        allowNegative : false, 
+                        allowDecimals: true,    //是否允许小数
+                        decimalPrecision: 2,    // 精确的位数
+                        allowNegative: false,
                         minValue: 0,
-                        maxValue:1,
+                        maxValue: 1,
                         allowBlank: false,
                         anchor: '100%'
                     },
                     {
                         xtype: "label",
                         text: "*优惠折扣必须为介于0-1的两位小数！",
-                        style:"color:red;padding-left:100px;"
+                        style: "color:red;padding-left:100px;"
                     },
                      {
                          xtype: 'numberfield',
@@ -304,7 +323,7 @@ Ext.define('addWin', {
                     },
                      {
                          xtype: "label",
-                         id:"zspoint",
+                         id: "zspoint",
                          text: "",
                          style: "padding-left:100px;"
                      }
@@ -367,6 +386,281 @@ Ext.define('addWin', {
         me.callParent(arguments);
     }
 });
+
+Ext.define('PSWin', {
+    extend: 'Ext.window.Window',
+
+    height: 407,
+    width: 634,
+    layout: {
+        type: 'fit'
+    },
+    title: '派送管理',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var PlatToSaleId = me.PlatToSaleId;
+        var UserID = me.UserID;
+        var points = me.points;
+        Ext.applyIf(me, {
+            items: [
+
+                {
+                    xtype: 'gridpanel',
+                    border: 1,
+                    columnLines: 1,
+                    store: sfstore,
+                    dockedItems: [
+                        
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            items: [
+                                {
+                                    xtype: 'numberfield',
+                                    fieldLabel: '有效期限',
+                                    id: 'psvalidHour',
+                                    allowDecimals: false,    //是否允许小数
+                                    //decimalPrecision: 2,    // 精确的位数
+                                    allowNegative: false,
+                                    minValue: 72,
+                                    maxValue: 360,
+                                    allowBlank: false,
+                                },
+                                {
+                                    xtype: "label",
+                                    text: "*有效期限必须为介于72-360小时！",
+                                    style: "color:red;"
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            items: [
+                                {
+                                    xtype: 'numberfield',
+                                    fieldLabel: '派送运费券',
+                                    allowBlank: false,
+                                    allowDecimals: false,
+                                    allowNegative: false,
+                                    minValue: 1,
+                                    id: 'psyfq'
+                                },
+                                {
+                                    xtype: 'buttongroup',
+                                    title: '',
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            iconCls: 'upload',
+                                            text: '上传派送三方',
+                                            handler: function () {
+                                                var win = new drWin();
+                                                win.show();
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    columns: [Ext.create('Ext.grid.RowNumberer'),
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'UserID',
+                            sortable: false,
+                            menuDisabled: true,
+                            flex: 1,
+                            hidden: true
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'UserName',
+                            sortable: false,
+                            menuDisabled: true,
+                            flex: 1,
+                            text: '三方'
+                        }
+                    ]
+                }
+            ],
+            buttonAlign: 'center',
+            buttons: [
+                {
+                    text: '确定',
+                    iconCls: 'dropyes',
+                    handler: function () {
+                        if (!Ext.getCmp("psyfq").getValue()) {
+                            Ext.Msg.show({
+                                title: '错误',
+                                msg: '请填写派送运费券！',
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.ERROR
+                            });
+                            return;
+                        } else {
+                            if (Ext.getCmp("psyfq").getValue() > points) {
+                                Ext.Msg.show({
+                                    title: '错误',
+                                    msg: '派送运费券不得大于可开放的数额！',
+                                    buttons: Ext.MessageBox.OK,
+                                    icon: Ext.MessageBox.ERROR
+                                });
+                                return;
+                            }
+                        }
+                        if (sfstore.data.items.length <= 0) {
+                            Ext.Msg.show({
+                                title: '错误',
+                                msg: '请上传派送三方列表',
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.ERROR
+                            });
+                            return;
+                        }
+                        if (!Ext.getCmp("psvalidHour").getValue()) {
+                            Ext.Msg.show({
+                                title: '错误',
+                                msg: '请填写派送有效期限！',
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.ERROR
+                            });
+                            return;
+                        } else {
+                            if (Ext.getCmp("psvalidHour").getValue() > 360 || Ext.getCmp("psvalidHour").getValue()<72) {
+                                Ext.Msg.show({
+                                    title: '错误',
+                                    msg: '有效期限必须为介于72-360小时！',
+                                    buttons: Ext.MessageBox.OK,
+                                    icon: Ext.MessageBox.ERROR
+                                });
+                                return;
+                            }
+                        }
+                      
+                        var list = [];
+                        for (var i = 0; i < sfstore.data.length; i++) {
+                            list.push({ sanfanguserid: sfstore.data.items[i].data.UserID })
+                        }
+                        CS('CZCLZ.KFGMMag.SavePS', function (retVal) {
+                            if (retVal) {
+                                var result = retVal.evalJSON();
+                                if (result.success) {
+                                    Ext.MessageBox.alert('提示', "派送成功！");
+                                    getList(1);
+                                } else {
+                                    Ext.MessageBox.alert('提示', result.details);
+                                }
+                            }
+                        }, CS.onError, PlatToSaleId, UserID, Ext.getCmp("psyfq").getValue(), Ext.getCmp("psvalidHour").getValue(), JSON.stringify(list));
+                        this.up('window').close();
+                        
+                    }
+                },
+                {
+                    text: '关闭',
+                    iconCls: 'close',
+                    handler: function () {
+                        me.close();
+                    }
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
+//***************************上传附件层*********************************************************************************************************************
+Ext.define('drWin', {
+    extend: 'Ext.window.Window',
+
+    height: 120,
+    width: 350,
+    id: "drWin",
+    layout: {
+        type: 'fit'
+    },
+    closeAction: 'destroy',
+    title: '导入',
+
+    initComponent: function () {
+        var me = this;
+        me.items = [
+            {
+                xtype: 'UploaderPanel',
+                id: 'uploadproductpic',
+                frame: true,
+                bodyPadding: 10,
+                title: '',
+                items: [
+            {
+                xtype: 'filefield',
+                fieldLabel: '上传文件',
+                labelWidth: 70,
+                buttonText: '浏览',
+                allowBlank: false,
+                anchor: '100%'
+            }
+                ],
+                buttonAlign: 'center',
+                buttons: [
+            {
+                text: '确定',
+                handler: function () {
+                    var form = Ext.getCmp('uploadproductpic');
+                    if (form.form.isValid()) {
+                        //取得表单中的内容
+                        var values = form.form.getValues(false);
+                        var me = this;
+                        Ext.getCmp('uploadproductpic').upload('CZCLZ.KFGMMag.UploadSF', function (retVal) {
+                            if (retVal) {
+                                if (retVal.dt) {
+                                    sfstore.loadData(retVal.dt);
+                                }
+                                if (retVal.str) {
+                                    Ext.Msg.show({
+                                        title: '提示',
+                                        msg: retVal.str,
+                                        buttons: Ext.MessageBox.OK,
+                                        icon: Ext.MessageBox.INFO,
+                                        fn: function () {
+                                            me.up('window').close();
+                                        }
+                                    });
+                                }
+                            }
+                        }, function (err) {
+                            Ext.Msg.show({
+                                title: '错误',
+                                msg: err,
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.ERROR,
+                                fn: function () {
+                                    me.up('window').close();
+                                }
+                            });
+                        });
+                    }
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    this.up('window').close();
+                }
+            }
+                ]
+            }
+        ];
+        me.callParent(arguments);
+    }
+});
+
+//************************************************************************************************************************************************************
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
@@ -410,8 +704,9 @@ Ext.onReady(function () {
                             menuDisabled: true,
                             dataIndex: 'PlatPointId',
                             text: '操作',
+                            width: 150,
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                str = "<a href='JavaScript:void(0)' onclick='kfgm(\"" + value + "\")'>开放购买</a>";
+                                str = "<a href='JavaScript:void(0)' onclick='kfgm(\"" + value + "\")'>开放购买</a> || <a href='JavaScript:void(0)' onclick='ps(\"" + value + '\",\"' + record.data.UserID + '\",\"' + record.data.Points + "\")'>派送</a>";
                                 return str;
                             }
                         }
@@ -458,7 +753,6 @@ Ext.onReady(function () {
                                         }
                                     ]
                                 }
-                                
                             ]
                         },
                         {

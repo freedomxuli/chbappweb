@@ -1988,7 +1988,7 @@ public class CWBBMag
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
-                            left join (select sum(Points) as xj,UserID from tb_b_xj where status=0 group by UserID) i on a.UserID=i.UserID
+                            left join (select sum(Points) as xj,UserID from tb_b_xj where status=0 and addtime>='2018-12-30 09:00:00'  group by UserID) i on a.UserID=i.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
@@ -2184,7 +2184,7 @@ public class CWBBMag
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             left join (select sum(Points) as wsj,UserID from tb_b_platpoints where status=0 group by UserID) h on a.UserID=h.UserID
-                            left join (select sum(Points) as xj,UserID from tb_b_xj where status=0 group by UserID) i on a.UserID=i.UserID
+                            left join (select sum(Points) as xj,UserID from tb_b_xj where status=0 and addtime>='2018-12-30 09:00:00' group by UserID) i on a.UserID=i.UserID
                             where a.ClientKind=1 and b.sjdzq>0";
                 str += where;
 
@@ -2905,7 +2905,7 @@ public class CWBBMag
         {
             try
             {
-                string str = @" select * from tb_b_xj where status=0 and UserID=@UserID";
+                string str = @" select * from tb_b_xj where status=0 and addtime>='2018-12-30 09:00:00' and UserID=@UserID order by addtime desc";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@UserID", userId);
                 //开始取分页数据
@@ -2968,7 +2968,7 @@ public class CWBBMag
                 cells[0, 2].SetStyle(style2);
                 cells.SetColumnWidth(2, 20);
 
-                string str = @" select * from tb_b_xj where status=0 and UserID=@UserID";
+                string str = @" select * from tb_b_xj where status=0 and addtime>='2018-12-30 09:00:00' and UserID=@UserID order by addtime desc";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@UserID", userId);
                 //开始取分页数据
@@ -3748,6 +3748,7 @@ public class CWBBMag
                     {
                         cells[i + 1, 1].PutValue(dt.Rows[i]["points"]);
                     }
+                    cells[i + 1, 1].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -3762,4 +3763,361 @@ public class CWBBMag
         }
     }
     #endregion 
+
+    #region
+    [CSMethod("GetPSList")]
+    public object GetPSList(int pagnum, int pagesize, string xm, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(xm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("e.UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+
+                string str = @"  select a.*,e.UserXM,b.ylqrs,c.dlqrs,d.jlqrs,f.clqrs from tb_b_paisong a  
+                                      left join tb_b_user e on a.carduserid=e.UserID 
+                                      left join (select count(id) as ylqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=1 group by paisongid) b on a.id=b.paisongid
+                                      left join (select count(id) as dlqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=0 group by paisongid)c on a.id=c.paisongid
+                                    left join (select count(id) as jlqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=2 group by paisongid)d on a.id=d.paisongid
+                                    left join (select count(id) as clqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=3 group by paisongid)f on a.id=f.paisongid
+                                    where a.status=0 ";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.addtime desc,e.UserName,e.UserXM", pagesize, ref cp, out ac);
+
+                dtPage.Columns.Add("jzsj");
+                foreach (DataRow dr in dtPage.Rows)
+                {
+                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
+                    {
+                        dr["jzsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
+                    }
+                }
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("GetPSListToFile", 2)]
+    public byte[] GetPSListToFile(string xm, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("专线");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("运费券");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("派送人数");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("已领取人数");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("待领取人数");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 20);
+                cells[0, 5].PutValue("拒绝领取人数");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 20);
+                cells[0, 6].PutValue("超期未领取人数");
+                cells[0, 6].SetStyle(style2);
+                cells.SetColumnWidth(6, 20);
+                cells[0, 7].PutValue("派送时间");
+                cells[0, 7].SetStyle(style2);
+                cells.SetColumnWidth(7, 20);
+                cells[0, 8].PutValue("截止时间");
+                cells[0, 8].SetStyle(style2);
+                cells.SetColumnWidth(8, 20);
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(xm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("e.UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+
+                string str = @"  select a.*,e.UserXM,b.ylqrs,c.dlqrs,d.jlqrs,f.clqrs from tb_b_paisong a  
+                                      left join tb_b_user e on a.carduserid=e.UserID 
+                                      left join (select count(id) as ylqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=1 group by paisongid) b on a.id=b.paisongid
+                                      left join (select count(id) as dlqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=0 group by paisongid)c on a.id=c.paisongid
+                                    left join (select count(id) as jlqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=2 group by paisongid)d on a.id=d.paisongid
+                                    left join (select count(id) as clqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=3 group by paisongid)f on a.id=f.paisongid
+                                    where a.status=0 ";
+                str += where;
+
+                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by a.addtime desc,e.UserName,e.UserXM");
+
+                dt.Columns.Add("jzsj");
+                foreach (DataRow dr in dt.Rows)
+                {
+                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
+                    {
+                        dr["jzsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
+                    }
+                }
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["UserXM"] != null && dt.Rows[i]["UserXM"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserXM"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["points"] != null && dt.Rows[i]["points"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["points"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["paisongcount"] != null && dt.Rows[i]["paisongcount"].ToString() != "")
+                    {
+                        cells[i + 1, 2].PutValue(dt.Rows[i]["paisongcount"]);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
+                    if (dt.Rows[i]["ylqrs"] != null && dt.Rows[i]["ylqrs"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(dt.Rows[i]["ylqrs"]);
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
+                    if (dt.Rows[i]["dlqrs"] != null && dt.Rows[i]["dlqrs"].ToString() != "")
+                    {
+                        cells[i + 1, 4].PutValue(dt.Rows[i]["dlqrs"]);
+                    }
+                    cells[i + 1, 4].SetStyle(style4);
+                    if (dt.Rows[i]["jlqrs"] != null && dt.Rows[i]["jlqrs"].ToString() != "")
+                    {
+                        cells[i + 1, 5].PutValue(dt.Rows[i]["jlqrs"]);
+                    }
+                    cells[i + 1, 5].SetStyle(style4);
+                    if (dt.Rows[i]["clqrs"] != null && dt.Rows[i]["clqrs"].ToString() != "")
+                    {
+                        cells[i + 1, 6].PutValue(dt.Rows[i]["clqrs"]);
+                    }
+                    cells[i + 1, 6].SetStyle(style4);
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 7].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 7].SetStyle(style4);
+                    if (dt.Rows[i]["validhour"] != null && dt.Rows[i]["validhour"].ToString() != "")
+                    {
+                        cells[i + 1, 8].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).AddHours(Convert.ToInt32(dt.Rows[i]["validhour"].ToString())).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 8].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+
+    [CSMethod("GetPSSF")]
+    public object GetPSSF(int pagnum, int pagesize, string id)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string str = @"select a.*,b.UserName from tb_b_paisong_detail a left join  
+                              tb_b_user b on a.sanfanguserid=b.UserID
+                              where paisongid=@id and status=0
+                              order by a.getstatus,b.UserName";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.AddWithValue("@id", id);
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(cmd, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetPSSFToFile", 2)]
+    public byte[] GetPSSFToFile(string id)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("三方");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("运费券");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("状态");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("获取时间");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+
+
+                string str = @"select a.*,b.UserName from tb_b_paisong_detail a left join  
+                              tb_b_user b on a.sanfanguserid=b.UserID
+                              where paisongid=@id and status=0
+                              order by a.getstatus,b.UserName";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.AddWithValue("@id", id);
+                System.Data.DataTable dt = dbc.ExecuteDataTable(cmd);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["UserName"] != null && dt.Rows[i]["UserName"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["getpoints"] != null && dt.Rows[i]["getpoints"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["getpoints"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["getstatus"] != null && dt.Rows[i]["getstatus"].ToString() != "")
+                    {
+                        if (Convert.ToInt32(dt.Rows[i]["getstatus"]) == 0)
+                        {
+                            cells[i + 1, 2].PutValue("待领取");
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["getstatus"]) == 1)
+                        {
+                            cells[i + 1, 2].PutValue("已领取");
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["getstatus"]) == 2)
+                        {
+                            cells[i + 1, 2].PutValue("拒绝领取");
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["getstatus"]) == 3)
+                        {
+                            cells[i + 1, 2].PutValue("超期未领取");
+                        }
+
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
+                    if (dt.Rows[i]["gettime"] != null && dt.Rows[i]["gettime"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(Convert.ToDateTime(dt.Rows[i]["gettime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
 }

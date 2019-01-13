@@ -558,7 +558,7 @@ public class UserMag
 
                 string str = @"select a.*,c.roleName,b.roleId,d.SalePoints,e.Points as KFGMPoints from tb_b_user a left join tb_b_user_role b on a.UserID=b.UserID
                                left join tb_b_roledb c on b.roleId=c.roleId
-                               left join (select sum(points) SalePoints,UserID from tb_b_plattosale where status = 0 and points > 0  group by UserID) d on a.UserID = d.UserID 
+                               left join (select sum(points) SalePoints,UserID from tb_b_plattosale where status = 0 and pointkind=0 and points > 0  group by UserID) d on a.UserID = d.UserID 
                                left join tb_b_platpoints e on a.UserID = e.UserID 
                                where 1=1";
                 str += where;
