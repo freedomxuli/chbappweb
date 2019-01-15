@@ -399,7 +399,29 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                         cell.Value = cell.Value;
                     }
                 }
-                DataTable mydt = cells.ExportDataTableAsString(1, 0, cells.MaxRow + 1, cells.MaxColumn + 1);
+                DataTable mydt = cells.ExportDataTableAsString(1, 0, cells.MaxRow+1, cells.MaxColumn + 1);
+
+                List<DataRow> removelist = new List<DataRow>();
+                for (int i = 0; i < mydt.Rows.Count; i++)
+                {
+                    bool IsNull = true;
+                    for (int j = 0; j < mydt.Columns.Count; j++)
+                    {
+                        if (!string.IsNullOrEmpty(mydt.Rows[i][j].ToString().Trim()))
+                        {
+                            IsNull = false;
+                        }
+                    }
+                    if (IsNull)
+                    {
+                        removelist.Add(mydt.Rows[i]);
+                    }
+                }
+                for (int i = 0; i < removelist.Count; i++)
+                {
+                    mydt.Rows.Remove(removelist[i]);
+                }
+
                 string sql = "select * from tb_b_user where IsSHPass=1 and ClientKind=2";
                 DataTable sfdt = dbc.ExecuteDataTable(sql);
 

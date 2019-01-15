@@ -454,6 +454,20 @@ Ext.define('PSWin', {
                                     items: [
                                         {
                                             xtype: 'button',
+                                            iconCls: 'view',
+                                            text: '下载模板',
+                                            handler: function () {
+                                                window.location.href = "approot/r/JS/KFGM/派送三方模板.xls";
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'buttongroup',
+                                    title: '',
+                                    items: [
+                                        {
+                                            xtype: 'button',
                                             iconCls: 'upload',
                                             text: '上传派送三方',
                                             handler: function () {
@@ -555,6 +569,7 @@ Ext.define('PSWin', {
                                 }
                             }
                         }, CS.onError, PlatToSaleId, UserID, Ext.getCmp("psyfq").getValue(), Ext.getCmp("psvalidHour").getValue(), JSON.stringify(list));
+                        sfstore.removeAll();
                         this.up('window').close();
                         
                     }
@@ -563,6 +578,7 @@ Ext.define('PSWin', {
                     text: '关闭',
                     iconCls: 'close',
                     handler: function () {
+                        sfstore.removeAll();
                         me.close();
                     }
                 }
@@ -620,6 +636,7 @@ Ext.define('drWin', {
                             if (retVal) {
                                 if (retVal.dt) {
                                     sfstore.loadData(retVal.dt);
+                                    me.up('window').close();
                                 }
                                 if (retVal.str) {
                                     Ext.Msg.show({

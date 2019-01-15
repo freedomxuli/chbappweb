@@ -183,7 +183,7 @@ Ext.onReady(function () {
                             }
                             Ext.Msg.show({
                                 title: '提示',
-                                msg: '请上传成功！',
+                                msg: '保存成功！',
                                 buttons: Ext.MessageBox.OK,
                                 icon: Ext.MessageBox.INFO
                             });
