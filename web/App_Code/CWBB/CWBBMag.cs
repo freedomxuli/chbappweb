@@ -52,7 +52,7 @@ public class CWBBMag
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.UserID,a.UserXM,a.UserName,a.Addtime,b.sykkf,c.zsyfq,d.sxyfq,e.sqcs,f.gzs,a.Points,g.sxed from tb_b_user a left join 
+                string str = @"select a.UserID,a.UserXM,a.UserName,a.Addtime,b.sykkf,c.zsyfq,d.sxyfq,e.sqcs,f.gzs,a.Points,g.sxed,h.ps from tb_b_user a left join 
                                 (select sum(Points) as sykkf,UserID from tb_b_platpoints where status=0 group by UserID) b on a.UserID=b.UserID
                                 left join
                                 (select isNULL(a.points,0)+isnull(b.points,0) as zsyfq,a.UserID from 
@@ -69,6 +69,8 @@ public class CWBBMag
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join(select count(GZ_ID) as gzs,GZUserID from tb_b_user_gz group by GZUserID) f on a.UserID=f.GZUserID
                                 left join(select sum(sqjf) as sxed,userId  from tb_b_jfsq where  issq=1 group by userId) g on a.UserID=g.userId
+                                left join (select sum(getpoints) as ps,b.carduserid from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
+                                where getstatus=1 and b.status=0 and a.status=0 group by b.carduserid) h on a.UserID=h.carduserid
                                 where 1=1 and a.ClientKind=1 and g.sxed>0";
                 str += where;
 
@@ -165,6 +167,9 @@ public class CWBBMag
                 cells[0, 9].PutValue("授信额度");
                 cells[0, 9].SetStyle(style2);
                 cells.SetColumnWidth(9, 20);
+                cells[0, 10].PutValue("实际派送运费券");
+                cells[0, 10].SetStyle(style2);
+                cells.SetColumnWidth(10, 20);
 
 
                 string where = "";
@@ -187,7 +192,7 @@ public class CWBBMag
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.UserID,a.UserXM,a.UserName,a.Addtime,b.sykkf,c.zsyfq,d.sxyfq,e.sqcs,f.gzs,a.Points,g.sxed from tb_b_user a left join 
+                string str = @"select a.UserID,a.UserXM,a.UserName,a.Addtime,b.sykkf,c.zsyfq,d.sxyfq,e.sqcs,f.gzs,a.Points,g.sxed,h.ps from tb_b_user a left join 
                                 (select sum(Points) as sykkf,UserID from tb_b_platpoints where status=0 group by UserID) b on a.UserID=b.UserID
                                 left join
                                 (select isNULL(a.points,0)+isnull(b.points,0) as zsyfq,a.UserID from 
@@ -204,6 +209,8 @@ public class CWBBMag
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join(select count(GZ_ID) as gzs,GZUserID from tb_b_user_gz group by GZUserID) f on a.UserID=f.GZUserID
                                 left join(select sum(sqjf) as sxed,userId  from tb_b_jfsq where  issq=1 group by userId) g on a.UserID=g.userId
+                                left join (select sum(getpoints) as ps,b.carduserid from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
+                                where getstatus=1 and b.status=0 and a.status=0 group by b.carduserid) h on a.UserID=h.carduserid
                                 where 1=1 and a.ClientKind=1 and g.sxed>0 " + where + " order by a.AddTime desc,a.UserName,a.UserXM";
                 //开始取分页数据
                 System.Data.DataTable dt = new System.Data.DataTable();
@@ -252,6 +259,11 @@ public class CWBBMag
                         cells[i + 1, 9].PutValue(dt.Rows[i]["sxed"]);
                     }
                     cells[i + 1, 9].SetStyle(style4);
+                    if (dt.Rows[i]["ps"] != null && dt.Rows[i]["ps"].ToString() != "")
+                    {
+                        cells[i + 1, 10].PutValue(dt.Rows[i]["ps"]);
+                    }
+                    cells[i + 1, 10].SetStyle(style4);
 
                 }
 
@@ -530,7 +542,7 @@ public class CWBBMag
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.UserID,a.UserName,a.Addtime,b.gmyfq,c.ysyyfq,d.gmcs,e.gzs,f.syyfq,g.gqwsy from tb_b_user a left join 
+                string str = @"select a.UserID,a.UserName,a.Addtime,b.gmyfq,c.ysyyfq,d.gmcs,e.gzs,f.syyfq,g.gqwsy,h.ps from tb_b_user a left join 
                                 (select sum(Points) as gmyfq,BuyUserID from tb_b_order where SaleRecordID in
                                 (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
                                 and status=0 and ZhiFuZT=1 group by BuyUserID) b on a.UserID=b.BuyUserID
@@ -553,6 +565,8 @@ public class CWBBMag
                                 select sum(a.points) as gqwsy,a.UserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                                 where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime<getDate() and a.status=0
                                 group by a.UserID) g on a.UserID=g.UserID
+                                left join (select sum(getpoints) as ps,a.sanfanguserid from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
+                                where getstatus=1 and b.status=0 and a.status=0 group by a.sanfanguserid) h on a.UserID=h.sanfanguserid
                                 where 1=1 and a.ClientKind=2";
                 str += where;
 
@@ -643,6 +657,9 @@ public class CWBBMag
                 cells[0, 7].PutValue("注册时间");
                 cells[0, 7].SetStyle(style2);
                 cells.SetColumnWidth(7, 20);
+                cells[0, 8].PutValue("派送运费券");
+                cells[0, 8].SetStyle(style2);
+                cells.SetColumnWidth(8, 20);
 
 
                 string where = "";
@@ -661,7 +678,7 @@ public class CWBBMag
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.UserID,a.UserName,a.Addtime,b.gmyfq,c.ysyyfq,d.gmcs,e.gzs,f.syyfq,g.gqwsy from tb_b_user a left join 
+                string str = @"select a.UserID,a.UserName,a.Addtime,b.gmyfq,c.ysyyfq,d.gmcs,e.gzs,f.syyfq,g.gqwsy,h.ps from tb_b_user a left join 
                                 (select sum(Points) as gmyfq,BuyUserID from tb_b_order where SaleRecordID in
                                 (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
                                 and status=0 and ZhiFuZT=1 group by BuyUserID) b on a.UserID=b.BuyUserID
@@ -684,6 +701,8 @@ public class CWBBMag
                                 select sum(a.points) as gqwsy,a.UserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                                 where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime<getDate() and a.status=0
                                 group by a.UserID) g on a.UserID=g.UserID
+                                left join (select sum(getpoints) as ps,a.sanfanguserid from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
+                                where getstatus=1 and b.status=0 and a.status=0 group by a.sanfanguserid) h on a.UserID=h.sanfanguserid
                                 where 1=1 and a.ClientKind=2" + where + " order by a.AddTime desc,a.UserName,a.UserXM";
                 //开始取分页数据
                 System.Data.DataTable dt = new System.Data.DataTable();
@@ -725,6 +744,11 @@ public class CWBBMag
                     cells[i + 1, 6].SetStyle(style4);
                     cells[i + 1, 7].PutValue(Convert.ToDateTime(dt.Rows[i]["AddTime"]).ToString("yyyy-MM-dd"));
                     cells[i + 1, 7].SetStyle(style4);
+                    if (dt.Rows[i]["ps"] != null && dt.Rows[i]["ps"].ToString() != "")
+                    {
+                        cells[i + 1, 8].PutValue(dt.Rows[i]["ps"]);
+                    }
+                    cells[i + 1, 8].SetStyle(style4);
 
                 }
 
@@ -755,6 +779,37 @@ public class CWBBMag
                                   where a.[SaleRecordID] in
                                 (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
                                 and a.status=0 and a.ZhiFuZT=1 and a.BuyUserID=@UserID  order by a.AddTime desc
+                                ";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.AddWithValue("@UserID", UserID);
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(cmd, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("getPSList")]
+    public object getPSList(int pagnum, int pagesize, string UserID)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string str = @" select a.getpoints,b.carduserid,c.UserXM,b.addtime from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
+                                left join tb_b_user c on b.carduserid=c.userid
+                                where getstatus=1 and b.status=0 and a.status=0 and a.sanfanguserid=@UserID order by b.addtime desc
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);
@@ -962,6 +1017,87 @@ public class CWBBMag
                     cells[i + 1, 3].SetStyle(style4);
                     cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["AddTime"]).ToString("yyyy-MM-dd"));
                     cells[i + 1, 4].SetStyle(style4);
+
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+
+    [CSMethod("getPSListToFile", 2)]
+    public byte[] getPSListToFile(string UserID)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("专线");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("运费券");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("时间");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+
+
+                string str = @"  select a.getpoints,b.carduserid,c.UserXM,b.addtime from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
+                                left join tb_b_user c on b.carduserid=c.userid
+                                where getstatus=1 and b.status=0 and a.status=0 and a.sanfanguserid=@UserID order by b.addtime desc
+                                ";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.AddWithValue("@UserID", UserID);
+                DataTable dt = dbc.ExecuteDataTable(cmd);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    cells[i + 1, 0].PutValue(dt.Rows[i]["UserXM"]);
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["getpoints"] != null && dt.Rows[i]["getpoints"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["getpoints"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    cells[i + 1, 2].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd"));
+                    cells[i + 1, 2].SetStyle(style4);
 
                 }
 
@@ -1968,7 +2104,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=9 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.status=0
@@ -2296,7 +2432,7 @@ public class CWBBMag
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
+		                    where b.status=9 and c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
 		                    and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
@@ -2513,7 +2649,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=9 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -3796,7 +3932,7 @@ public class CWBBMag
                                       left join (select count(id) as dlqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=0 group by paisongid)c on a.id=c.paisongid
                                     left join (select count(id) as jlqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=2 group by paisongid)d on a.id=d.paisongid
                                     left join (select count(id) as clqrs,paisongid from tb_b_paisong_detail where status=0 and getstatus=3 group by paisongid)f on a.id=f.paisongid
-                                    where a.status=0 ";
+                                    where a.status=0 and a.points>0 ";
                 str += where;
 
                 //开始取分页数据

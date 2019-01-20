@@ -42,7 +42,7 @@ public class XJMag
                 }
 
                 string str = @"  select a.*,b.UserName,b.UserXM from tb_b_plattosale a left join tb_b_user b on a.UserID=b.UserID
-                        where a.status=0 ";
+                        where a.status=0 and a.pointkind=0  ";
                 str += where;
 
                 //开始取分页数据
@@ -116,6 +116,23 @@ public class XJMag
                 dbc.RoolbackTransaction();
                 throw ex;
             }
+        }
+    }
+
+    [CSMethod("getHisSale")]
+    public DataTable getHisSale(string UserID)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            string sql = @"select isNULL(a.points,0)+isnull(b.points,0) as points,a.UserID,a.PlatToSaleId,a.discountmemo, c.UserXM from 
+(select Points as points,UserID,PlatToSaleId,discountmemo from tb_b_plattosale where  UserID=@UserID and status=0 and pointkind=0 ) a left join (
+select sum(Points) as points,SaleUserID from [tb_b_order] where  [SaleUserID]=@UserID and ZhiFuZT=0 and status=0
+group by SaleUserID) b  on a.UserID=b.SaleUserID 
+ left join tb_b_user c on a.UserID = c.UserID";
+            SqlCommand cmd = dbc.CreateCommand(sql);
+            cmd.Parameters.Add("@UserID", UserID);
+            DataTable dt = dbc.ExecuteDataTable(cmd);
+            return dt;
         }
     }
 }

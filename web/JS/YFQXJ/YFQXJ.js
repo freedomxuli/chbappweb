@@ -34,7 +34,7 @@ function getList(nPage) {
 
 function xj(id) {
     var r = store.findRecord("PlatToSaleId", id).data;
-    CS('CZCLZ.KFGMMag.getHisSale', function (retVal) {
+    CS('CZCLZ.XJMag.getHisSale', function (retVal) {
 
         var win = new addWin();
         win.show(null, function () {

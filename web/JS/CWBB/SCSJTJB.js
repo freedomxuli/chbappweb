@@ -23,7 +23,8 @@ var store = createSFW4Store({
        { name: 'sxyfq' },
        { name: 'sqcs' },
        { name: 'gzs' },
-       { name: 'sxed' }
+       { name: 'sxed' },
+       { name: 'ps' },
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -397,6 +398,15 @@ Ext.onReady(function () {
                                 text: "剩余可开放运费券"
 
                             },
+                             {
+                                 xtype: 'gridcolumn',
+                                 dataIndex: 'ps',
+                                 width: 100,
+                                 sortable: false,
+                                 menuDisabled: true,
+                                 text: "实际派送运费券"
+
+                             },
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'zsyfq',

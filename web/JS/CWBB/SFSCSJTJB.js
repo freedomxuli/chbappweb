@@ -4,6 +4,7 @@ var cx_yhm;
 var cx_beg;
 var cx_end;
 var gmuserid = "";
+var psuserid = "";
 var ysyuserid = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
@@ -21,7 +22,8 @@ var store = createSFW4Store({
        { name: 'gzs' },
        { name: 'syyfq' },
        { name: 'gqwsy' },
-       { name: 'Addtime' }
+       { name: 'Addtime' },
+       { name: 'ps' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -43,6 +45,22 @@ var gmstore = createSFW4Store({
     ],
     onPageChange: function (sto, nPage, sorters) {
         getGMList(nPage, gmuserid);
+    }
+});
+
+
+var psstore = createSFW4Store({
+    data: [],
+    pageSize: pageSize,
+    total: 1,
+    currentPage: 1,
+    fields: [
+       { name: 'UserXM' },
+       { name: 'getpoints' },
+       { name: 'addtime' }
+    ],
+    onPageChange: function (sto, nPage, sorters) {
+        getPSList(nPage, psuserid);
     }
 });
 
@@ -93,6 +111,14 @@ function GM(userId) {
     })
 }
 
+function PS(userId) {
+    psuserid = userId;
+    var win = new PSList({ userId: userId });
+    win.show(null, function () {
+        getPSList(1);
+    })
+}
+
 function getGMList(nPage) {
     CS('CZCLZ.CWBBMag.getGMList', function (retVal) {
         gmstore.setData({
@@ -102,6 +128,17 @@ function getGMList(nPage) {
             currentPage: retVal.cp
         });
     }, CS.onError, nPage, pageSize, gmuserid);
+}
+
+function getPSList(nPage) {
+    CS('CZCLZ.CWBBMag.getPSList', function (retVal) {
+        psstore.setData({
+            data: retVal.dt,
+            pageSize: pageSize,
+            total: retVal.ac,
+            currentPage: retVal.cp
+        });
+    }, CS.onError, nPage, pageSize, psuserid);
 }
 
 function SY(userId) {
@@ -242,6 +279,116 @@ Ext.define('GMList', {
                             ]
                         }
                         
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
+Ext.define('PSList', {
+    extend: 'Ext.window.Window',
+
+    height: 422,
+    width: 620,
+    layout: {
+        type: 'fit'
+    },
+    title: '派送列表详情',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userId = me.userId;
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: psstore,
+                                    columns: [
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'UserXM',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             flex:1,
+                                             text: '专线'
+                                         },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'getpoints',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '运费券'
+                                        },
+                                        {
+                                            xtype: 'datecolumn',
+                                            dataIndex: 'addtime',
+                                            format: 'Y-m-d',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '时间'
+                                        }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CWBBMag.getPSListToFile", "实际获得派送运费券列表.xls", userId);
+                                                    }
+                                                },
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'pagingtoolbar',
+                                    displayInfo: true,
+                                    store: gmstore,
+                                    dock: 'bottom'
+                                }
+                                    ]
+                                }
+                            ]
+                        }
+
                     ],
                     buttonAlign: 'center',
                     buttons: [
@@ -538,6 +685,17 @@ Ext.onReady(function () {
                                 text: "购买运费券",
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     return "<a onclick='GM(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
+                                }
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'ps',
+                                sortable: false,
+                                menuDisabled: true,
+                                flex: 1,
+                                text: "派送运费券",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return "<a onclick='PS(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
                                 }
                             },
                              {
