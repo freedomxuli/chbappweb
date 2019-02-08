@@ -3900,7 +3900,7 @@ public class CWBBMag
     }
     #endregion 
 
-    #region
+    #region  派送
     [CSMethod("GetPSList")]
     public object GetPSList(int pagnum, int pagesize, string xm, string beg, string end)
     {
@@ -4256,4 +4256,54 @@ public class CWBBMag
         }
     }
     #endregion
+
+    #region 上下架明细
+    [CSMethod("GetSXJList")]
+    public object GetSXJList(int pagnum, int pagesize, string zt, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(zt.Trim()))
+                {
+                    where += " and " + dbc.C_EQ("a.FLAG", Convert.ToInt32(zt));
+                }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.SJ>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.SJ<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+
+                string str = @" select  a.ZXMC,a.YFQ,a.SJ,a.ZK,a.YXQ,a.FLAG,c.UserXM as CZR from 
+                            (select SaleRecordUserXM as ZXMC,SaleRecordPoints as YFQ,adduser as CZR,SaleRecordTime as SJ,SaleRecordDiscount as ZK,DATEADD(HOUR,ValidHour,SaleRecordTime) YXQ,'1' as FLAG
+                            from tb_b_salerecord where SaleRecordLX=0 and status=0
+                            union all
+                            (select b.UserXM as ZXMC,a.Points as YFQ,a.adduser as CZR,a.addtime as SJ,null as ZK,null as YXQ,'2' as FLAG from tb_b_xj a left join tb_b_user b on a.UserID=b.UserID where a.status=0)
+                            ) a 
+                            left join tb_b_user c on a.CZR=c.UserID ";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.YXQ desc,a.ZXMC", pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+    #endregion 
 }
