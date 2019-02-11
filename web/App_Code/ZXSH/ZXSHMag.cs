@@ -39,25 +39,28 @@ public class ZXSHMag
 
                 if (!string.IsNullOrEmpty(yhm.Trim()))
                 {
-                    where += " and " + dbc.C_Like("UserName", yhm.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("a.UserName", yhm.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(xm.Trim()))
                 {
-                    where += " and " + dbc.C_Like("UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("a.UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(isrelease.Trim()))
                 {
-                    where += " and " + dbc.C_EQ("IsCanRelease", Convert.ToInt32(isrelease));
+                    where += " and " + dbc.C_EQ("a.IsCanRelease", Convert.ToInt32(isrelease));
                 }
 
-                string str = @"select * from [tb_b_user] where IsSHPass=1 and ClientKind=1 ";
+                string str = @"select a.*,b.fqcs from [tb_b_user] a 
+  left join (select count(SaleRecordID) as fqcs,SaleRecordUserID from tb_b_salerecord where status=0 and SaleRecordLX!=0 group by SaleRecordUserID) b
+  on a.UserID=b.SaleRecordUserID
+  where a.IsSHPass=1 and a.ClientKind=1 ";
                 str += where;
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by AddTime desc,UserName,UserXM", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by a.AddTime desc,a.UserName,a.UserXM", pagesize, ref cp, out ac);
 
                 dtPage.Columns.Add("dqS");
                 for (int i = 0; i < dtPage.Rows.Count; i++)
@@ -95,6 +98,7 @@ public class ZXSHMag
                 var sr = dt.NewRow();
                 sr["UserID"] = new Guid(userId);
                 sr["IsCanRelease"] = iscanrealese;
+                sr["canReleaseTime"] = DateTime.Now;
                 dt.Rows.Add(sr);
                 dbc.UpdateTable(dt, dtt);
                 dbc.CommitTransaction();
@@ -198,4 +202,118 @@ public class ZXSHMag
 
         return responseString;
     }
+
+    [CSMethod("getKFCSList")]
+    public object getKFCSList(int pagnum, int pagesize, string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string str = @"select * from  tb_b_salerecord where SaleRecordLX!=0 and status=0 and SaleRecordUserID=@SaleRecordUserID order by AddTime desc";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.Add("@SaleRecordUserID", userid);
+                //开始取分页数据
+                System.Data.DataTable dtPage = dbc.GetPagedDataTable(cmd, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("getKFCSListToFile")]
+    public object getKFCSListToFile(int pagnum, int pagesize, string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string str = @"select * from  tb_b_salerecord where SaleRecordLX!=0 and status=0 and SaleRecordUserID=@SaleRecordUserID order by AddTime desc";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.Add("@SaleRecordUserID", userid);
+                //开始取分页数据
+                System.Data.DataTable dtPage = dbc.GetPagedDataTable(cmd, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    #region  专线发布运费券审核功能
+    [CSMethod("getZFQList")]
+    public object getZFQList(int pagnum, int pagesize, string userxm, string isVerifyType)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string where="";
+                if(!string.IsNullOrEmpty(userxm)){
+                    where+=" and "+dbc.C_Like("SaleRecordUserXM",userxm,LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(isVerifyType))
+                {
+                    where += " and " + dbc.C_EQ("SaleRecordVerifyType", Convert.ToInt32(isVerifyType));
+                }
+                string str = "select * from  tb_b_salerecord where status=0 and SaleRecordLX!=0 " + where + " order by addtime desc";
+                System.Data.DataTable dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("ZFQSH")]
+    public object ZFQSH(string SaleRecordID, int issh)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string str = "select * from tb_b_salerecord where (SaleRecordVerifyType=0 or SaleRecordVerifyType is null) and SaleRecordID=" + dbc.ToSqlValue(SaleRecordID);
+                DataTable sdt = dbc.ExecuteDataTable(str);
+
+                if (sdt.Rows.Count > 0)
+                {
+                    var dt = dbc.GetEmptyDataTable("tb_b_salerecord");
+                    var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                    var sr = dt.NewRow();
+                    sr["SaleRecordID"] = new Guid(SaleRecordID);
+                    sr["SaleRecordVerifyType"] = issh;
+                    sr["SaleRecordVerifyTime"] = DateTime.Now;
+                    dt.Rows.Add(sr);
+                    dbc.UpdateTable(dt, dtt);
+                }
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+    #endregion
 }

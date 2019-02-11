@@ -11,7 +11,8 @@ var store = createSFW4Store({
        { name: 'UserID' },
        { name: 'UserName' },
        { name: 'UserXM' },
-       { name: 'points' }
+       { name: 'points' },
+       { name: 'xssy' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getList(nPage);
@@ -173,7 +174,6 @@ Ext.define('addWin', {
     }
 });
 //************************************弹出界面***************************************
-
 //************************************主界面*****************************************
 Ext.onReady(function () {
     Ext.define('KFGMView', {
@@ -212,6 +212,19 @@ Ext.onReady(function () {
                             menuDisabled: true,
                             width: 200,
                             text: '线上运费券'
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'xssy',
+                            sortable: false,
+                            menuDisabled: true,
+                            width: 200,
+                            text: '线上剩余时间',
+                            renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+                                if (parseInt(value) < 100)
+                                    metaData.style = 'background-color:red';
+                                return value
+                            }
                         },
                         {
                             xtype: 'gridcolumn',

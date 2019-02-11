@@ -2,6 +2,7 @@
 var cx_yhm;
 var cx_xm;
 var cx_iscanrelease;
+var userId = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
     data: [],
@@ -26,7 +27,9 @@ var store = createSFW4Store({
        { name: 'dqS' },
        { name: 'DqBm' },
        { name: 'AddTime' },
-       { name: 'IsCanRelease' }
+       { name: 'IsCanRelease' },
+       { name: 'canReleaseTime' },
+       { name: 'fqcs' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -52,6 +55,24 @@ var KindStore = Ext.create('Ext.data.Store', {
             'MC': '可以'
         }
     ]
+});
+
+var kfcsstore = createSFW4Store({
+    data: [],
+    pageSize: pageSize,
+    total: 1,
+    currentPage: 1,
+    fields: [
+       { name: 'SaleRecordUserID' },
+       { name: 'SaleRecordUserXM' },
+       { name: 'SaleRecordPoints' },
+       { name: 'SaleRecordTime' },
+       { name: 'ValidHour' },
+       { name: 'SaleRecordDiscount' }
+    ],
+    onPageChange: function (sto, nPage, sorters) {
+        getKFCSList(nPage);
+    }
 });
 //************************************数据源*****************************************
 
@@ -82,8 +103,152 @@ function sq(id,iscanrelease,str) {
     }
 }
 
-//************************************页面方法***************************************
+function KFCS(id) {
+    userId = id;
+    var win = new KFCSList({ userId: userId });
+    win.show(null, function () {
+        getKFCSList(1);
+    })
+}
 
+function getKFCSList(nPage) {
+    CS('CZCLZ.ZXSHMag.getKFCSList', function (retVal) {
+        kfcsstore.setData({
+            data: retVal.dt,
+            pageSize: pageSize,
+            total: retVal.ac,
+            currentPage: retVal.cp
+        });
+    }, CS.onError, nPage, pageSize, userId);
+}
+//************************************页面方法***************************************
+//************************************弹出界面***************************************
+Ext.define('KFCSList', {
+    extend: 'Ext.window.Window',
+
+    height: 500,
+    width: 800,
+    layout: {
+        type: 'fit'
+    },
+    title: '开放次数列表',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userId = me.userId
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: kfcsstore,
+                                    columns: [
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'SaleRecordUserXM',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             flex:1,
+                                             text: '专线名称'
+                                         },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'SaleRecordPoints',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '电子券'
+                                        },
+                                        {
+                                            xtype: 'datecolumn',
+                                            dataIndex: 'SaleRecordTime',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            format: 'Y-m-d',
+                                            flex: 1,
+                                            text: '时间'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'SaleRecordDiscount',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '折扣'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'ValidHour',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 150,
+                                            text: '有效时间（小时）'
+                                        }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.ZXSHMag.getKFCSListToFile", "自发券明细                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           .xls", userId, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                    }
+                                                },
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'pagingtoolbar',
+                                    displayInfo: true,
+                                    store: kfcsstore,
+                                    dock: 'bottom'
+                                }
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+//************************************弹出界面***************************************
 //************************************主界面*****************************************
 Ext.onReady(function () {
     Ext.define('YhView', {
@@ -164,6 +329,27 @@ Ext.onReady(function () {
                                     }
                                     return str;
                                 }
+                            },
+                            {
+                                xtype: 'datecolumn',
+                                dataIndex: 'canReleaseTime',
+                                sortable: false,
+                                menuDisabled: true,
+                                width: 150,
+                                text: "审核时间",
+                                format:'Y-m-d'
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'fqcs',
+                                sortable: false,
+                                menuDisabled: true,
+                                width: 120,
+                                text: "开放次数",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return "<a onclick='KFCS(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
+                                }
+                                
                             },
                             {
                                 xtype: 'gridcolumn',

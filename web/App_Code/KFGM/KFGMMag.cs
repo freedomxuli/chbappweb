@@ -116,7 +116,19 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
             dbc.BeginTransaction();
             try
             {
-                var time=DateTime.Now;
+                var time = DateTime.Now;
+
+                var kfsj = DateTime.Now.ToString();
+
+                if (jsr["kfsj_rq"] != null && jsr["kfsj_rq"].ToString() != "")
+                {
+                    kfsj = Convert.ToDateTime(jsr["kfsj_rq"].ToString()).ToString("yyyy-MM-dd");
+
+                    if (jsr["kfsj_hour"] != null && jsr["kfsj_hour"].ToString() != "")
+                    {
+                        kfsj += " " + jsr["kfsj_hour"].ToString() + ":00:00";
+                    }
+                }
                 var PlatPointId = jsr["PlatPointId"].ToString();
                 string str = "select * from tb_b_platpoints where PlatPointId=" + dbc.ToSqlValue(PlatPointId);
                 DataTable pdt = dbc.ExecuteDataTable(str);
@@ -147,7 +159,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                         logdr["SaleRecordCode"] = GetRandom();
                         logdr["SaleRecordUserID"] = userid;
                         logdr["SaleRecordUserXM"] = wlmc;
-                        logdr["SaleRecordTime"] = time;
+                        logdr["SaleRecordTime"] = kfsj;
                         logdr["SaleRecordPoints"] = Convert.ToDecimal(jsr["points"].ToString());
                         logdr["SaleRecordLX"] = 0;
                         logdr["Status"] = 0;
@@ -160,6 +172,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                         logdr["SaleRecordDiscount"] = Convert.ToDecimal(jsr["discount"].ToString());
                         logdt.Rows.Add(logdr);
                         dbc.InsertTable(logdt);
+
 
                         var saledt = dbc.GetEmptyDataTable("tb_b_plattosale");
                         DataTableTracker saledtt = new DataTableTracker(saledt);
@@ -178,6 +191,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                             saledr["SaleRecordID"] = SaleRecordID;
                             saledr["belongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
                             saledr["validHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
+                            saledr["SaleRecordTime"] = kfsj;
                             saledt.Rows.Add(saledr);
                             dbc.InsertTable(saledt);
                         }
@@ -204,6 +218,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                                 saledr["SaleRecordID"] = SaleRecordID;
                                 saledr["belongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
                                 saledr["validHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
+                                saledr["SaleRecordTime"] = kfsj;
                                 saledt.Rows.Add(saledr);
                                 dbc.UpdateTable(saledt, saledtt);
                             }

@@ -221,7 +221,7 @@ Ext.define('KFList', {
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 250,
+    height: 300,
     width: 400,
     layout: {
         type: 'fit'
@@ -326,7 +326,72 @@ Ext.define('addWin', {
                          id: "zspoint",
                          text: "",
                          style: "padding-left:100px;"
-                     }
+                     },
+                {
+                    xtype: 'container',
+                    anchor: '100%',
+                    margin: '0 0 10 0',
+                    layout: {
+                        type: 'column'
+                    },
+                    items: [
+                        {
+                            xtype: 'datefield',
+                            fieldLabel: '开放时间',
+                            anchor: '100%',
+                            id:'kfsj_rq',
+                            name: 'kfsj_rq',
+                            format: 'Y-m-d',
+                            allowBlank: false,
+                            editable: false
+                        },
+                        {
+                            xtype: 'combobox',
+                            margin: '0 0 0 10',
+                            width: 100,
+                            fieldLabel: '',
+                            id: 'kfsj_hour',
+                            name: 'kfsj_hour',
+                            store: Ext.create('Ext.data.Store', {
+                                fields: [
+                                   { name: 'text' },
+                                   { name: 'value' }
+                                ],
+                                data: [
+                                    { 'text': '0', 'value': '00' },
+                                    { 'text': '1', 'value': '01' },
+                                    { 'text': '2', 'value': '02' },
+                                    { 'text': '3', 'value': '03' },
+                                    { 'text': '4', 'value': '04' },
+                                    { 'text': '5', 'value': '05' },
+                                    { 'text': '6', 'value': '06' },
+                                    { 'text': '7', 'value': '07' },
+                                    { 'text': '8', 'value': '08' },
+                                    { 'text': '9', 'value': '09' },
+                                    { 'text': '10', 'value': '10' },
+                                    { 'text': '11', 'value': '11' },
+                                    { 'text': '12', 'value': '12' },
+                                    { 'text': '13', 'value': '13' },
+                                    { 'text': '14', 'value': '14' },
+                                    { 'text': '15', 'value': '15' },
+                                    { 'text': '16', 'value': '16' },
+                                    { 'text': '17', 'value': '17' },
+                                    { 'text': '18', 'value': '18' },
+                                    { 'text': '19', 'value': '19' },
+                                    { 'text': '20', 'value': '20' },
+                                    { 'text': '21', 'value': '21' },
+                                    { 'text': '22', 'value': '22' },
+                                    { 'text': '23', 'value': '23' }
+                                ]
+                            }),
+                            queryMode: 'local',
+                            allowBlank: false,
+                            editable: false,
+                            displayField: 'text',
+                            valueField: 'value'
+                        }
+                    ]
+                }
                 ],
                 buttonAlign: 'center',
                 buttons: [

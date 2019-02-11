@@ -1,4 +1,9 @@
-﻿var pageSize=15;
+﻿inline_include("approot/r/weixin/js/qrcode/jquery-1.8.3.min.js");
+inline_include("approot/r/weixin/js/qrcode/jquery.qrcode.js");
+inline_include("approot/r/weixin/js/qrcode/qrcode.js");
+inline_include("approot/r/weixin/js/qrcode/utf.js");
+
+var pageSize = 15;
 var cx_role;
 var cx_yhm;
 var cx_xm;
@@ -96,7 +101,6 @@ function AddPhoto(v)
             if (retVal[i].ISDEFAULT == 1)
                 isDefault = true;
             Ext.getCmp('uploadproductpic').add(new SelectImg({
-
                 isSelected: isDefault,
                 src: retVal[i].FILEURL,
                 fileid: retVal[i].fj_id
@@ -106,6 +110,18 @@ function AddPhoto(v)
 
     var win = new phWin({ UserID: v });
     win.show();
+}
+
+function LookEWM1(userid) {
+    var win = new EWMWin1();
+    win.show(null, function () {
+        jQuery('#qrcodeTable1').qrcode({
+            render: "table",
+            text: "http://share.chahuobao.net/freight/html/htbd.html?userid=" + userid,
+            width: "570",               //二维码的宽度
+            height: "570",
+        });
+    });
 }
 //************************************页面方法***************************************
 
@@ -352,6 +368,46 @@ Ext.define('addWin', {
         me.callParent(arguments);
     }
 });
+
+Ext.define('EWMWin1', {
+    extend: 'Ext.window.Window',
+
+    height: 670,
+    width: 600,
+    layout: {
+        type: 'fit'
+    },
+    closeAction: 'destroy',
+    modal: true,
+    title: '查看绑定二维码',
+
+    initComponent: function () {
+        var me = this;
+        me.items = [
+            {
+                xtype: 'panel',
+                region: 'center',
+                width: 150,
+                html: '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top:10px;">'
+                   + ' <tr>'
+                   + '   <td align="center"> <div id="qrcodeTable1"></div></td>'
+                  + ' </tr>'
+                  + '</table>',
+                buttonAlign: 'center',
+                buttons: [
+                     {
+                         text: '取消',
+                         iconCls: 'back',
+                         handler: function () {
+                             this.up('window').close();
+                         }
+                     }
+                ]
+            }
+        ];
+        me.callParent(arguments);
+    }
+});
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
@@ -407,12 +463,12 @@ Ext.onReady(function() {
                         {
                             text: '操作',
                             dataIndex: 'UserID',
-                            width:120,
+                            width:150,
                             sortable: false,
                             menuDisabled: true,
                             renderer: function(value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str;
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookEWM1(\"" + value + "\");'>查看绑定二维码</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
                                 return str;
                             }
                         }

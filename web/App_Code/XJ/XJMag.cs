@@ -41,13 +41,14 @@ public class XJMag
                     where += " and " + dbc.C_Like("b.UserXM", yhm.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
-                string str = @"  select a.*,b.UserName,b.UserXM from tb_b_plattosale a left join tb_b_user b on a.UserID=b.UserID
+                string str = @"  select a.*,b.UserName,b.UserXM,case when a.points>0 then a.validHour-(DATEDIFF(HOUR,a.addtime,getDate())) else null end as xssy
+                    from tb_b_plattosale a left join tb_b_user b on a.UserID=b.UserID
                         where a.status=0 and a.pointkind=0  ";
                 str += where;
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by a.points desc", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by case when a.points>0 then a.validHour-(DATEDIFF(HOUR,a.addtime,getDate())) else 999 end asc,a.points desc", pagesize, ref cp, out ac);
 
                 return new { dt = dtPage, cp = cp, ac = ac };
             }

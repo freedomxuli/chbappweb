@@ -1637,6 +1637,7 @@ public class UserMag
                     dr["companyId"] = companyId;
                     //dr["PayPassword"] = ;
                     dr["Address"] = jsr["Address"].ToString();
+                    dr["searchAddress"] = jsr["searchAddress"].ToString();
                     dr["DqBm"] = jsr["DqBm"].ToString();
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
@@ -1675,6 +1676,7 @@ public class UserMag
                     dr["FromRoute"] = jsr["FromRoute"].ToString();
                     dr["ToRoute"] = jsr["ToRoute"].ToString();
                     dr["Address"] = jsr["Address"].ToString();
+                    dr["searchAddress"] = jsr["searchAddress"].ToString();
                     dr["DqBm"] = jsr["DqBm"].ToString();
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);

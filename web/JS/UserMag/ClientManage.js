@@ -33,6 +33,7 @@ var store = createSFW4Store({
        { name: 'dqS' },
        { name: 'DqBm' },
        { name: 'AddTime' },
+       { name: 'searchAddress' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -205,6 +206,18 @@ function LookEWM(username) {
         });
     });
 }
+
+function LookEWM1(userid) {
+    var win = new EWMWin1();
+    win.show(null, function () {
+        jQuery('#qrcodeTable1').qrcode({
+            render: "table",
+            text: "http://share.chahuobao.net/freight/html/sfbd.html?userid=" + userid,
+            width: "570",               //二维码的宽度
+            height: "570",
+        });
+    });
+}
 //************************************页面方法***************************************
 
 //************************************弹出界面***************************************
@@ -332,7 +345,7 @@ Ext.define('phWin', {
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 350,
+    height: 425,
     width: 400,
     layout: {
         type: 'fit'
@@ -469,6 +482,14 @@ Ext.define('addWin', {
                          labelWidth: 70,
                          fieldLabel: '地址',
                          anchor: '100%'
+                     },
+                     {
+                         xtype: 'textareafield',
+                         id: 'searchAddress',
+                         name: 'searchAddress',
+                         labelWidth: 70,
+                         fieldLabel: '搜索地址',
+                         anchor: '100%'
                      }
                 ],
                 buttonAlign: 'center',
@@ -529,6 +550,46 @@ Ext.define('EWMWin', {
                    +    ' <tr>'
                    +      '   <td align="center"> <div id="qrcodeTable"></div></td>'
                   +     ' </tr>'
+                  + '</table>',
+                buttonAlign: 'center',
+                buttons: [
+                     {
+                         text: '取消',
+                         iconCls: 'back',
+                         handler: function () {
+                             this.up('window').close();
+                         }
+                     }
+                ]
+            }
+        ];
+        me.callParent(arguments);
+    }
+});
+
+Ext.define('EWMWin1', {
+    extend: 'Ext.window.Window',
+
+    height: 670,
+    width: 600,
+    layout: {
+        type: 'fit'
+    },
+    closeAction: 'destroy',
+    modal: true,
+    title: '查看绑定二维码',
+
+    initComponent: function () {
+        var me = this;
+        me.items = [
+            {
+                xtype: 'panel',
+                region: 'center',
+                width: 150,
+                html: '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top:10px;">'
+                   + ' <tr>'
+                   + '   <td align="center"> <div id="qrcodeTable1"></div></td>'
+                  + ' </tr>'
                   + '</table>',
                 buttonAlign: 'center',
                 buttons: [
@@ -802,12 +863,16 @@ Ext.onReady(function () {
                             {
                                 text: '操作',
                                 dataIndex: 'UserID',
-                                width: 250,
+                                width: 350,
                                 sortable: false,
                                 menuDisabled: true,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
-                                    str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a> 　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
+                                    if (record.data.ClientKind == 1) {
+                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
+                                    } else if (record.data.ClientKind == 2) {
+                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID+ "\");'>查看绑定二维码</a>";
+                                    }
                                     return str;
                                 }
                             }
