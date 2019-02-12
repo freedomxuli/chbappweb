@@ -17,6 +17,7 @@ using Aspose.Cells;
 using System.Net;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
+using ThoughtWorks.QRCode.Codec;
 /// <summary>
 ///UserMag 的摘要说明
 /// </summary>
@@ -2161,5 +2162,66 @@ public class UserMag
         }
     }
 
+    [CSMethod("GetEWMToFile", 2)]
+    public byte[] GetEWMToFile(string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+
+
+                Bitmap bt = QRCodeBimapForString("http://share.chahuobao.net/freight/html/htbd.html?userid=" + userid);
+                MemoryStream ms = new MemoryStream();
+                bt.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                byte[] bytes = ms.GetBuffer();
+                return bytes;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+    [CSMethod("GetEWMToFile1", 2)]
+    public byte[] GetEWMToFile1(string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+
+
+                Bitmap bt = QRCodeBimapForString("http://share.chahuobao.net/freight/html/sfbd.html?userid=" + userid);
+                MemoryStream ms = new MemoryStream();
+                bt.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                byte[] bytes = ms.GetBuffer();
+                return bytes;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    public Bitmap QRCodeBimapForString(string nr)
+{
+   string enCodeString = nr;
+   QRCodeEncoder qrCodeEncoder = new QRCodeEncoder();
+   //编码方式(注意：BYTE能支持中文，ALPHA_NUMERIC扫描出来的都是数字)
+   qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.BYTE;
+   qrCodeEncoder.QRCodeScale = 4;//大小(值越大生成的二维码图片像素越高)
+   //版本(注意：设置为0主要是防止编码的字符串太长时发生错误)
+   qrCodeEncoder.QRCodeVersion = 7;
+   //错误效验、错误更正(有4个等级)
+   qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
+
+   return qrCodeEncoder.Encode(enCodeString, Encoding.GetEncoding("GB2312"));
+}
+
+    
 
 }

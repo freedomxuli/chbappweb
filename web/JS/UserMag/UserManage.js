@@ -113,7 +113,7 @@ function AddPhoto(v)
 }
 
 function LookEWM1(userid) {
-    var win = new EWMWin1();
+    var win = new EWMWin1({ id: userid });
     win.show(null, function () {
         jQuery('#qrcodeTable1').qrcode({
             render: "table",
@@ -383,6 +383,7 @@ Ext.define('EWMWin1', {
 
     initComponent: function () {
         var me = this;
+        var id = me.id;
         me.items = [
             {
                 xtype: 'panel',
@@ -395,6 +396,12 @@ Ext.define('EWMWin1', {
                   + '</table>',
                 buttonAlign: 'center',
                 buttons: [
+                    {
+                        text: '下载',
+                        handler: function () {
+                            DownloadFile("CZCLZ.YHGLClass.GetEWMToFile", "二维码.jpg", id);
+                        }
+                    },
                      {
                          text: '取消',
                          iconCls: 'back',

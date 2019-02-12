@@ -1263,7 +1263,7 @@ public class CWBBMag
                     where += " and " + dbc.C_Like("a.FromRoute", sc.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -1320,33 +1320,33 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '"+sjstr+@"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
-                            (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string str = @"select '"+sjstr+ @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
+                            (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
                             (select sum(Points) as ysyq,CardUserID from tb_b_pay where ReceiveUserID=CardUserID and  mycardId in (select a.mycardId from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1))
+                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1))
                              group by CardUserID) c on a.UserID=c.CardUserID
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
+                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
                             and a.PointsEndTime>=getDate() group by CardUserID) e on a.UserID=e.CardUserID
                             left join
                             (select isnull(a.sjdzq,0)-isnull(b.sxyfq,0) as sxq,a.SaleRecordUserID from (
-                            select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                            select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and status=0 " + sjwhere + @" and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour  group by SaleRecordUserID ) a 
                             left join (
                             select sum(Points) as sxyfq,SaleUserID from tb_b_order where [SaleRecordID] in
-                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @" and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
+                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @" and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour)
                             and status=0  and ZhiFuZT=1 group by SaleUserID) b on a.SaleRecordUserID=b.SaleUserID) f on a.UserID=f.SaleRecordUserID
                             left join(
 							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
-                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
+                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             where a.IsCanRelease=1 and a.ClientKind=1 ";
@@ -1451,7 +1451,7 @@ public class CWBBMag
                     where += " and " + dbc.C_Like("a.FromRoute", sc.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -1509,32 +1509,32 @@ public class CWBBMag
                 }
 
                 string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
-                            (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                            (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
                             (select sum(Points) as ysyq,CardUserID from tb_b_pay where ReceiveUserID=CardUserID and  mycardId in (select a.mycardId from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1))
+                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1))
                              group by CardUserID) c on a.UserID=c.CardUserID
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
+                            where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
                             and a.PointsEndTime>=getDate() group by CardUserID) e on a.UserID=e.CardUserID
                             left join
                             (select isnull(a.sjdzq,0)-isnull(b.sxyfq,0) as sxq,a.SaleRecordUserID from (
-                            select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                            select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and status=0 " + sjwhere + @" and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour  group by SaleRecordUserID ) a 
                             left join (
                             select sum(Points) as sxyfq,SaleUserID from tb_b_order where [SaleRecordID] in
-                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @" and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
+                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @" and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour)
                             and status=0  and ZhiFuZT=1 group by SaleUserID) b on a.SaleRecordUserID=b.SaleUserID) f on a.UserID=f.SaleRecordUserID
                             left join(
 							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
-                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
+                            (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
                             where a.IsCanRelease=1 and a.ClientKind=1  ";
@@ -1605,7 +1605,7 @@ public class CWBBMag
             {
                 int cp = pagnum;
                 int ac = 0;
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -1623,7 +1623,7 @@ public class CWBBMag
                 string str = @"select a.rq,b.FromRoute,b.UserName,b.UserXM,a.xsdzq,c.xfje,d.gqje,e.wsyje,a.zje,a.pjzk,a.yj from
 		                    (select sum(c.Points) as xsdzq,sum(c.Money) as zje,sum(c.CHBMoney) as yj, CONVERT(varchar(100), c.AddTime, 23) as rq,c.SaleUserID,
 		                    AVG(d.SaleRecordDiscount) as pjzk from tb_b_order c 
-		                    left join tb_b_salerecord d on c.SaleRecordID=d.SaleRecordID  where d.status=0  and d.SaleRecordLX!=0 
+		                    left join tb_b_salerecord d on c.SaleRecordID=d.SaleRecordID  where d.status=0  and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 
 		                    and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and c.status=0 " + sjwhere + @" and c.ZhiFuZT=1 and c.SaleUserID=@UserID  group by CONVERT(varchar(100), c.AddTime, 23),c.SaleUserID) a 
                             left join tb_b_user b on a.SaleUserID=b.UserID
@@ -1632,19 +1632,19 @@ public class CWBBMag
 		                    left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and 
-		                    d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) c on a.rq=c.rq
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
-		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
 		                    (select sum(c.Money) as wsyje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime>=getDate() and b.status=0
-		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
@@ -1734,7 +1734,7 @@ public class CWBBMag
                 cells.SetColumnWidth(10, 20);
 
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -1752,7 +1752,7 @@ public class CWBBMag
                 string str = @"select a.rq,b.FromRoute,b.UserName,b.UserXM,a.xsdzq,c.xfje,d.gqje,e.wsyje,a.zje,a.pjzk,a.yj from
 		                    (select sum(c.Points) as xsdzq,sum(c.Money) as zje,sum(c.CHBMoney) as yj, CONVERT(varchar(100), c.AddTime, 23) as rq,c.SaleUserID,
 		                    AVG(d.SaleRecordDiscount) as pjzk from tb_b_order c 
-		                    left join tb_b_salerecord d on c.SaleRecordID=d.SaleRecordID  where d.status=0  and d.SaleRecordLX!=0 
+		                    left join tb_b_salerecord d on c.SaleRecordID=d.SaleRecordID  where d.status=0  and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 
 		                    and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and c.status=0 " + sjwhere + @" and c.ZhiFuZT=1 and c.SaleUserID=@UserID  group by CONVERT(varchar(100), c.AddTime, 23),c.SaleUserID) a 
                             left join tb_b_user b on a.SaleUserID=b.UserID
@@ -1761,19 +1761,19 @@ public class CWBBMag
 		                    left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where a.ReceiveUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and 
-		                    d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) c on a.rq=c.rq
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
-		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
 		                    (select sum(c.Money) as wsyje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime>=getDate() and b.status=0
-		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    and d.status=0 and d.SaleRecordLX!=0 and and d.SaleRecordVerifyType=1 d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
@@ -1856,7 +1856,7 @@ public class CWBBMag
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
 		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
-		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
+		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@UserID", userId);
@@ -1945,7 +1945,7 @@ public class CWBBMag
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
 		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
-		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
+		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@UserID", userId);
@@ -2037,7 +2037,7 @@ public class CWBBMag
                     where += " and " + dbc.C_Like("a.FromRoute", sc.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -2233,7 +2233,7 @@ public class CWBBMag
                     where += " and " + dbc.C_Like("a.FromRoute", sc.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -2529,7 +2529,7 @@ public class CWBBMag
                 cells.SetColumnWidth(10, 20);
 
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -2811,7 +2811,7 @@ public class CWBBMag
             try
             {
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
@@ -2934,7 +2934,7 @@ public class CWBBMag
                 cells[0, 3].SetStyle(style2);
                 cells.SetColumnWidth(3, 20);
 
-                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+                string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                     and status=0  ";
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
