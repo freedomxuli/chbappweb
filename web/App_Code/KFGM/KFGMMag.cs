@@ -169,7 +169,9 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                         logdr["updatetime"] = time;
                         logdr["SaleRecordBelongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
                         logdr["ValidHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
-                        logdr["SaleRecordDiscount"] = Convert.ToDecimal(jsr["discount"].ToString());
+                        logdr["SaleRecordDiscount"] = Convert.ToDecimal(jsr["discount"].ToString()); 
+                        logdr["SaleRecordVerifyType"]=1;
+                        logdr["SaleRecordVerifyTime"] = kfsj;
                         logdt.Rows.Add(logdr);
                         dbc.InsertTable(logdt);
 
@@ -192,6 +194,8 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                             saledr["belongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
                             saledr["validHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
                             saledr["SaleRecordTime"] = kfsj;
+                            saledr["SaleRecordVerifyType"] = 1;
+                            saledr["SaleRecordVerifyTime"] = kfsj;
                             saledt.Rows.Add(saledr);
                             dbc.InsertTable(saledt);
                         }
@@ -219,6 +223,8 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                                 saledr["belongID"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
                                 saledr["validHour"] = Convert.ToDecimal(jsr["validHour"].ToString());
                                 saledr["SaleRecordTime"] = kfsj;
+                                saledr["SaleRecordVerifyType"] = 1;
+                                saledr["SaleRecordVerifyTime"] = kfsj;
                                 saledt.Rows.Add(saledr);
                                 dbc.UpdateTable(saledt, saledtt);
                             }
