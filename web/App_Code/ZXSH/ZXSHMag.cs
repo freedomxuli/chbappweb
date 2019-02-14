@@ -291,6 +291,7 @@ public class ZXSHMag
             dbc.BeginTransaction();
             try
             {
+                var time = DateTime.Now;
                 string str = "select * from tb_b_salerecord where (SaleRecordVerifyType=0 or SaleRecordVerifyType is null) and SaleRecordID=" + dbc.ToSqlValue(SaleRecordID);
                 DataTable sdt = dbc.ExecuteDataTable(str);
 
@@ -301,9 +302,25 @@ public class ZXSHMag
                     var sr = dt.NewRow();
                     sr["SaleRecordID"] = new Guid(SaleRecordID);
                     sr["SaleRecordVerifyType"] = issh;
-                    sr["SaleRecordVerifyTime"] = DateTime.Now;
+                    sr["SaleRecordVerifyTime"] = time;
                     dt.Rows.Add(sr);
                     dbc.UpdateTable(dt, dtt);
+
+
+                    string str1 = "select * from tb_b_plattosale where (SaleRecordVerifyType=0 or SaleRecordVerifyType is null) and SaleRecordID=" + dbc.ToSqlValue(SaleRecordID);
+                    DataTable sdt1 = dbc.ExecuteDataTable(str);
+
+                    if (sdt1.Rows.Count > 0)
+                    {
+                        var dt1 = dbc.GetEmptyDataTable("tb_b_plattosale");
+                        var dtt1 = new SmartFramework4v2.Data.DataTableTracker(dt1);
+                        var sr1 = dt1.NewRow();
+                        sr1["SaleRecordID"] = new Guid(SaleRecordID);
+                        sr1["SaleRecordVerifyType"] = issh;
+                        sr1["SaleRecordVerifyTime"] = time;
+                        dt1.Rows.Add(sr1);
+                        dbc.UpdateTable(dt1, dtt1);
+                    }
                 }
                 dbc.CommitTransaction();
                 return true;
