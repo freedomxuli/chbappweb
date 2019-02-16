@@ -272,7 +272,7 @@ public class ZXSHMag
                 {
                     where += " and " + dbc.C_EQ("SaleRecordVerifyType", Convert.ToInt32(isVerifyType));
                 }
-                string str = "select * from  tb_b_salerecord where status=0 and SaleRecordLX!=0 " + where + " order by addtime desc";
+                string str = "select * from  tb_b_salerecord where status=0 and SaleRecordLX!=0  and SaleRecordVerifyType!=3 " + where + " order by addtime desc";
                 System.Data.DataTable dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
                 return new { dt = dtPage, cp = cp, ac = ac };
             }
@@ -308,14 +308,14 @@ public class ZXSHMag
 
 
                     string str1 = "select * from tb_b_plattosale where (SaleRecordVerifyType=0 or SaleRecordVerifyType is null) and SaleRecordID=" + dbc.ToSqlValue(SaleRecordID);
-                    DataTable sdt1 = dbc.ExecuteDataTable(str);
+                    DataTable sdt1 = dbc.ExecuteDataTable(str1);
 
                     if (sdt1.Rows.Count > 0)
                     {
                         var dt1 = dbc.GetEmptyDataTable("tb_b_plattosale");
                         var dtt1 = new SmartFramework4v2.Data.DataTableTracker(dt1);
                         var sr1 = dt1.NewRow();
-                        sr1["SaleRecordID"] = new Guid(SaleRecordID);
+                        sr1["PlatToSaleId"] = sdt1.Rows[0]["PlatToSaleId"];
                         sr1["SaleRecordVerifyType"] = issh;
                         sr1["SaleRecordVerifyTime"] = time;
                         dt1.Rows.Add(sr1);

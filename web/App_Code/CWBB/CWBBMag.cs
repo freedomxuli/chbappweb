@@ -1345,7 +1345,7 @@ public class CWBBMag
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour)
                             and status=0  and ZhiFuZT=1 group by SaleUserID) b on a.SaleRecordUserID=b.SaleUserID) f on a.UserID=f.SaleRecordUserID
                             left join(
-							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
+							select sum(Points) as zsq, UserID from  tb_b_plattosale where SaleRecordVerifyType=1 and status=0 and [SaleRecordID] in
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
@@ -1533,7 +1533,7 @@ public class CWBBMag
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())>validHour)
                             and status=0  and ZhiFuZT=1 group by SaleUserID) b on a.SaleRecordUserID=b.SaleUserID) f on a.UserID=f.SaleRecordUserID
                             left join(
-							select sum(Points) as zsq, UserID from  tb_b_plattosale where [SaleRecordID] in
+							select sum(Points) as zsq, UserID from  tb_b_plattosale where SaleRecordVerifyType=1 and status=0 and [SaleRecordID] in
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
