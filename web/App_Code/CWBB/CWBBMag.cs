@@ -3390,7 +3390,7 @@ public class CWBBMag
                                 (select count(OrderID) as sqcs,SaleUserID from tb_b_order where [SaleRecordID] is null 
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join 
-							    (select sum(Points) as xfyfq,CardUserID from tb_b_pay where mycardId is null and ReceiveUserID=CardUserID group by CardUserID) b on a.UserID=b.CardUserID
+							    (select sum(Points) as xfyfq,CardUserID from tb_b_pay where OrderCode is null and ReceiveUserID=CardUserID group by CardUserID) b on a.UserID=b.CardUserID
                                 left join 
                                 (select sum(Points) as wsyyfq,CardUserID from tb_b_mycard where SaleRecordID is null and status=0 group by CardUserID) c on a.UserID=c.CardUserID
                                 where 1=1 and a.ClientKind=1";
@@ -3497,7 +3497,7 @@ public class CWBBMag
                                 (select count(OrderID) as sqcs,SaleUserID from tb_b_order where [SaleRecordID] is null 
                                 and status=0 and ZhiFuZT=1 group by SaleUserID) e on a.UserID=e.SaleUserID
                                 left join 
-							    (select sum(Points) as xfyfq,CardUserID from tb_b_pay where mycardId is null and ReceiveUserID=CardUserID group by CardUserID) b on a.UserID=b.CardUserID
+							    (select sum(Points) as xfyfq,CardUserID from tb_b_pay where OrderCode is null and ReceiveUserID=CardUserID group by CardUserID) b on a.UserID=b.CardUserID
                                 left join 
                                 (select sum(Points) as wsyyfq,CardUserID from tb_b_mycard where SaleRecordID is null and status=0 group by CardUserID) c on a.UserID=c.CardUserID
                                 where 1=1 and a.ClientKind=1";
@@ -3693,7 +3693,7 @@ public class CWBBMag
 
                 string str = @"select a.*,b.UserName from tb_b_pay a 
                                 left join tb_b_user b on a.PayUserID=b.UserID  
-                                where a.mycardId is null and a.ReceiveUserID=a.CardUserID and a.CardUserID=@UserID  order by a.AddTime desc
+                                where a.OrderCode is null and a.ReceiveUserID=a.CardUserID and a.CardUserID=@UserID  order by a.AddTime desc
                                                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);
@@ -3761,7 +3761,7 @@ public class CWBBMag
 
                 string str = @"  select a.*,b.UserName from tb_b_pay a 
                                 left join tb_b_user b on a.PayUserID=b.UserID  
-                                where a.mycardId is null and a.ReceiveUserID=a.CardUserID and a.CardUserID=@UserID  order by a.AddTime desc
+                                where a.OrderCode is null and a.ReceiveUserID=a.CardUserID and a.CardUserID=@UserID  order by a.AddTime desc
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);

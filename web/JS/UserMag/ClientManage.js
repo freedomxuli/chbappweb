@@ -33,7 +33,8 @@ var store = createSFW4Store({
        { name: 'dqS' },
        { name: 'DqBm' },
        { name: 'AddTime' },
-       { name: 'searchAddress' }
+       { name: 'searchAddress' },
+       { name: 'ewmbs' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -876,9 +877,9 @@ Ext.onReady(function () {
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
                                     if (record.data.ClientKind == 1) {
-                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
+                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
                                     } else if (record.data.ClientKind == 2) {
-                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.UserName + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID+ "\");'>查看绑定二维码</a>";
+                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a>";
                                     }
                                     return str;
                                 }

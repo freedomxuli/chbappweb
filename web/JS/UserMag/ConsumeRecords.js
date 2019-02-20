@@ -140,9 +140,8 @@ Ext.onReady(function () {
                                                 text: '交易对象'
                                             },
                                             {
-                                                xtype: 'datecolumn',
+                                                xtype: 'gridcolumn',
                                                 dataIndex: 'DATE',
-                                                format: 'Y-m-d',
                                                 sortable: false,
                                                 menuDisabled: true,
                                                 flex: 1,
@@ -265,9 +264,8 @@ Ext.onReady(function () {
                                                 text: '三方'
                                             },
                                             {
-                                                xtype: 'datecolumn',
+                                                xtype: 'gridcolumn',
                                                 dataIndex: 'DATE',
-                                                format: 'Y-m-d',
                                                 sortable: false,
                                                 menuDisabled: true,
                                                 flex: 1,

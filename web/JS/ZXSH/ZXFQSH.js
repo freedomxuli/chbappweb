@@ -155,8 +155,8 @@ Ext.onReady(function () {
                                 dataIndex: 'SaleRecordTime',
                                 sortable: false,
                                 menuDisabled: true,
-                                width: 120,
-                                format: 'Y-m-d',
+                                width: 150,
+                                format: 'Y-m-d H:i:s',
                                 text: "开放时间"
                             },
                              {
@@ -184,8 +184,8 @@ Ext.onReady(function () {
                                  dataIndex: 'SaleRecordVerifyTime',
                                  sortable: false,
                                  menuDisabled: true,
-                                 width: 120,
-                                 format:'Y-m-d',
+                                 width: 150,
+                                 format: 'Y-m-d H:i:s',
                                  text: "审核时间"
                              },
                             {

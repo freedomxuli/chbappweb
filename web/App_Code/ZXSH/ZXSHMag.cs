@@ -320,7 +320,18 @@ public class ZXSHMag
                         sr1["SaleRecordVerifyTime"] = time;
                         dt1.Rows.Add(sr1);
                         dbc.UpdateTable(dt1, dtt1);
+
+                        try
+                        {
+                            KFGMMag.WebServiceApp(System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString(), "pcReleaseNotify", "userid=" + sdt1.Rows[0]["UserID"]);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
                     }
+
+                    
                 }
                 dbc.CommitTransaction();
                 return true;

@@ -2222,6 +2222,57 @@ public class UserMag
    return qrCodeEncoder.Encode(enCodeString, Encoding.GetEncoding("GB2312"));
 }
 
-    
+    #region 分享明细
+    [CSMethod("getShareList")]
+    public object getShareList(int pagnum, int pagesize, string isregister, string isbuy,string start,string end,string tjr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(isregister))
+                {
+                    where += " and " + dbc.C_EQ("a.isregister", isregister);
+                }
+                if (!string.IsNullOrEmpty(isbuy))
+                {
+                    where += " and " + dbc.C_EQ("a.isbuy", isbuy);
+                }
+                if (!string.IsNullOrEmpty(start))
+                {
+                    where += " and a.addtime>='" +Convert.ToDateTime(start).ToString("yyyy-MM-dd")+"'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<'" + Convert.ToDateTime(start).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(tjr))
+                {
+                    where += " and (" + dbc.C_Like("b.UserName", tjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("b.UserXM", tjr, LikeStyle.LeftAndRightLike)+" )";
+                }
+
+                string str = @" select a.*,b.UserName as tjname,b.UserXM as tjxm,c.UserName as btjname,c.UserXM as btjxm from tb_b_share a left join tb_b_user b on a.userid=b.UserID
+                                left join tb_b_user c on a.tel=c.UserName   where 1=1";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order  by a.addtime ", pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+    #endregion 
 
 }
