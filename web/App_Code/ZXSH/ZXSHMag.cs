@@ -292,6 +292,7 @@ public class ZXSHMag
             try
             {
                 var time = DateTime.Now;
+                var userid = "";
                 string str = "select * from tb_b_salerecord where (SaleRecordVerifyType=0 or SaleRecordVerifyType is null) and SaleRecordID=" + dbc.ToSqlValue(SaleRecordID);
                 DataTable sdt = dbc.ExecuteDataTable(str);
 
@@ -321,19 +322,22 @@ public class ZXSHMag
                         dt1.Rows.Add(sr1);
                         dbc.UpdateTable(dt1, dtt1);
 
-                        try
-                        {
-                            KFGMMag.WebServiceApp(System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString(), "pcReleaseNotify", "userid=" + sdt1.Rows[0]["UserID"]);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw ex;
-                        }
+                        userid=sdt1.Rows[0]["UserID"].ToString();
+                       
                     }
 
                     
                 }
                 dbc.CommitTransaction();
+                try
+                {
+                    KFGMMag.WebServiceApp(System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString(), "pcReleaseNotify", "userid=" + userid);
+                }
+                catch (Exception ex)
+                {
+                    return true;
+                }
+
                 return true;
             }
             catch (Exception ex)
