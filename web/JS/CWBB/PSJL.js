@@ -154,7 +154,7 @@ Ext.define('SFList', {
                                         {
                                             xtype: 'datecolumn',
                                             dataIndex: 'gettime',
-                                            format: 'Y-m-d h:m:s',
+                                            format: 'Y-m-d H:i:s',
                                             sortable: false,
                                             menuDisabled: true,
                                             width: 100,
@@ -307,7 +307,7 @@ Ext.onReady(function () {
                              {
                                  xtype: 'datecolumn',
                                  dataIndex: 'addtime',
-                                 format: 'Y-m-d h:m:s',
+                                 format: 'Y-m-d H:i:s',
                                  sortable: false,
                                  menuDisabled: true,
                                  flex: 1,
@@ -315,7 +315,7 @@ Ext.onReady(function () {
                              },
                              {
                                  xtype: 'datecolumn',
-                                 format: 'Y-m-d h:m:s',
+                                 format: 'Y-m-d H:i:s',
                                  dataIndex: 'jzsj',
                                  sortable: false,
                                  menuDisabled: true,

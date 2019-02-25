@@ -330,7 +330,7 @@ Ext.define('XFList', {
                                         {
                                             xtype: 'datecolumn',
                                             dataIndex: 'AddTime',
-                                            format: 'Y-m-d h:m:s',
+                                            format: 'Y-m-d H:i:s',
                                             sortable: false,
                                             menuDisabled: true,
                                             flex: 1,

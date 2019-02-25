@@ -265,14 +265,15 @@ public class ZXSHMag
                 int ac = 0;
                 string where="";
                 if(!string.IsNullOrEmpty(userxm)){
-                    where+=" and "+dbc.C_Like("SaleRecordUserXM",userxm,LikeStyle.LeftAndRightLike);
+                    where+=" and "+dbc.C_Like("a.SaleRecordUserXM",userxm,LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(isVerifyType))
                 {
-                    where += " and " + dbc.C_EQ("SaleRecordVerifyType", Convert.ToInt32(isVerifyType));
+                    where += " and " + dbc.C_EQ("a.SaleRecordVerifyType", Convert.ToInt32(isVerifyType));
                 }
-                string str = "select * from  tb_b_salerecord where status=0 and SaleRecordLX!=0  and SaleRecordVerifyType!=3 " + where + " order by addtime desc";
+                string str = @"select a.*,b.ZXSaleListCitys from  tb_b_salerecord a left join tb_b_zxsalelist b on a.SaleRecordID=b.SaleRecordID
+   where a.status=0 and a.SaleRecordLX!=0  and a.SaleRecordVerifyType!=3 and b.status=0 " + where + " order by a.addtime desc";
                 System.Data.DataTable dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
                 return new { dt = dtPage, cp = cp, ac = ac };
             }

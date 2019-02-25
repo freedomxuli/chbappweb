@@ -71,7 +71,7 @@ Ext.onReady(function () {
                          {
                              xtype: 'datecolumn',
                              dataIndex: 'jysj',
-                             format: 'Y-m-d h:m:s',
+                             format: 'Y-m-d H:i:s',
                              sortable: false,
                              menuDisabled: true,
                              width: 150,
@@ -82,7 +82,7 @@ Ext.onReady(function () {
                               dataIndex: 'xfsj',
                               sortable: false,
                               menuDisabled: true,
-                              format: 'Y-m-d h:m:s',
+                              format: 'Y-m-d H:i:s',
                               width: 150,
                               text: "消费时间"
                           },

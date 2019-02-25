@@ -384,7 +384,7 @@ Ext.define('MXList', {
                                     {
                                         xtype: 'datecolumn',
                                         dataIndex: 'AddTime',
-                                        format: 'Y-m-d h:m:s',
+                                        format: 'Y-m-d H:i:s',
                                         sortable: false,
                                         menuDisabled: true,
                                         flex:1,
@@ -441,7 +441,7 @@ Ext.define('MXList', {
                                         {
                                             xtype: 'datecolumn',
                                             dataIndex: 'xfrq',
-                                            format: 'Y-m-d h:m:s',
+                                            format: 'Y-m-d H:i:s',
                                             sortable: false,
                                             menuDisabled: true,
                                             flex: 1,
@@ -530,7 +530,7 @@ Ext.define('SJList', {
                                     {
                                         xtype: 'datecolumn',
                                         dataIndex: 'SaleRecordTime',
-                                        format: 'Y-m-d h:m:s',
+                                        format: 'Y-m-d H:i:s',
                                         sortable: false,
                                         menuDisabled: true,
                                         flex: 1,
@@ -643,7 +643,7 @@ Ext.define('XJList', {
                                     {
                                         xtype: 'datecolumn',
                                         dataIndex: 'addtime',
-                                        format: 'Y-m-d h:m:s',
+                                        format: 'Y-m-d H:i:s',
                                         sortable: false,
                                         menuDisabled: true,
                                         flex: 1,

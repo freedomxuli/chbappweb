@@ -25,7 +25,8 @@ var store = createSFW4Store({
         { name: 'addtime' },
         { name: 'SaleRecordDiscount' },
         { name: 'SaleRecordVerifyType' },
-        { name: 'SaleRecordVerifyTime' }
+        { name: 'SaleRecordVerifyTime' },
+        { name:'ZXSaleListCitys'}
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -124,6 +125,14 @@ Ext.onReady(function () {
                                 menuDisabled: true,
                                 flex:1,
                                 text: "专线名称"
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'ZXSaleListCitys',
+                                sortable: false,
+                                menuDisabled: true,
+                                flex: 1,
+                                text: "目的地"
                             },
                             {
                                 xtype: 'gridcolumn',

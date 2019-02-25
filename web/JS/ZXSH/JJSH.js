@@ -32,7 +32,8 @@ var store = createSFW4Store({
        { name: 'paramphoto3' },
        { name: 'paramphoto4' },
        { name: 'paramphoto5' },
-       { name: 'status' }
+       { name: 'status' },
+       { name: 'param' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -85,13 +86,12 @@ function ck(id) {
     var r = store.findRecord("id", id).data;
     var win = new addWin({id:id});
     win.show(null, function () { })
-    Ext.getCmp("UserContent").setValue(r.UserContent);
-    Ext.getCmp("Address").setValue(r.Address);
-    Ext.getCmp("UserTel").setValue(r.UserTel);
+    Ext.getCmp("UserContent").setValue(r.param.usercontent);
+    Ext.getCmp("Address").setValue(r.param.address);
+    Ext.getCmp("UserTel").setValue(r.param.usertel);
     Ext.getCmp("UserXM").setValue(r.UserXM);
-    Ext.getCmp("FromRoute").setValue(r.FromRoute);
-    Ext.getCmp("ToRoute").setValue(r.ToRoute);
-    Ext.getCmp("ToRoute").setValue(r.ToRoute);
+    Ext.getCmp("FromRoute").setValue(r.param.fromroute);
+    Ext.getCmp("ToRoute").setValue(r.param.toroute);
     if (r.paramphoto0.fileList) {
         if (r.paramphoto0.fileList.length > 0) {
             var isDefault = false;
@@ -159,15 +159,14 @@ function ck(id) {
 
 function sh(id) {
     var r = store.findRecord("id", id).data;
-    console.log(r);
     var win = new addWin({ id: id });
     win.show(null, function () { })
-    Ext.getCmp("UserContent").setValue(r.UserContent);
-    Ext.getCmp("Address").setValue(r.Address);
-    Ext.getCmp("UserTel").setValue(r.UserTel);
+    Ext.getCmp("UserContent").setValue(r.param.usercontent);
+    Ext.getCmp("Address").setValue(r.param.address);
+    Ext.getCmp("UserTel").setValue(r.param.usertel);
     Ext.getCmp("UserXM").setValue(r.UserXM);
-    Ext.getCmp("FromRoute").setValue(r.FromRoute);
-    Ext.getCmp("ToRoute").setValue(r.ToRoute);
+    Ext.getCmp("FromRoute").setValue(r.param.fromroute);
+    Ext.getCmp("ToRoute").setValue(r.param.toroute);
         if (r.paramphoto0.fileList) {
             if (r.paramphoto0.fileList.length > 0) {
                 var isDefault = false;
@@ -456,7 +455,6 @@ Ext.define('yjWin', {
                                 CS('CZCLZ.ZXSHMag.SHJJSB', function (retVal) {
                                     if (retVal) {
                                         var result = retVal.evalJSON();
-                                        console.log(result);
                                         getUser(1);
                                         if (result.success) {
                                             Ext.MessageBox.alert('提示', "审核成功！");
@@ -523,11 +521,13 @@ Ext.onReady(function () {
                             },
                             {
                                 xtype: 'gridcolumn',
-                                dataIndex: 'UserTel',
                                 sortable: false,
                                 menuDisabled: true,
                                 width: 120,
-                                text: "电话"
+                                text: "电话",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return record.data.param.usertel;
+                                }
                             },
                             {
                                 xtype: 'gridcolumn',
@@ -537,11 +537,11 @@ Ext.onReady(function () {
                                 flex: 1,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str="";
-                                    if (record.data.FromRoute) {
-                                        str += record.data.FromRoute
+                                    if (record.data.param.fromroute) {
+                                        str += record.data.param.fromroute
                                     }
-                                    if (record.data.ToRoute) {
-                                        str += "─" + record.data.ToRoute;
+                                    if (record.data.param.toroute) {
+                                        str += "─" + record.data.param.toroute;
                                     }
                                     return str;
                                 }
@@ -549,11 +549,13 @@ Ext.onReady(function () {
                             },
                             {
                                 xtype: 'gridcolumn',
-                                dataIndex: 'UserContent',
                                 sortable: false,
                                 menuDisabled: true,
                                 flex: 1,
-                                text: "简介"
+                                text: "简介",
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return record.data.param.usercontent;
+                                }
                             },
                             {
                                 xtype: 'gridcolumn',
