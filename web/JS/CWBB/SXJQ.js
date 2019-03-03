@@ -201,7 +201,7 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getPSList(1);
+                                                        GetSXJList(1);
                                                     }
                                                 },
                                                 {

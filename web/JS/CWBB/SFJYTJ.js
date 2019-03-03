@@ -18,7 +18,9 @@ var store = createSFW4Store({
        { name: 'UserXM' },
        { name: 'OrderCode' },
        { name: 'Money' },
-       { name: 'flag' }
+       { name: 'flag' },
+       { name: 'redenvelopeid' },
+       { name: 'redmoney' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -94,7 +96,6 @@ Ext.onReady(function () {
                                 flex:1,
                                 text: "专线名称"
                             },
-                           
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'OrderCode',
@@ -113,6 +114,30 @@ Ext.onReady(function () {
                                 text: "交易金额"
 
                             },
+                             {
+                                 xtype: 'gridcolumn',
+                                 dataIndex: 'redenvelopeid',
+                                 width: 140,
+                                 sortable: false,
+                                 menuDisabled: true,
+                                 text: "是否使用红包",
+                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                     var str = "否";
+                                     if (value) {
+                                         str = "是";
+                                     }
+                                     return str;
+                                 }
+                             },
+                              {
+                                  xtype: 'gridcolumn',
+                                  dataIndex: 'redmoney',
+                                  width: 140,
+                                  sortable: false,
+                                  menuDisabled: true,
+                                  text: "红包金额"
+
+                              },
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'flag',

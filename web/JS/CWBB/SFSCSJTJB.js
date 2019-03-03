@@ -6,6 +6,7 @@ var cx_end;
 var gmuserid = "";
 var psuserid = "";
 var ysyuserid = "";
+var gqwsyuserid = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
     data: [],
@@ -87,6 +88,21 @@ var systore = Ext.create('Ext.data.Store', {
     ]
 });
 
+var gqwsystore = createSFW4Store({
+    data: [],
+    pageSize: pageSize,
+    total: 1,
+    currentPage: 1,
+    fields: [
+       { name: 'UserXM' },
+       { name: 'points' },
+       { name: 'PointsEndTime' }
+    ],
+    onPageChange: function (sto, nPage, sorters) {
+        getGQWSYList(nPage, gqwsyuserid);
+    }
+});
+
 
 
 //************************************数据源*****************************************
@@ -159,6 +175,15 @@ function YSY(userId) {
     })
 }
 
+
+function GQWSY(userId) {
+    gqwsyuserid = userId;
+    var win = new GQWSYList({ userId: userId });
+    win.show(null, function () {
+        getGQWSYList(1);
+    })
+}
+
 function getYSYList(nPage) {
     CS('CZCLZ.CWBBMag.getYSYList', function (retVal) {
         ysystore.setData({
@@ -168,6 +193,17 @@ function getYSYList(nPage) {
             currentPage: retVal.cp
         });
     }, CS.onError, nPage, pageSize, ysyuserid);
+}
+
+function getGQWSYList(nPage) {
+    CS('CZCLZ.CWBBMag.getGQWSYList', function (retVal) {
+        gqwsystore.setData({
+            data: retVal.dt,
+            pageSize: pageSize,
+            total: retVal.ac,
+            currentPage: retVal.cp
+        });
+    }, CS.onError, nPage, pageSize, gqwsyuserid);
 }
 //************************************页面方法***************************************
 
@@ -623,6 +659,116 @@ Ext.define('YSYList', {
 
 });
 
+Ext.define('GQWSYList', {
+    extend: 'Ext.window.Window',
+
+    height: 422,
+    width: 620,
+    layout: {
+        type: 'fit'
+    },
+    title: '过期未使用运费券列表详情',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userId = me.userId;
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: gqwsystore,
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'UserXM',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '专线'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'points',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '运费券'
+                                        },
+                                        {
+                                            xtype: 'datecolumn',
+                                            dataIndex: 'PointsEndTime',
+                                            format: 'Y-m-d',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '时间'
+                                        }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CWBBMag.getGQWSYListToFile", "过期未使用运费券明细表.xls", userId);
+                                                    }
+                                                },
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'pagingtoolbar',
+                                    displayInfo: true,
+                                    store: gqwsystore,
+                                    dock: 'bottom'
+                                }
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
@@ -672,7 +818,7 @@ Ext.onReady(function () {
                                 menuDisabled: true,
                                 text: "过期未使用",
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    return "<a onclick='SY(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
+                                    return "<a onclick='GQWSY(\"" + record.data.UserID + "\");'>" + (value == null ? "" : value) + "</a>"
                                 }
 
                             },

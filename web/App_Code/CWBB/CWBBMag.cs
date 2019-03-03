@@ -543,27 +543,20 @@ public class CWBBMag
                 }
 
                 string str = @"select a.UserID,a.UserName,a.Addtime,b.gmyfq,c.ysyyfq,d.gmcs,e.gzs,f.syyfq,g.gqwsy,h.ps from tb_b_user a left join 
-                                (select sum(Points) as gmyfq,BuyUserID from tb_b_order where SaleRecordID in
-                                (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and status=0 and ZhiFuZT=1 group by BuyUserID) b on a.UserID=b.BuyUserID
+                                (select sum(Points) as gmyfq,BuyUserID from tb_b_order where  status=0 and ZhiFuZT=1 group by BuyUserID) b on a.UserID=b.BuyUserID
                                 left join 
-                                (select sum(Points) as ysyyfq,PayUserID  from tb_b_pay where 
-                                mycardId in(select a.mycardId from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                group by PayUserID) c on a.UserID=c.PayUserID
+                                (select sum(Points) as ysyyfq,PayUserID  from tb_b_pay group by PayUserID) c on a.UserID=c.PayUserID
                                 left join 
-                                (select count(OrderID) as gmcs,BuyUserID from tb_b_order where [SaleRecordID] in
-                                (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and status=0 and ZhiFuZT=1 group by BuyUserID) d on a.UserID=d.BuyUserID 
+                                (select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 group by BuyUserID) d on a.UserID=d.BuyUserID 
                                 left join 
                                 (select count(GZ_ID) as gzs,UserID from tb_b_user_gz group by UserID) e on a.UserID=e.UserID
                                 left join(
                                 select sum(a.points) as syyfq,a.UserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime>=getDate() and a.status=0
+                                where b.status=0  and a.PointsEndTime>=getDate() and a.status=0
                                 group by a.UserID) f on a.UserID=f.UserID
                                 left join(
                                 select sum(a.points) as gqwsy,a.UserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime<getDate() and a.status=0
+                                where b.status=0  and a.PointsEndTime<getDate() and (a.status=0  or a.status=9)
                                 group by a.UserID) g on a.UserID=g.UserID
                                 left join (select sum(getpoints) as ps,a.sanfanguserid from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
                                 where getstatus=1 and b.status=0 and a.status=0 group by a.sanfanguserid) h on a.UserID=h.sanfanguserid
@@ -679,27 +672,20 @@ public class CWBBMag
                 }
 
                 string str = @"select a.UserID,a.UserName,a.Addtime,b.gmyfq,c.ysyyfq,d.gmcs,e.gzs,f.syyfq,g.gqwsy,h.ps from tb_b_user a left join 
-                                (select sum(Points) as gmyfq,BuyUserID from tb_b_order where SaleRecordID in
-                                (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and status=0 and ZhiFuZT=1 group by BuyUserID) b on a.UserID=b.BuyUserID
+                                (select sum(Points) as gmyfq,BuyUserID from tb_b_order where  status=0 and ZhiFuZT=1 group by BuyUserID) b on a.UserID=b.BuyUserID
                                 left join 
-                                (select sum(Points) as ysyyfq,PayUserID  from tb_b_pay where 
-                                mycardId in(select a.mycardId from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                group by PayUserID) c on a.UserID=c.PayUserID
+                                (select sum(Points) as ysyyfq,PayUserID  from tb_b_pay group by PayUserID) c on a.UserID=c.PayUserID
                                 left join 
-                                (select count(OrderID) as gmcs,BuyUserID from tb_b_order where [SaleRecordID] in
-                                (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and status=0 and ZhiFuZT=1 group by BuyUserID) d on a.UserID=d.BuyUserID 
+                                (select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 group by BuyUserID) d on a.UserID=d.BuyUserID 
                                 left join 
                                 (select count(GZ_ID) as gzs,UserID from tb_b_user_gz group by UserID) e on a.UserID=e.UserID
                                 left join(
                                 select sum(a.points) as syyfq,a.UserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime>=getDate() and a.status=0
+                                where b.status=0  and a.PointsEndTime>=getDate() and a.status=0
                                 group by a.UserID) f on a.UserID=f.UserID
                                 left join(
                                 select sum(a.points) as gqwsy,a.UserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime<getDate() and a.status=0
+                                where b.status=0  and a.PointsEndTime<getDate() and (a.status=0  or a.status=9)
                                 group by a.UserID) g on a.UserID=g.UserID
                                 left join (select sum(getpoints) as ps,a.sanfanguserid from tb_b_paisong_detail a left join tb_b_paisong b on a.paisongid=b.id 
                                 where getstatus=1 and b.status=0 and a.status=0 group by a.sanfanguserid) h on a.UserID=h.sanfanguserid
@@ -776,9 +762,7 @@ public class CWBBMag
 
                 string str = @"  select a.*,b.UserXM from tb_b_order a 
                                  left join tb_b_user b on a.SaleUserID=b.UserID
-                                  where a.[SaleRecordID] in
-                                (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and a.status=0 and a.ZhiFuZT=1 and a.BuyUserID=@UserID  order by a.AddTime desc
+                                  where  a.status=0 and a.ZhiFuZT=1 and a.BuyUserID=@UserID  order by a.AddTime desc
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);
@@ -837,7 +821,7 @@ public class CWBBMag
             {
                 string str = @" select a.points,c.UserXM,a.PointsEndTime from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                         left join tb_b_user c on a.CardUserID=c.UserID
-                        where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime>=getDate()
+                        where b.status=0  and a.PointsEndTime>=getDate()
                         and a.UserID=@UserID order by a.PointsEndTime
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
@@ -903,7 +887,7 @@ public class CWBBMag
 
                 string str = @" select a.points,c.UserXM,a.PointsEndTime from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                         left join tb_b_user c on a.CardUserID=c.UserID
-                        where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.PointsEndTime>=getDate()
+                        where b.status=0  and a.PointsEndTime>=getDate()
                         and a.UserID=@UserID order by a.PointsEndTime
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
@@ -991,9 +975,7 @@ public class CWBBMag
 
                 string str = @"  select a.*,b.UserXM from tb_b_order a 
                                  left join tb_b_user b on a.SaleUserID=b.UserID
-                                  where a.[SaleRecordID] in
-                                (select SaleRecordID from  tb_b_salerecord where status=0 and SaleRecordLX=0 and SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and a.status=0 and a.ZhiFuZT=1 and a.BuyUserID=@UserID  order by a.AddTime desc
+                                  where  a.status=0 and a.ZhiFuZT=1 and a.BuyUserID=@UserID  order by a.AddTime desc
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);
@@ -1127,10 +1109,7 @@ public class CWBBMag
                                   b.UserXM   from tb_b_pay a
                                   left join tb_b_user b on a.CardUserID=b.UserID
                                   left join tb_b_user c on a.ReceiveUserID=c.UserID
-                                   where 
-                                mycardId in(select a.mycardId from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and a.PayUserID=@UserID order by AddTime  desc
+                                   where a.PayUserID=@UserID order by AddTime  desc
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);
@@ -1200,9 +1179,7 @@ public class CWBBMag
                                   left join tb_b_user b on a.CardUserID=b.UserID
                                   left join tb_b_user c on a.ReceiveUserID=c.UserID
                                    where 
-                                mycardId in(select a.mycardId from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
-                                where b.status=0 and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9')
-                                and a.PayUserID=@UserID order by AddTime  desc
+                                a.PayUserID=@UserID order by AddTime  desc
                                 ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@UserID", UserID);
@@ -1232,6 +1209,116 @@ public class CWBBMag
             }
 
         }
+    }
+
+    [CSMethod("getGQWSYList")]
+    public object getGQWSYList(int pagnum, int pagesize, string UserID)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string str = @" select a.points,c.UserXM,a.PointsEndTime from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
+                        left join tb_b_user c on a.CardUserID=c.UserID
+                        where b.status=0  and a.PointsEndTime<getDate() and (a.status=0 or a.status=9)
+                        and a.UserID=@UserID order by a.PointsEndTime
+                                ";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.AddWithValue("@UserID", UserID);
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(cmd, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("getGQWSYListToFile", 2)]
+    public byte[] getGQWSYListToFile(string UserID)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("专线");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("运费券");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("截止时间");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+
+                string str = @" select a.points,c.UserXM,a.PointsEndTime from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
+                        left join tb_b_user c on a.CardUserID=c.UserID
+                        where b.status=0  and a.PointsEndTime<getDate() and (a.status=0 or a.status=9)
+                        and a.UserID=@UserID order by a.PointsEndTime
+                                ";
+                SqlCommand cmd = new SqlCommand(str);
+                cmd.Parameters.AddWithValue("@UserID", UserID);
+                DataTable dt = dbc.ExecuteDataTable(cmd);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    cells[i + 1, 0].PutValue(dt.Rows[i]["UserXM"]);
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["points"] != null && dt.Rows[i]["points"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["points"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    cells[i + 1, 2].PutValue(Convert.ToDateTime(dt.Rows[i]["PointsEndTime"]).ToString("yyyy-MM-dd"));
+                    cells[i + 1, 2].SetStyle(style4);
+
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
     #endregion
 
@@ -3175,19 +3262,22 @@ public class CWBBMag
                     where += " and d.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag  from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
+                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney  from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
+                                left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  "+where+@"
+                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where+ @"
                                 union all
-                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
+                                left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                  where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
-                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
+                                left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                  where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=0 and a.PointsEndTime<getDate() " + where + @"";
 
@@ -3259,9 +3349,15 @@ public class CWBBMag
                 cells[0, 5].PutValue("交易金额");
                 cells[0, 5].SetStyle(style2);
                 cells.SetColumnWidth(5, 20);
-                cells[0, 6].PutValue("交易类型");
+                cells[0, 6].PutValue("是否使用红包");
                 cells[0, 6].SetStyle(style2);
                 cells.SetColumnWidth(6, 20);
+                cells[0, 7].PutValue("红包金额");
+                cells[0, 7].SetStyle(style2);
+                cells.SetColumnWidth(7, 20);
+                cells[0, 8].PutValue("交易类型");
+                cells[0, 8].SetStyle(style2);
+                cells.SetColumnWidth(8, 20);
 
 
                 string where = "";
@@ -3285,19 +3381,22 @@ public class CWBBMag
                     where += " and d.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag  from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
+                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney  from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
+                                left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                 where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + @"
                                 union all
-                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
+                                left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                  where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
-                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
+                                left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                  where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=0 and a.PointsEndTime<getDate() " + where + @"";
 
@@ -3330,11 +3429,22 @@ public class CWBBMag
                         cells[i + 1, 5].PutValue(dt.Rows[i]["Money"]);
                     }
                     cells[i + 1, 5].SetStyle(style4);
+                    if (dt.Rows[i]["redenvelopeid"] != null && dt.Rows[i]["redenvelopeid"].ToString() != "")
+                    {
+                        cells[i + 1, 6].PutValue("是");
+                    }
+                    else { cells[i + 1, 6].PutValue("否"); }
+                    cells[i + 1, 6].SetStyle(style4);
+                    if (dt.Rows[i]["redmoney"] != null && dt.Rows[i]["redmoney"].ToString() != "")
+                    {
+                        cells[i + 1, 7].PutValue(dt.Rows[i]["redmoney"]);
+                    }
+                    cells[i + 1, 7].SetStyle(style4);
                     if (dt.Rows[i]["flag"] != null && dt.Rows[i]["flag"].ToString() != "")
                     {
-                        cells[i + 1, 6].PutValue(dt.Rows[i]["flag"]);
+                        cells[i + 1, 8].PutValue(dt.Rows[i]["flag"]);
                     }
-                    cells[i + 1, 6].SetStyle(style4);
+                    cells[i + 1, 8].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -4289,12 +4399,12 @@ public class CWBBMag
                             union all
                             (select b.UserXM as ZXMC,a.Points as YFQ,a.adduser as CZR,a.addtime as SJ,null as ZK,null as YXQ,'2' as FLAG from tb_b_xj a left join tb_b_user b on a.UserID=b.UserID where a.status=0)
                             ) a 
-                            left join tb_b_user c on a.CZR=c.UserID ";
+                            left join tb_b_user c on a.CZR=c.UserID where 1=1 ";
                 str += where;
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by a.YXQ desc,a.ZXMC", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by a.YXQ desc,a.SJ desc,a.ZXMC", pagesize, ref cp, out ac);
 
                 return new { dt = dtPage, cp = cp, ac = ac };
             }
@@ -4385,11 +4495,11 @@ public class CWBBMag
                             union all
                             (select b.UserXM as ZXMC,a.Points as YFQ,a.adduser as CZR,a.addtime as SJ,null as ZK,null as YXQ,'2' as FLAG from tb_b_xj a left join tb_b_user b on a.UserID=b.UserID where a.status=0)
                             ) a 
-                            left join tb_b_user c on a.CZR=c.UserID ";
+                            left join tb_b_user c on a.CZR=c.UserID where 1=1 ";
                 str += where;
 
                 //开始取分页数据
-                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by a.YXQ desc,a.ZXMC");
+                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by a.YXQ desc,a.SJ desc,a.ZXMC");
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
 
@@ -4623,4 +4733,88 @@ public class CWBBMag
     }
     #endregion 
 
+
+    #region 销售情况
+    [CSMethod("getXSQK")]
+    public object getXSQK()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try {
+                //今日销量 购买人数 购买人次
+                string str = "select sum(Points) as xl,count(BuyUserID) as gmcs,count(distinct BuyUserID) as gmrs  from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                //历史销量 购买人数 购买人次
+                string str1 = "select sum(Points) as xl,count(BuyUserID) as gmcs,count(distinct BuyUserID) as gmrs  from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())<>0";
+                DataTable dt1 = dbc.ExecuteDataTable(str1);
+
+                //今日复购情况
+                string str2 = @"select count(*) as fg from 
+                            (select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0 group by BuyUserID) a
+                            where gmcs>1";
+                DataTable dt2 = dbc.ExecuteDataTable(str2);
+
+                //历史复购情况
+                string str3 = @"select count(*) as fg from 
+                            (select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())<>0 group by BuyUserID) a
+                            where gmcs>1";
+                DataTable dt3 = dbc.ExecuteDataTable(str3);
+
+                //今日省钱人数
+                string str5 = @"select case when m.userid is not null then m.userid else n.userid end as userid,isnull(m.sq,0)+isnull(n.sq,0) as sq into #jtemp from 
+                                (
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
+                                group by a.BuyUserID
+                                 )m full join 
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())=0
+                                group by sanfanguserid
+                                ) n 
+                                on  m.userid=n.userid
+
+                                select count(userid) as counts,'500以下' as  flag from #jtemp where sq<500
+                                union all
+                                select count(userid) as counts,'500-1000' as  flag  from #jtemp where sq>=500 and sq<1000
+                                union all
+                                select count(userid) as counts,'1000-2000' as  flag  from #jtemp where sq>=1000 and sq<2000
+                                union all
+                                select count(userid) as counts,'2000以上' as  flag  from #jtemp where sq>=2000 
+
+                                DROP TABLE #jtemp;";
+                DataTable dt5 = dbc.ExecuteDataTable(str5);
+
+                //历史省钱人数
+                string str6 = @"select case when m.userid is not null then m.userid else n.userid end as userid,isnull(m.sq,0)+isnull(n.sq,0) as sq into #jtemp from 
+                                (
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                group by a.BuyUserID
+                                 )m full join 
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())<>0
+                                group by sanfanguserid
+                                ) n 
+                                on  m.userid=n.userid
+
+                                select count(userid) as counts,'500以下' as  flag from #jtemp where sq<500
+                                union all
+                                select count(userid) as counts,'500-1000' as  flag  from #jtemp where sq>=500 and sq<1000
+                                union all
+                                select count(userid) as counts,'1000-2000' as  flag  from #jtemp where sq>=1000 and sq<2000
+                                union all
+                                select count(userid) as counts,'2000以上' as  flag  from #jtemp where sq>=2000 
+
+                                DROP TABLE #jtemp;";
+                DataTable dt6 = dbc.ExecuteDataTable(str6);
+
+                return new { dt = dt, dt1 = dt1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6 };
+
+            }
+            catch (Exception ex) { throw ex; }
+        }
+
+    }
+    #endregion 
 }
