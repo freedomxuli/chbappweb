@@ -34,7 +34,8 @@ var store = createSFW4Store({
        { name: 'DqBm' },
        { name: 'AddTime' },
        { name: 'searchAddress' },
-       { name: 'ewmbs' }
+       { name: 'ewmbs' },
+       {name:'IDCard'}
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -141,10 +142,12 @@ function EditUser(id) {
                         Ext.getCmp("roleId").allowBlank = true;
                         Ext.getCmp("roleId").hide();
                         Ext.getCmp("UserXM").allowBlank = true;
-                        Ext.getCmp("UserXM").hide();
+                        //Ext.getCmp("UserXM").hide();
                     } else if (r.ClientKind == 1) {
                         Ext.getCmp("roleId").allowBlank = true;
                         Ext.getCmp("roleId").hide();
+                        Ext.getCmp("IDCard").allowBlank = true;
+                        Ext.getCmp("IDCard").hide();
                     } else {
                         Ext.getCmp("roleId").getEl().allowBlank = false;
                         Ext.getCmp("roleId").show();
@@ -346,7 +349,7 @@ Ext.define('phWin', {
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 425,
+    height: 450,
     width: 400,
     layout: {
         type: 'fit'
@@ -475,6 +478,14 @@ Ext.define('addWin', {
                          displayField: 'ClientName',
                          valueField: 'ClientKind',
                          value: ''
+                     },
+                     {
+                         xtype: 'textfield',
+                         fieldLabel: '身份证号',
+                         id: 'IDCard',
+                         name: 'IDCard',
+                         labelWidth: 70,
+                         anchor: '100%'
                      },
                      {
                          xtype: 'textareafield',
