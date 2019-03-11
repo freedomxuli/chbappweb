@@ -97,7 +97,36 @@ function BindData() {
                     html += '</tr>';
                 }
             }
-           
+
+            var jsq = "";
+            var hsq = "";
+            if (retVal.dt7[0]["sq"] != null && retVal.dt7[0]["sq"] != "") {
+                jsq = retVal.dt7[0]["sq"];
+            }
+            if (retVal.dt8[0]["sq"] != null && retVal.dt8[0]["sq"] != "") {
+                hsq = retVal.dt8[0]["sq"];
+            }
+            html += '<tr>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">省钱总额（元）</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + jsq + '</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + hsq + '</td>';
+            html += '</tr>';
+            var jscgm = "";
+            var hscgm = "";
+            if (retVal.dt9[0]["scgm"] != null && retVal.dt9[0]["scgm"] != "") {
+                jscgm = retVal.dt9[0]["scgm"];
+            }
+            if (retVal.dt10[0]["scgm"] != null && retVal.dt10[0]["scgm"] != "") {
+                hscgm = retVal.dt10[0]["scgm"];
+            }
+            html += '<tr>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">首次购买（人）</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + jscgm + '</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + hscgm + '（当月）</td>';
+            html += '</tr>';
+
+
+
             html += '</table>';
             document.getElementById("main").innerHTML=html; 
         }

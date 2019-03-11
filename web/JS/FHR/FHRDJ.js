@@ -1,5 +1,6 @@
 ﻿var pageSize = 15;
 var cx_name;
+var cx_dj;
 var id = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
@@ -19,6 +20,32 @@ var store = createSFW4Store({
         getUserList(nPage);
     }
 });
+
+var djStore = Ext.create('Ext.data.Store', {
+    fields: [
+       { name: 'val' },
+       { name: 'txt' }
+    ],
+    data: [
+        {
+            'val': '',
+            'txt': '全部',
+        },
+        {
+            'val': 'A',
+            'txt': 'A',
+        },
+        {
+            'val': 'B',
+            'txt': 'B',
+        },
+        {
+            'val': 'C',
+            'txt': 'C',
+        },
+    ]
+});
+
 //************************************数据源*****************************************
 
 //************************************页面方法***************************************
@@ -30,7 +57,7 @@ function getUserList(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_name").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_name").getValue(), Ext.getCmp("cx_dj").getValue());
 }
 
 //************************************页面方法***************************************
@@ -118,6 +145,19 @@ Ext.onReady(function () {
                                             labelWidth: 70,
                                             fieldLabel: '手机号'
                                         },
+                                         {
+                                             xtype: 'combobox',
+                                             id: 'cx_dj',
+                                             width: 160,
+                                             fieldLabel: '等级',
+                                             editable: false,
+                                             labelWidth: 40,
+                                             store: djStore,
+                                             queryMode: 'local',
+                                             displayField: 'txt',
+                                             valueField: 'val',
+                                             value: ''
+                                         },
                                         {
                                             xtype: 'buttongroup',
                                             title: '',
@@ -131,7 +171,19 @@ Ext.onReady(function () {
                                                     }
                                                 }
                                             ]
-                                        }
+                                        },
+                                         {
+                                             xtype: 'buttongroup',
+                                             title: '',
+                                             items: [
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '导出',
+                                                        handler: function () {
+                                                            DownloadFile("CZCLZ.FHRMag.GetUserListToFile", "发货人等级.xls", Ext.getCmp("cx_name").getValue(), Ext.getCmp("cx_dj").getValue());
+                                                        }
+                                                    }]
+                                         }
                                     ]
                                 },
                                 {
@@ -149,7 +201,7 @@ Ext.onReady(function () {
 
     new YhView();
 
-
+    cx_dj = Ext.getCmp("cx_dj").getValue();
     cx_name = Ext.getCmp("cx_name").getValue();
     getUserList(1);
 

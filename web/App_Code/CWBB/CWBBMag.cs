@@ -1436,7 +1436,7 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
-                            where a.IsCanRelease=1 and a.ClientKind=1 ";
+                            where b.sjdzq>0 and a.ClientKind=1 ";
                 str += where;
 
                 //开始取分页数据
@@ -1624,7 +1624,7 @@ public class CWBBMag
                             (select SaleRecordID from  tb_b_salerecord where status=0 " + sjwhere + @"  and SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and DATEDIFF(HOUR,SaleRecordTime,getDate())<=validHour) group by UserID
 							) g on a.UserID=g.UserID
-                            where a.IsCanRelease=1 and a.ClientKind=1  ";
+                            where b.sjdzq>0 and a.ClientKind=1  ";
                 str += where;
                 //开始取分页数据
                 DataTable dt = dbc.ExecuteDataTable(str + " order by a.AddTime desc,a.UserName,a.UserXM");
@@ -4809,7 +4809,48 @@ public class CWBBMag
                                 DROP TABLE #jtemp;";
                 DataTable dt6 = dbc.ExecuteDataTable(str6);
 
-                return new { dt = dt, dt1 = dt1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6 };
+                //今日省钱数
+                string str7 = @"select sum(isnull(m.sq,0)+isnull(n.sq,0)) as sq from 
+                                (
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
+                                group by a.BuyUserID
+                                    )m full join 
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())=0
+                                group by sanfanguserid
+                                ) n 
+                                on  m.userid=n.userid";
+                DataTable dt7 = dbc.ExecuteDataTable(str7);
+
+                //历史省钱数
+                string str8 = @"select sum(isnull(m.sq,0)+isnull(n.sq,0)) as sq from 
+                                (
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                group by a.BuyUserID
+                                    )m full join 
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())<>0
+                                group by sanfanguserid
+                                ) n 
+                                on  m.userid=n.userid";
+                DataTable dt8 = dbc.ExecuteDataTable(str8);
+
+                //今日首次购买
+                string str9 = @"select count(BuyUserID) as scgm from (
+                                select BuyUserID,AddTime,status,ZhiFuZT,row_number() over(partition by BuyUserID order by AddTime asc) num 
+                                from  tb_b_order where status=0 and ZhiFuZT=1) a where a.num=1 and  DateDiff(dd,a.AddTime,getdate())=0";
+                DataTable dt9 = dbc.ExecuteDataTable(str9);
+
+                //当月首次购买
+                string str10 = @"select count(BuyUserID) as scgm from (
+                                select BuyUserID,AddTime,status,ZhiFuZT,row_number() over(partition by BuyUserID order by AddTime asc) num 
+                                from  tb_b_order where status=0 and ZhiFuZT=1) a where a.num=1 and  dateDiff(Month,a.AddTime,getdate())=0 ";
+                DataTable dt10 = dbc.ExecuteDataTable(str10);
+
+
+                return new { dt = dt, dt1 = dt1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6, dt7 = dt7, dt8 = dt8, dt9 = dt9, dt10 = dt10 };
 
             }
             catch (Exception ex) { throw ex; }

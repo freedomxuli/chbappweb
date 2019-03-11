@@ -285,7 +285,7 @@ public class ZXSHMag
     }
 
     [CSMethod("ZFQSH")]
-    public object ZFQSH(string SaleRecordID, int issh)
+    public object ZFQSH(string SaleRecordID, int issh,string thyj)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -324,7 +324,52 @@ public class ZXSHMag
                         dbc.UpdateTable(dt1, dtt1);
 
                         userid=sdt1.Rows[0]["UserID"].ToString();
-                       
+
+
+                        string str2 = "select * from tb_b_user where userid="+dbc.ToSqlValue(userid);
+                        DataTable udt = dbc.ExecuteDataTable(str2);
+                        if (udt.Rows.Count > 0)
+                        {
+                            var username = udt.Rows[0]["UserName"];
+
+                            if (issh == 1)
+                            {
+                                string _url = ServiceURL + "releasePass";
+                                string jsonParam = new JavaScriptSerializer().Serialize(new
+                                {
+                                    username = udt.Rows[0]["UserName"],
+                                    userxm = udt.Rows[0]["UserXM"]
+                                });
+                                var request = (HttpWebRequest)WebRequest.Create(_url);
+                                request.Method = "POST";
+                                request.ContentType = "application/json;charset=UTF-8";
+                                var byteData = Encoding.UTF8.GetBytes(jsonParam);
+                                var length = byteData.Length;
+                                request.ContentLength = length;
+                                var writer = request.GetRequestStream();
+                                writer.Write(byteData, 0, length);
+                                writer.Close();
+                            }
+                            else
+                            {
+                                string _url = ServiceURL + "releaseReject";
+                                string jsonParam = new JavaScriptSerializer().Serialize(new
+                                {
+                                    username = udt.Rows[0]["UserName"],
+                                    userxm = udt.Rows[0]["UserXM"],
+                                    memo = thyj
+                                });
+                                var request = (HttpWebRequest)WebRequest.Create(_url);
+                                request.Method = "POST";
+                                request.ContentType = "application/json;charset=UTF-8";
+                                var byteData = Encoding.UTF8.GetBytes(jsonParam);
+                                var length = byteData.Length;
+                                request.ContentLength = length;
+                                var writer = request.GetRequestStream();
+                                writer.Write(byteData, 0, length);
+                                writer.Close();
+                            }
+                        }
                     }
 
                     
@@ -349,4 +394,5 @@ public class ZXSHMag
         }
     }
     #endregion
+
 }

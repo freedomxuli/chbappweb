@@ -142,6 +142,15 @@ function EditUser(id) {
                         Ext.getCmp("roleId").allowBlank = true;
                         Ext.getCmp("roleId").hide();
                         Ext.getCmp("UserXM").allowBlank = true;
+                        CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
+                            if (ret1) {
+                                Ext.getCmp("IDCard").allowBlank = true;
+                                Ext.getCmp("IDCard").show();
+                            } else {
+                                Ext.getCmp("IDCard").allowBlank = true;
+                                Ext.getCmp("IDCard").hide();
+                            }
+                        }, CS.onError);
                         //Ext.getCmp("UserXM").hide();
                     } else if (r.ClientKind == 1) {
                         Ext.getCmp("roleId").allowBlank = true;
@@ -153,6 +162,15 @@ function EditUser(id) {
                         Ext.getCmp("roleId").show();
                         Ext.getCmp("UserXM").getEl().allowBlank = false;
                         Ext.getCmp("UserXM").show();
+                        CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
+                            if (ret1) {
+                                Ext.getCmp("IDCard").allowBlank = true;
+                                Ext.getCmp("IDCard").show();
+                            } else {
+                                Ext.getCmp("IDCard").allowBlank = true;
+                                Ext.getCmp("IDCard").hide();
+                            }
+                        }, CS.onError);
                     }
                 }, CS.onError, r.dqS);
             }

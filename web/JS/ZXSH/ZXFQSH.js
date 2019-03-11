@@ -79,23 +79,81 @@ function sq(id) {
                 CS('CZCLZ.ZXSHMag.ZFQSH', function (retVal) {
                     if (retVal) {
                         getUser(1);
-                        Ext.MessageBox.alert('提示', '申请通过成功！');
+                        Ext.MessageBox.alert('提示', '申请通过成功！',"");
                     }
                 }, CS.onError, id, 1);
             }
             else {
-                CS('CZCLZ.ZXSHMag.ZFQSH', function (retVal) {
-                    if (retVal) {
-                        getUser(1);
-                        Ext.MessageBox.alert('提示', '申请拒绝成功！');
-                    }
-                }, CS.onError, id, 2);
+
+                var yjwin = new yjWin({ id: id });
+                yjwin.show();
+               
             }
         });
     }
 }
 
 //************************************页面方法***************************************
+//************************************弹出页面***************************************
+Ext.define('yjWin', {
+    extend: 'Ext.window.Window',
+
+    height: 150,
+    width: 400,
+    layout: {
+        type: 'fit'
+    },
+    closeAction: 'destroy',
+    modal: true,
+    title: '退回意见',
+    initComponent: function () {
+        var me = this;
+        var id = me.id;
+        me.items = [
+            {
+                xtype: 'form',
+                id: 'yjform',
+                bodyPadding: 10,
+                items: [
+                     {
+                         xtype: 'textareafield',
+                         id: 'yj',
+                         name: 'yj',
+                         labelWidth: 70,
+                         fieldLabel: '意见',
+                         anchor: '100%'
+                     }
+                ],
+                buttonAlign: 'center',
+                buttons: [
+                    {
+                        text: '确认',
+                        iconCls: 'dropyes',
+                        handler: function () {
+                            CS('CZCLZ.ZXSHMag.ZFQSH', function (retVal) {
+                                if (retVal) {
+                                    getUser(1);
+                                    Ext.MessageBox.alert('提示', '申请拒绝成功！');
+                                }
+                            }, CS.onError, id, 2,Ext.getCmp("yj").getValue());
+
+                            this.up('window').close();
+                        }
+                    },
+                     {
+                         text: '取消',
+                         iconCls: 'close',
+                         handler: function () {
+                             this.up('window').close();
+                         }
+                     }
+                ]
+            }
+        ];
+        me.callParent(arguments);
+    }
+});
+//************************************弹出页面***************************************
 //************************************主界面*****************************************
 Ext.onReady(function () {
     Ext.define('YhView', {
