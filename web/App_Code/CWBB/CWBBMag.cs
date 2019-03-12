@@ -1732,7 +1732,7 @@ public class CWBBMag
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime>=getDate() and b.status=0
 		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
-		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq
+		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq desc
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@UserID", userId);
@@ -1861,7 +1861,7 @@ public class CWBBMag
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime>=getDate() and b.status=0
 		                    and d.status=0 and d.SaleRecordLX!=0 and and d.SaleRecordVerifyType=1 d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
-		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq
+		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq desc
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@UserID", userId);
@@ -4742,11 +4742,13 @@ public class CWBBMag
         {
             try {
                 //今日销量 购买人数 购买人次
-                string str = "select sum(Points) as xl,count(BuyUserID) as gmcs,count(distinct BuyUserID) as gmrs  from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0";
+                string str = @"select sum(a.Points) as xl,count(a.BuyUserID) as gmcs,count(distinct a.BuyUserID) as gmrs  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID 
+                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0 and b.DqBm is not null";
                 DataTable dt = dbc.ExecuteDataTable(str);
 
                 //历史销量 购买人数 购买人次
-                string str1 = "select sum(Points) as xl,count(BuyUserID) as gmcs,count(distinct BuyUserID) as gmrs  from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())<>0";
+                string str1 = @"select sum(a.Points) as xl,count(a.BuyUserID) as gmcs,count(distinct a.BuyUserID) as gmrs  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID 
+                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0 and b.DqBm is not null";
                 DataTable dt1 = dbc.ExecuteDataTable(str1);
 
                 //今日复购情况
@@ -4849,13 +4851,271 @@ public class CWBBMag
                                 from  tb_b_order where status=0 and ZhiFuZT=1) a where a.num=1 and  dateDiff(Month,a.AddTime,getdate())=0 ";
                 DataTable dt10 = dbc.ExecuteDataTable(str10);
 
+                //历史开通专线统计
+                string str11 = @"select count(*) as ktzx from tb_b_user where ClientKind=1 and IsCanRelease=1 and DqBm is not null";
+                DataTable dt11 = dbc.ExecuteDataTable(str11);
 
-                return new { dt = dt, dt1 = dt1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6, dt7 = dt7, dt8 = dt8, dt9 = dt9, dt10 = dt10 };
+                //今日已有销量专线统计
+                string str12 = @"select count(distinct SaleUserID) as yxl  from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0";
+                DataTable dt12 = dbc.ExecuteDataTable(str12);
+
+                return new { dt = dt, dt1 = dt1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6, dt7 = dt7, dt8 = dt8, dt9 = dt9, dt10 = dt10, dt11 = dt11, dt12 = dt12 };
 
             }
             catch (Exception ex) { throw ex; }
         }
 
+    }
+
+
+    [CSMethod("getJXL")]
+    public object getJXL(){
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select sum(a.Points) as xl,c.dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
+                                left join tb_b_dq c on b.DqBm=c.dq_bm
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
+                                group by c.dq_bm,c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getHXL")]
+    public object getHXL()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select sum(a.Points) as xl,c.dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
+                                left join tb_b_dq c on b.DqBm=c.dq_bm
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                group by c.dq_bm,c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getJFG")]
+    public object getJFG()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0 group by BuyUserID";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                int count1=0;
+                int count2=0;
+                DataRow[] drs1 = dt.Select("gmcs=2");
+                count1 = drs1.Length;
+
+                DataRow[] drs2 = dt.Select("gmcs>2");
+                count2 = drs2.Length;
+
+                return new {count1=count1,count2=count2};
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getHFG")]
+    public object getHFG()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())<>0 group by BuyUserID";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                int count1 = 0;
+                int count2 = 0;
+                DataRow[] drs1 = dt.Select("gmcs=2");
+                count1 = drs1.Length;
+
+                DataRow[] drs2 = dt.Select("gmcs>2");
+                count2 = drs2.Length;
+
+                return new { count1 = count1, count2 = count2 };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getJSQ")]
+    public object getJSQ()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select sum(a.sq) as sq,c.dq_mc from 
+                                (select case when m.userid is not null then m.userid else n.userid end as userid,isnull(m.sq,0)+isnull(n.sq,0) as sq  from 
+                                (
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
+                                group by a.BuyUserID
+                                )m full join 
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())=0
+                                group by sanfanguserid
+                                ) n 
+                                on  m.userid=n.userid) a left join tb_b_user b on a.userid=b.UserID
+                                left join tb_b_dq c on b.DqBm=c.dq_bm
+                                group by c.dq_bm,c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getHSQ")]
+    public object getHSQ()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select sum(a.sq) as sq,c.dq_mc from 
+                                (select case when m.userid is not null then m.userid else n.userid end as userid,isnull(m.sq,0)+isnull(n.sq,0) as sq  from 
+                                (
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
+                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                group by a.BuyUserID
+                                )m full join 
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())<>0
+                                group by sanfanguserid
+                                ) n 
+                                on  m.userid=n.userid) a left join tb_b_user b on a.userid=b.UserID
+                                left join tb_b_dq c on b.DqBm=c.dq_bm
+                                group by c.dq_bm,c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getJSCGM")]
+    public object getJSCGM()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(a.BuyUserID) as scgm,c.dq_mc from (
+                                select BuyUserID,AddTime,status,ZhiFuZT,SaleUserID,row_number() over(partition by BuyUserID order by AddTime asc) num 
+                                from  tb_b_order where status=0 and ZhiFuZT=1) a
+                                left join tb_b_user b on a.SaleUserID=b.UserID
+                                left join tb_b_dq c on b.DqBm=c.dq_bm
+                                 where a.num=1 and  DateDiff(dd,a.AddTime,getdate())=0
+                                 group by c.dq_mc
+                                ";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getHSCGM")]
+    public object getHSCGM()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(a.BuyUserID) as scgm,c.dq_mc from (
+                                select BuyUserID,AddTime,status,ZhiFuZT,SaleUserID,row_number() over(partition by BuyUserID order by AddTime asc) num 
+                                from  tb_b_order where status=0 and ZhiFuZT=1) a
+                                left join tb_b_user b on a.SaleUserID=b.UserID
+                                left join tb_b_dq c on b.DqBm=c.dq_bm
+                                 where a.num=1 and  dateDiff(Month,a.AddTime,getdate())=0
+                                 group by c.dq_mc
+                                ";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getKTZX")]
+    public object getKTZX()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(b.UserID) as ktzx,dq_mc from tb_b_user b
+								 left join tb_b_dq c on b.DqBm=c.dq_bm
+								 where b.ClientKind=1 and b.IsCanRelease=1 and b.DqBm is not null 
+								 group by c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getYXL")]
+    public object getYXL()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(distinct SaleUserID)as yxl,c.dq_mc  from tb_b_order a
+								 left join tb_b_user b on a.SaleUserID=b.UserID
+									left join tb_b_dq c on b.DqBm=c.dq_bm
+								  where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
+								  group by  c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
     #endregion 
 }
