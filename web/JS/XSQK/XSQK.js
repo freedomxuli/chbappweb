@@ -130,14 +130,18 @@ function BindData() {
             html += '<tr>';
             html += '<td colspan="3" style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">专线情况</td>';
             html += '</tr>';
-            var ktzx = "";
+            var jktzx = "";
+            if (retVal.dt13[0]["ktzx"] != null && retVal.dt13[0]["ktzx"] != "") {
+                jktzx = retVal.dt13[0]["ktzx"];
+            }
+            var hktzx = "";
             if (retVal.dt11[0]["ktzx"] != null && retVal.dt11[0]["ktzx"] != "") {
-                ktzx = retVal.dt11[0]["ktzx"];
+                hktzx = retVal.dt11[0]["ktzx"];
             }
             html += '<tr>';
             html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">开通专线</td>';
-            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center"></td>';
-            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="ktzx()">' + ktzx + '</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="jktzx()">' + jktzx + '</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="hktzx()">' + hktzx + '</td>';
             html += '</tr>';
 
             var yxl = "";
@@ -550,7 +554,7 @@ function jsq() {
 Ext.define('jsqWin', {
     extend: 'Ext.window.Window',
 
-    height: 470,
+    height: 230,
     width: 600,
     layout: {
         type: 'fit'
@@ -604,7 +608,7 @@ function hsq() {
 Ext.define('hsqWin', {
     extend: 'Ext.window.Window',
 
-    height: 470,
+    height: 230,
     width: 600,
     layout: {
         type: 'fit'
@@ -734,10 +738,10 @@ Ext.define('hscgmWin', {
     }
 });
 
-function ktzx() {
-    var win = new ktzxWin();
+function jktzx() {
+    var win = new jktzxWin();
     win.show(null, function () {
-        CS('CZCLZ.CWBBMag.getKTZX', function (retVal) {
+        CS('CZCLZ.CWBBMag.getJKTZX', function (retVal) {
             var html = "";
             html += '<table border="0" cellspacing="1" cellpadding="1" width="90%" bgcolor="#ffffff">';
             html += '<tr style="font-family:微软雅黑;font-size:30px;font-weight:bold;">';
@@ -755,13 +759,13 @@ function ktzx() {
                 }
             }
             html += '</table>';
-            document.getElementById("ktzx").innerHTML = html;
+            document.getElementById("jktzx").innerHTML = html;
 
         }, CS.onError);
     });
 }
 
-Ext.define('ktzxWin', {
+Ext.define('jktzxWin', {
     extend: 'Ext.window.Window',
 
     height: 230,
@@ -771,7 +775,7 @@ Ext.define('ktzxWin', {
     },
     closeAction: 'destroy',
     modal: true,
-    title: '开通专线',
+    title: '今日开通专线',
 
     initComponent: function () {
         var me = this;
@@ -780,7 +784,60 @@ Ext.define('ktzxWin', {
                 xtype: 'panel',
                 bodyStyle: 'overflow-x:hidden;overflow-y:auto;',
                 bodyPadding: 10,
-                html: '<table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:5px;"><tr><td width="100%" align="center" id="ktzx" ></td></tr></table>'
+                html: '<table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:5px;"><tr><td width="100%" align="center" id="jktzx" ></td></tr></table>'
+            }
+        ];
+        me.callParent(arguments);
+    }
+});
+
+function hktzx() {
+    var win = new hktzxWin();
+    win.show(null, function () {
+        CS('CZCLZ.CWBBMag.getHKTZX', function (retVal) {
+            var html = "";
+            html += '<table border="0" cellspacing="1" cellpadding="1" width="90%" bgcolor="#ffffff">';
+            html += '<tr style="font-family:微软雅黑;font-size:30px;font-weight:bold;">';
+            html += '<td width="30%" style="font-size: 18px;color: White;font-weight: bold;border: solid 1px #ffffff;background-color: #5B9BD5;line-height:250%" align="center">地区</td>';
+            html += '<td width="70%" style="font-size: 18px;color: White;font-weight: bold;border: solid 1px #ffffff;background-color: #5B9BD5;line-height:250%" align="center">开通专线</td>';
+            html += '</tr>';
+            if (retVal) {
+                for (var i = 0; i < retVal.length; i++) {
+                    if (retVal[i]["dq_mc"]) {
+                        html += '<tr>';
+                        html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + retVal[i]["dq_mc"] + '</td>';
+                        html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + retVal[i]["ktzx"] + '</td>';
+                        html += '</tr>';
+                    }
+                }
+            }
+            html += '</table>';
+            document.getElementById("hktzx").innerHTML = html;
+
+        }, CS.onError);
+    });
+}
+
+Ext.define('hktzxWin', {
+    extend: 'Ext.window.Window',
+
+    height: 230,
+    width: 600,
+    layout: {
+        type: 'fit'
+    },
+    closeAction: 'destroy',
+    modal: true,
+    title: '历史开通专线',
+
+    initComponent: function () {
+        var me = this;
+        me.items = [
+            {
+                xtype: 'panel',
+                bodyStyle: 'overflow-x:hidden;overflow-y:auto;',
+                bodyPadding: 10,
+                html: '<table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:5px;"><tr><td width="100%" align="center" id="hktzx" ></td></tr></table>'
             }
         ];
         me.callParent(arguments);

@@ -160,9 +160,9 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 }
 
                 string str = @" select a.*,b.UserXM from tb_b_plattosale a left join tb_b_user b on a.userid=b.userid
-                                where a.status=0 and a.pointkind!=0 and a.points>0 and a.points<100 
+                                where a.status=0 and a.pointkind!=0 and a.points>0 and a.points<500 
                                 and a.validHour-(DATEDIFF(HOUR,a.addtime,getDate()))>=0
-                                and a.UserID in (select distinct a.SaleRecordID from (select SaleRecordPoints,SaleRecordID from tb_b_salerecord where status=0) a 
+                                and a.SaleRecordID in (select distinct a.SaleRecordID from (select SaleRecordPoints,SaleRecordID from tb_b_salerecord where status=0) a 
                                 left join (select sum(points) as points,SaleRecordID from tb_b_order where status=0 and zhifuZT=1 group by SaleRecordID) b  on a.SaleRecordID=b.SaleRecordID
                                 left join (select points,SaleRecordID from tb_b_plattosale where status=0 ) c on a.SaleRecordID=c.SaleRecordID
                                 where isnull(a.SaleRecordPoints,0)-(isnull(b.points,0)+isnull(c.points,0))=0)";
@@ -197,7 +197,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 {
                     if (dt.Rows[0]["points"] != null && dt.Rows[0]["points"].ToString() != "")
                     {
-                        if (Convert.ToDecimal(dt.Rows[0]["points"]) == 0 || Convert.ToDecimal(dt.Rows[0]["points"]) >= 100)
+                        if (Convert.ToDecimal(dt.Rows[0]["points"]) == 0 || Convert.ToDecimal(dt.Rows[0]["points"]) >= 500)
                         {
                             throw new Exception("该数据不需要清理！");
                         }

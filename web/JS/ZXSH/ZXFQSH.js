@@ -81,7 +81,7 @@ function sq(id) {
                         getUser(1);
                         Ext.MessageBox.alert('提示', '申请通过成功！',"");
                     }
-                }, CS.onError, id, 1);
+                }, CS.onError, id, 1,"");
             }
             else {
 

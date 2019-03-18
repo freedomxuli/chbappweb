@@ -334,7 +334,7 @@ public class ZXSHMag
 
                             if (issh == 1)
                             {
-                                string _url = ServiceURL + "releasePass";
+                                string _url = ServiceURL + "sendSms/releasePass";
                                 string jsonParam = new JavaScriptSerializer().Serialize(new
                                 {
                                     username = udt.Rows[0]["UserName"],
@@ -352,7 +352,7 @@ public class ZXSHMag
                             }
                             else
                             {
-                                string _url = ServiceURL + "releaseReject";
+                                string _url = ServiceURL + "sendSms/releaseReject";
                                 string jsonParam = new JavaScriptSerializer().Serialize(new
                                 {
                                     username = udt.Rows[0]["UserName"],

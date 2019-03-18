@@ -1417,7 +1417,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
-                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=9 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
@@ -1605,7 +1605,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
-                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=9 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX!=0 and b.SaleRecordVerifyType=1 and b.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.status=0
@@ -1724,7 +1724,7 @@ public class CWBBMag
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
+		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate() and b.status=9
 		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
@@ -1853,7 +1853,7 @@ public class CWBBMag
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
+		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate() and b.status=9    
 		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
@@ -1941,7 +1941,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=9 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -2030,7 +2030,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=9 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -2387,7 +2387,7 @@ public class CWBBMag
                              left join
                              (select sum(points) as gqwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                            and a.PointsEndTime<getDate() and a.status=0 group by CardUserID) d on a.UserID=d.CardUserID
+                            and a.PointsEndTime<getDate() and a.status=9 group by CardUserID) d on a.UserID=d.CardUserID
                             left join
                             (select sum(points) as qxnwsy,CardUserID from tb_b_mycard a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID 
                             where b.status=0 " + sjwhere1 + @" and b.SaleRecordLX=0 and b.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.status=0
@@ -2648,7 +2648,7 @@ public class CWBBMag
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate()
+		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate() and b.status=9
 		                    and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
@@ -2825,7 +2825,7 @@ public class CWBBMag
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
 		                        left join (select b.OrderCode,b.points as wsyje from tb_b_mycard b where status=0 and b.PointsEndTime>=getDate()) f on a.OrderCode=f.OrderCode
-		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=0 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
+		                        left join (select b.OrderCode,b.points as gqje from tb_b_mycard b where status=9 and b.PointsEndTime<getDate()) g on a.OrderCode=g.OrderCode
 		                         where a.SaleUserID=@UserID and a.AddTime>='" + Convert.ToDateTime(rq).ToString("yyyy-MM-dd") + @"' and a.AddTime<'" + Convert.ToDateTime(rq).AddDays(1).ToString("yyyy-MM-dd") + @"'
 		                         and d.status=0 and d.SaleRecordLX=0 and d.SaleRecordBelongID='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and a.Status=0 and a.ZhiFuZT=1
 		                    ";
@@ -3279,7 +3279,7 @@ public class CWBBMag
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                 where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=0 and a.PointsEndTime<getDate() " + where + @"";
+                                 where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=9 and a.PointsEndTime<getDate() " + where + @"";
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
@@ -3398,7 +3398,7 @@ public class CWBBMag
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
-                                 where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=0 and a.PointsEndTime<getDate() " + where + @"";
+                                 where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=9 and a.PointsEndTime<getDate() " + where + @"";
 
                 //开始取分页数据
                 DataTable dt = dbc.ExecuteDataTable(str + " order by d.AddTime desc,b.UserName,e.UserXM");
@@ -4743,13 +4743,23 @@ public class CWBBMag
             try {
                 //今日销量 购买人数 购买人次
                 string str = @"select sum(a.Points) as xl,count(a.BuyUserID) as gmcs,count(distinct a.BuyUserID) as gmrs  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID 
-                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0 and b.DqBm is not null";
+                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0";
                 DataTable dt = dbc.ExecuteDataTable(str);
+
+                string str_1 = @"select sum(a.Points) points from tb_b_pay a left join tb_b_paisong_detail b on a.PaisongDetailID=b.id
+				 where PaisongDetailID is not null and carduserid in (select userid from tb_b_user where clientkind = 1)
+			 and DateDiff(dd,b.gettime,getdate())=0";
+                DataTable dt_1 = dbc.ExecuteDataTable(str_1);
 
                 //历史销量 购买人数 购买人次
                 string str1 = @"select sum(a.Points) as xl,count(a.BuyUserID) as gmcs,count(distinct a.BuyUserID) as gmrs  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID 
-                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0 and b.DqBm is not null";
+                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0";
                 DataTable dt1 = dbc.ExecuteDataTable(str1);
+
+                string str1_1 = @"select sum(a.Points) points from tb_b_pay a left join tb_b_paisong_detail b on a.PaisongDetailID=b.id
+				 where PaisongDetailID is not null and carduserid in (select userid from tb_b_user where clientkind = 1)
+			 and DateDiff(dd,b.gettime,getdate())<>0";
+                DataTable dt1_1 = dbc.ExecuteDataTable(str1_1);
 
                 //今日复购情况
                 string str2 = @"select count(*) as fg from 
@@ -4851,15 +4861,21 @@ public class CWBBMag
                                 from  tb_b_order where status=0 and ZhiFuZT=1) a where a.num=1 and  dateDiff(Month,a.AddTime,getdate())=0 ";
                 DataTable dt10 = dbc.ExecuteDataTable(str10);
 
+                //今日开通专线统计 
+                string str13 = @"select count(*) as ktzx from tb_b_user where ClientKind=1 and IsCanRelease=1 and DqBm is not null
+								and DateDiff(dd,canReleaseTime,getdate())=0";
+                DataTable dt13 = dbc.ExecuteDataTable(str13);
+
                 //历史开通专线统计
-                string str11 = @"select count(*) as ktzx from tb_b_user where ClientKind=1 and IsCanRelease=1 and DqBm is not null";
+                string str11 = @"select count(*) as ktzx from tb_b_user where ClientKind=1 and IsCanRelease=1 and DqBm is not null
+								and DateDiff(dd,canReleaseTime,getdate())<>0";
                 DataTable dt11 = dbc.ExecuteDataTable(str11);
 
                 //今日已有销量专线统计
                 string str12 = @"select count(distinct SaleUserID) as yxl  from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0";
                 DataTable dt12 = dbc.ExecuteDataTable(str12);
 
-                return new { dt = dt, dt1 = dt1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6, dt7 = dt7, dt8 = dt8, dt9 = dt9, dt10 = dt10, dt11 = dt11, dt12 = dt12 };
+                return new { dt = dt, dt_1 = dt_1, dt1 = dt1, dt1_1 = dt1_1, dt2 = dt2, dt3 = dt3, dt5 = dt5, dt6 = dt6, dt7 = dt7, dt8 = dt8, dt9 = dt9, dt10 = dt10, dt11 = dt11, dt12 = dt12, dt13 = dt13 };
 
             }
             catch (Exception ex) { throw ex; }
@@ -4874,10 +4890,17 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select sum(a.Points) as xl,c.dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
+                string str = @"select ISNULL(m.xl,0)+ISNULL(n.points,0) as xl,m.dq_mc,m.gmrc from 
+
+(select sum(a.Points) as xl, b.FromRoute as dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                                 left join tb_b_dq c on b.DqBm=c.dq_bm
                                 where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
-                                group by c.dq_bm,c.dq_mc";
+                                group by b.FromRoute) m left join 
+
+								(select sum(a.Points) points,c.FromRoute from tb_b_pay a left join tb_b_paisong_detail b on a.PaisongDetailID=b.id
+								left join tb_b_user c on a.carduserid=c.UserID
+				 where a.PaisongDetailID is not null and  c.clientkind = 1 and DateDiff(dd,b.gettime,getdate())=0 
+				 group by c.FromRoute) n on m.dq_mc=n.FromRoute";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
             }
@@ -4895,10 +4918,17 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select sum(a.Points) as xl,c.dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
+                string str = @"select ISNULL(m.xl,0)+ISNULL(n.points,0) as xl,m.dq_mc,m.gmrc from 
+
+(select sum(a.Points) as xl, b.FromRoute as dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                                 left join tb_b_dq c on b.DqBm=c.dq_bm
                                 where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
-                                group by c.dq_bm,c.dq_mc";
+                                group by b.FromRoute) m left join 
+
+								(select sum(a.Points) points,c.FromRoute from tb_b_pay a left join tb_b_paisong_detail b on a.PaisongDetailID=b.id
+								left join tb_b_user c on a.carduserid=c.UserID
+				 where a.PaisongDetailID is not null and  c.clientkind = 1 and DateDiff(dd,b.gettime,getdate())<>0 
+				 group by c.FromRoute) n on m.dq_mc=n.FromRoute";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
             }
@@ -4983,6 +5013,7 @@ public class CWBBMag
                                 ) n 
                                 on  m.userid=n.userid) a left join tb_b_user b on a.userid=b.UserID
                                 left join tb_b_dq c on b.DqBm=c.dq_bm
+                                where  (c.dq_mc like '%常州%' or c.dq_mc like '%苏州%')
                                 group by c.dq_bm,c.dq_mc";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
@@ -5014,6 +5045,7 @@ public class CWBBMag
                                 ) n 
                                 on  m.userid=n.userid) a left join tb_b_user b on a.userid=b.UserID
                                 left join tb_b_dq c on b.DqBm=c.dq_bm
+                                where  (c.dq_mc like '%常州%' or c.dq_mc like '%苏州%')
                                 group by c.dq_bm,c.dq_mc";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
@@ -5075,8 +5107,8 @@ public class CWBBMag
         }
     }
 
-    [CSMethod("getKTZX")]
-    public object getKTZX()
+    [CSMethod("getJKTZX")]
+    public object getJKTZX()
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -5084,7 +5116,28 @@ public class CWBBMag
             {
                 string str = @"select count(b.UserID) as ktzx,dq_mc from tb_b_user b
 								 left join tb_b_dq c on b.DqBm=c.dq_bm
-								 where b.ClientKind=1 and b.IsCanRelease=1 and b.DqBm is not null 
+								 where b.ClientKind=1 and b.IsCanRelease=1 and b.DqBm is not null  and DateDiff(dd,canReleaseTime,getdate())=0 
+								 group by c.dq_mc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("getHKTZX")]
+    public object getHKTZX()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select count(b.UserID) as ktzx,dq_mc from tb_b_user b
+								 left join tb_b_dq c on b.DqBm=c.dq_bm
+								 where b.ClientKind=1 and b.IsCanRelease=1 and b.DqBm is not null and DateDiff(dd,canReleaseTime,getdate())<>0 
 								 group by c.dq_mc";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
