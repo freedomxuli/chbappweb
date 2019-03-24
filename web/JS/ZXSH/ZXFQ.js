@@ -214,7 +214,7 @@ Ext.define('KFCSList', {
                                                     handler: function () {
                                                         DownloadFile("CZCLZ.ZXSHMag.getKFCSListToFile", "自发券明细                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           .xls", userId, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                     }
-                                                },
+                                                }
                                             ]
                                         }
                                     ]
@@ -417,6 +417,19 @@ Ext.onReady(function () {
                                                     }
                                                 }
                                             ]
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.ZXSHMag.GetZXListToFile", "基础信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_iscanrelease").getValue());
+                                                    }
+                                                }]
                                         }
                                     ]
                                 },

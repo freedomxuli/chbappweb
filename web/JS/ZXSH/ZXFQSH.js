@@ -26,7 +26,14 @@ var store = createSFW4Store({
         { name: 'SaleRecordDiscount' },
         { name: 'SaleRecordVerifyType' },
         { name: 'SaleRecordVerifyTime' },
-        { name:'ZXSaleListCitys'}
+        { name: 'ZXSaleListCitys' },
+        { name: 'ProduceLx' },
+        { name: 'PackLx' },
+        { name: 'Fc' },
+        { name: 'ZhLx' },
+        { name: 'PhLx' },
+        { name: 'FromRoute' },
+        { name: 'ToRoute' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -186,6 +193,24 @@ Ext.onReady(function () {
                             },
                             {
                                 xtype: 'gridcolumn',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "线路",
+                                flex: 1,
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    var str = "";
+                                    if (record.data.FromRoute) {
+                                        str += record.data.FromRoute
+                                    }
+                                    if (record.data.ToRoute) {
+                                        str += "─" + record.data.ToRoute;
+                                    }
+                                    return str;
+                                }
+
+                            },
+                            {
+                                xtype: 'gridcolumn',
                                 dataIndex: 'ZXSaleListCitys',
                                 sortable: false,
                                 menuDisabled: true,
@@ -197,7 +222,7 @@ Ext.onReady(function () {
                                 dataIndex: 'SaleRecordPoints',
                                 sortable: false,
                                 menuDisabled: true,
-                                width: 120,
+                                width: 100,
                                 text: "运费券"
 
                             },
@@ -206,7 +231,7 @@ Ext.onReady(function () {
                                 dataIndex: 'SaleRecordDiscount',
                                 sortable: false,
                                 menuDisabled: true,
-                                width: 120,
+                                width: 100,
                                 text: "折扣"
                             },
                             {
@@ -214,7 +239,7 @@ Ext.onReady(function () {
                                 dataIndex: 'ValidHour',
                                 sortable: false,
                                 menuDisabled: true,
-                                width: 120,
+                                width: 100,
                                 text: "有效时间"
                             },
                             {
@@ -228,10 +253,50 @@ Ext.onReady(function () {
                             },
                              {
                                  xtype: 'gridcolumn',
+                                 dataIndex: 'ProduceLx',
+                                 sortable: false,
+                                 menuDisabled: true,
+                                 width: 100,
+                                 text: "货物类型"
+                             },
+                             {
+                                 xtype: 'gridcolumn',
+                                 sortable: false,
+                                 menuDisabled: true,
+                                 width: 100,
+                                 text: "重货/泡货类型",
+                                 renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+                                     var str = "";
+                                     if (record.data.ProduceLx == "重货") {
+                                         str += record.data.ZhLx;
+                                     } else if (record.data.ProduceLx == "泡货") {
+                                         str += record.data.PhLx;
+                                     } 
+                                     return str;
+                                 }
+                             },
+                              {
+                                  xtype: 'gridcolumn',
+                                  dataIndex: 'PackLx',
+                                  sortable: false,
+                                  menuDisabled: true,
+                                  width: 100,
+                                  text: "包装要求"
+                              },
+                               {
+                                   xtype: 'gridcolumn',
+                                   dataIndex: 'Fc',
+                                   sortable: false,
+                                   menuDisabled: true,
+                                   width: 100,
+                                   text: "发车时间"
+                               },
+                             {
+                                 xtype: 'gridcolumn',
                                  dataIndex: 'SaleRecordVerifyType',
                                  sortable: false,
                                  menuDisabled: true,
-                                 width: 120,
+                                 width: 100,
                                  text: "审核状态",
                                  renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
                                      var str = "";
@@ -313,7 +378,21 @@ Ext.onReady(function () {
                                                     }
                                                 }
                                             ]
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.ZXSHMag.getZFQListToFile", "审核专线自发券.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue());
+                                                    }
+                                                }]
                                         }
+
                                     ]
                                 },
                                 {

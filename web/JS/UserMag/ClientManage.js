@@ -144,11 +144,15 @@ function EditUser(id) {
                         Ext.getCmp("UserXM").allowBlank = true;
                         CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
                             if (ret1) {
-                                Ext.getCmp("IDCard").allowBlank = true;
+                                Ext.getCmp("IDCard").allowBlank = false;
                                 Ext.getCmp("IDCard").show();
+                                Ext.getCmp("Password").allowBlank = false;
+                                Ext.getCmp("Password").show();
                             } else {
                                 Ext.getCmp("IDCard").allowBlank = true;
                                 Ext.getCmp("IDCard").hide();
+                                Ext.getCmp("Password").allowBlank = true;
+                                Ext.getCmp("Password").hide();
                             }
                         }, CS.onError);
                         //Ext.getCmp("UserXM").hide();
@@ -157,6 +161,15 @@ function EditUser(id) {
                         Ext.getCmp("roleId").hide();
                         Ext.getCmp("IDCard").allowBlank = true;
                         Ext.getCmp("IDCard").hide();
+                        CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
+                            if (ret1) {
+                                Ext.getCmp("Password").allowBlank = false;
+                                Ext.getCmp("Password").show();
+                            } else {
+                                Ext.getCmp("Password").allowBlank = true;
+                                Ext.getCmp("Password").hide();
+                            }
+                        }, CS.onError);
                     } else {
                         Ext.getCmp("roleId").getEl().allowBlank = false;
                         Ext.getCmp("roleId").show();
@@ -164,11 +177,15 @@ function EditUser(id) {
                         Ext.getCmp("UserXM").show();
                         CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
                             if (ret1) {
-                                Ext.getCmp("IDCard").allowBlank = true;
+                                Ext.getCmp("IDCard").allowBlank = false;
                                 Ext.getCmp("IDCard").show();
+                                Ext.getCmp("Password").allowBlank = false;
+                                Ext.getCmp("Password").show();
                             } else {
                                 Ext.getCmp("IDCard").allowBlank = true;
                                 Ext.getCmp("IDCard").hide();
+                                Ext.getCmp("Password").allowBlank = true;
+                                Ext.getCmp("Password").hide();
                             }
                         }, CS.onError);
                     }

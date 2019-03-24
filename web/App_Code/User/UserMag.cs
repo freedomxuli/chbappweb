@@ -968,6 +968,9 @@ public class UserMag
                 cells[0, 8].PutValue("注册时间");
                 cells[0, 8].SetStyle(style2);
                 cells.SetColumnWidth(8, 20);
+                cells[0, 9].PutValue("地址");
+                cells[0, 9].SetStyle(style2);
+                cells.SetColumnWidth(9, 20);
 
                 string where = "";
                 if (!string.IsNullOrEmpty(beg))
@@ -1019,6 +1022,8 @@ public class UserMag
                     cells[i + 1, 7].SetStyle(style4);
                     cells[i + 1, 8].PutValue(Convert.ToDateTime(dt.Rows[i]["AddTime"]).ToString("yyyy-MM-dd"));
                     cells[i + 1, 8].SetStyle(style4);
+                    cells[i + 1, 9].PutValue(dt.Rows[i]["Address"]);
+                    cells[i + 1, 9].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -1098,7 +1103,7 @@ public class UserMag
                 cells[0, 4].PutValue("注册时间");
                 cells[0, 4].SetStyle(style2);
                 cells.SetColumnWidth(4, 20);
-                if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" || SystemUser.CurrentUser.RoleID == "d62345a4-4ea9-4502-8ec8-3af9d9909a21"){
+                if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" ){
                 cells[0, 5].PutValue("身份证号");
                 cells[0, 5].SetStyle(style2);
                 cells.SetColumnWidth(5, 20);
@@ -1137,7 +1142,7 @@ public class UserMag
                     cells[i + 1, 3].SetStyle(style4);
                     cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["AddTime"]).ToString("yyyy-MM-dd"));
                     cells[i + 1, 4].SetStyle(style4);
-                    if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" || SystemUser.CurrentUser.RoleID == "d62345a4-4ea9-4502-8ec8-3af9d9909a21")
+                    if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" )
                     {
                         cells[i + 1, 5].PutValue(dt.Rows[i]["IDCard"]);
                         cells[i + 1, 5].SetStyle(style4);
@@ -2290,7 +2295,7 @@ public class UserMag
     [CSMethod("JudgeUser")]
     public object JudgeUser()
     {
-        if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" || SystemUser.CurrentUser.RoleID == "d62345a4-4ea9-4502-8ec8-3af9d9909a21")
+        if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F")
         {
             return true;
         }
