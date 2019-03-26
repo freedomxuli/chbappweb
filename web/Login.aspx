@@ -36,13 +36,13 @@
             border-color: inherit;
             border-width: 0px;
             background-color: transparent;
-            height: 33px;
-            line-height: 33px;
-            width: 290px;
+            height: 80px;
+            line-height: 80px;
+            width: 535px;
             padding: 0px;
             position: relative;
-            top: 276px;
-            left: 327px;
+            top: 315px;
+            left: 265px;
             font-size: 24px;
         }
 
@@ -50,14 +50,14 @@
             border-style: none;
             border-color: inherit;
             border-width: 0px;
-            background-color: transparent;
-            height: 33px;
-            line-height: 33px;
-            width: 141px;
+            /*background-color: transparent;*/
+            height: 80px;
+            line-height: 80px;
+            width: 280px;
             padding: 0px;
             position: relative;
-            top: 416px;
-            left: -263px;
+            top: 481px;
+            left: -380px;
             font-size: 24px;
         }
 
@@ -66,43 +66,43 @@
             border-color: inherit;
             border-width: 0px;
             background-color: transparent;
-            height: 33px;
-            line-height: 33px;
-            width: 290px;
+            height: 80px;
+            line-height: 80px;
+            width: 535px;
             padding: 0px;
             position: relative;
-            top: 345px;
-            left: 33px;
+            top: 358px;
+            left: 265px;
             right: -33px;
             font-size: 24px;
         }
 
         #container {
-            width: 1010px;
-            height: 600px;
+            width: 950px;
+            height: 802px;
             background: url(Images/login/login_form_bg2.png) no-repeat no-repeat center center;
             position: absolute;
-            top: 50%;
+            top: 120px;
             left: 50%;
             margin-left: -480px;
-            margin-top: -280px;
+            /*margin-top: -280px;*/
         }
 
         #btnSubmit {
-            width: 411px;
-            height: 57px;
+            width: 692px;
+            height: 87px;
             position: relative;
-            top: 435px;
-            left: 285px;
+            top: 530px;
+            left: -120px;
             cursor: pointer;
         }
 
         #imgcode {
-            width: 120px;
-            height: 35px;
+            width: 249px;
+            height: 80px;
             position: relative;
-            top: 412px;
-            left: -249px;
+            top: 400px;
+            left: 479px;
             cursor: pointer;
         }
     </style>
