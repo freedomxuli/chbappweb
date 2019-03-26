@@ -68,7 +68,7 @@ var KindStore = Ext.create('Ext.data.Store', {
 
 //************************************页面方法***************************************
 function getUser(nPage) {
-   CS('CZCLZ.ZXSHMag.GetZXList2', function (retVal) {
+    CS('CZCLZ.ZXSHMag.GetZXList2', function (retVal) {
         if (retVal){
             var result = retVal.evalJSON();
             store.setData({
@@ -647,7 +647,20 @@ Ext.onReady(function () {
                                                     }
                                                 }
                                             ]
-                                        }
+                                        },
+                                         {
+                                             xtype: 'buttongroup',
+                                             title: '',
+                                             items: [
+                                                 {
+                                                     xtype: 'button',
+                                                     iconCls: 'view',
+                                                     text: '导出',
+                                                     handler: function () {
+                                                         DownloadFile("CZCLZ.ZXSHMag.GetZXList2ToFile", "基础信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
+                                                     }
+                                                 }]
+                                         }
                                     ]
                                 },
                                 {
