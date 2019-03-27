@@ -36,13 +36,13 @@
             border-color: inherit;
             border-width: 0px;
             background-color: transparent;
-            height: 80px;
-            line-height: 80px;
-            width: 535px;
+            height: 60px;
+            line-height: 60px;
+            width: 390px;
             padding: 0px;
             position: relative;
-            top: 315px;
-            left: 265px;
+            top: 331px;
+            left: 315px;
             font-size: 24px;
         }
 
@@ -50,14 +50,14 @@
             border-style: none;
             border-color: inherit;
             border-width: 0px;
-            /*background-color: transparent;*/
-            height: 80px;
-            line-height: 80px;
-            width: 280px;
+            background-color: transparent;
+            height: 60px;
+            line-height: 60px;
+            width: 195px;
             padding: 0px;
             position: relative;
-            top: 481px;
-            left: -380px;
+            top: 428px;
+            left: 245px;
             font-size: 24px;
         }
 
@@ -66,13 +66,13 @@
             border-color: inherit;
             border-width: 0px;
             background-color: transparent;
-            height: 80px;
-            line-height: 80px;
-            width: 535px;
+            height: 60px;
+            line-height: 60px;
+            width: 390px;
             padding: 0px;
             position: relative;
-            top: 358px;
-            left: 265px;
+            top: 423px;
+            left: -78px;
             right: -33px;
             font-size: 24px;
         }
@@ -82,27 +82,27 @@
             height: 802px;
             background: url(Images/login/login_form_bg2.png) no-repeat no-repeat center center;
             position: absolute;
-            top: 120px;
+            top: 10px;
             left: 50%;
             margin-left: -480px;
             /*margin-top: -280px;*/
         }
 
         #btnSubmit {
-            width: 692px;
-            height: 87px;
+            width: 510px;
+            height: 64px;
             position: relative;
-            top: 530px;
-            left: -120px;
+            top: 550px;
+            left: -170px;
             cursor: pointer;
         }
 
         #imgcode {
-            width: 249px;
-            height: 80px;
+            width: 187px;
+            height: 62px;
             position: relative;
-            top: 400px;
-            left: 479px;
+            top: 452px;
+            left: 278px;
             cursor: pointer;
         }
     </style>

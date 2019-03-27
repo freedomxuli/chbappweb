@@ -20,7 +20,8 @@ var store = createSFW4Store({
        { name: 'Money' },
        { name: 'flag' },
        { name: 'redenvelopeid' },
-       { name: 'redmoney' }
+       { name: 'redmoney' },
+       { name: 'KIND' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -145,6 +146,15 @@ Ext.onReady(function () {
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "交易类型"
+
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'KIND',
+                                width: 140,
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "券类型"
 
                             }
                     ],

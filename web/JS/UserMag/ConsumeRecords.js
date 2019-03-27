@@ -27,7 +27,8 @@ var orderstore1 = createSFW4Store({
         { name: 'UserName' },
         { name: 'UserXM' },
         { name: 'DATE' },
-        { name: 'MONEY' }
+        { name: 'MONEY' },
+        { name: 'FLAG' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getConsumeListBySF(nPage);
@@ -278,6 +279,14 @@ Ext.onReady(function () {
                                                 menuDisabled: true,
                                                 flex: 1,
                                                 text: '交易金额'
+                                            },
+                                            {
+                                                xtype: 'gridcolumn',
+                                                dataIndex: 'FLAG',
+                                                sortable: false,
+                                                menuDisabled: true,
+                                                flex: 1,
+                                                text: '券类型'
                                             }
                                         ],
                                         dockedItems: [

@@ -429,18 +429,27 @@ public class UserMag
                     where3 += " and " + db.C_Like("c.UserName", mc, LikeStyle.LeftAndRightLike);
                 }
 
-                string str = @"select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'转让' as KIND  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
+                string str = @"select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'转让' as KIND,'耗材券' as FLAG  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID 
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=2   " + where1 + @"
                                  union all 
-                                select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
+                                select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND,
+                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                                from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
-                                left join tb_b_user d on a.ReceiveUserID=d.UserID 
+                                left join tb_b_user d on a.ReceiveUserID=d.UserID
+                                left join tb_b_order e on a.OrderCode=e.OrderCode
+                                left join tb_b_salerecord f on e.SaleRecordID=f.SaleRecordID 
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=1   " + where3 + @"
                             union all 
-	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
+	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND,
+                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                            from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                             left join tb_b_user c on a.BuyUserID=c.UserID
+                            left join tb_b_salerecord f on a.SaleRecordID=f.SaleRecordID 
                             where a.Status=0 and a.ZhiFuZT=1 " + where2 + @"
                             order by AddTime desc";
                 DataTable dt = db.GetPagedDataTable(str, pagesize, ref cp, out ac);
@@ -803,6 +812,8 @@ public class UserMag
                 cells.SetColumnWidth(3, 30);
                 cells[0, 4].PutValue("交易金额");
                 cells[0, 4].SetStyle(style2);
+                cells[0, 5].PutValue("券类型");
+                cells[0, 5].SetStyle(style2);
 
                 string where1 = "";
                 string where2 = "";
@@ -840,18 +851,27 @@ public class UserMag
                     where3 += " and " + dbc.C_Like("c.UserName", mc, LikeStyle.LeftAndRightLike);
                 }
 
-                string str = @"select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'转让' as KIND  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
+                string str = @"select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'转让' as KIND,'耗材券' as FLAG  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID 
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=2   " + where1 + @"
                                  union all 
-                                select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
+                                select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND,
+                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                                from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
-                                left join tb_b_user d on a.ReceiveUserID=d.UserID 
+                                left join tb_b_user d on a.ReceiveUserID=d.UserID
+                                left join tb_b_order e on a.OrderCode=e.OrderCode
+                                left join tb_b_salerecord f on e.SaleRecordID=f.SaleRecordID 
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=1   " + where3 + @"
                             union all 
-	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
+	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND,
+                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                            from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                             left join tb_b_user c on a.BuyUserID=c.UserID
+                            left join tb_b_salerecord f on a.SaleRecordID=f.SaleRecordID 
                             where a.Status=0 and a.ZhiFuZT=1 " + where2 + @"
                             order by AddTime desc";
                 DataTable dt = dbc.ExecuteDataTable(str);
@@ -877,6 +897,8 @@ public class UserMag
                     cells[i + 1, 3].SetStyle(style4);
                     cells[i + 1, 4].PutValue(dt.Rows[i]["MONEY"]);
                     cells[i + 1, 4].SetStyle(style4);
+                    cells[i + 1, 5].PutValue(dt.Rows[i]["FLAG"]);
+                    cells[i + 1, 5].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();

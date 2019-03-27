@@ -3262,23 +3262,35 @@ public class CWBBMag
                     where += " and d.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney  from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
+                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney,
+                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
+                                left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
                                 where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where+ @"
                                 union all
-                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney,
+                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
+                                left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
                                  where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
-                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney,
+                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND 
+                                from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
+                                left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
                                  where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=9 and a.PointsEndTime<getDate() " + where + @"";
 
                 //开始取分页数据
@@ -3358,6 +3370,9 @@ public class CWBBMag
                 cells[0, 8].PutValue("交易类型");
                 cells[0, 8].SetStyle(style2);
                 cells.SetColumnWidth(8, 20);
+                cells[0, 9].PutValue("券类型");
+                cells[0, 9].SetStyle(style2);
+                cells.SetColumnWidth(9, 20);
 
 
                 string where = "";
@@ -3381,23 +3396,35 @@ public class CWBBMag
                     where += " and d.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney  from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
+                string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney,
+                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
+                                left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
                                 where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + @"
                                 union all
-                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney,
+                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
+                                left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
                                  where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
-                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
+                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney,
+                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND 
+                                from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
+                                left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
                                  where b.ClientKind=2 and d.status=0 and d.ZhiFuZT=1 and a.status=9 and a.PointsEndTime<getDate() " + where + @"";
 
                 //开始取分页数据
@@ -3445,6 +3472,11 @@ public class CWBBMag
                         cells[i + 1, 8].PutValue(dt.Rows[i]["flag"]);
                     }
                     cells[i + 1, 8].SetStyle(style4);
+                    if (dt.Rows[i]["KIND"] != null && dt.Rows[i]["KIND"].ToString() != "")
+                    {
+                        cells[i + 1, 9].PutValue(dt.Rows[i]["KIND"]);
+                    }
+                    cells[i + 1, 9].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
