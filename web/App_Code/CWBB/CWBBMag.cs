@@ -3263,8 +3263,8 @@ public class CWBBMag
                 }
 
                 string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney,
-                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
-                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>0 then  '自发券' end as KIND
                                 from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
@@ -3274,8 +3274,8 @@ public class CWBBMag
                                 where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where+ @"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney,
-                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
-                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>0 then  '自发券' end as KIND
                                 from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
@@ -3284,8 +3284,8 @@ public class CWBBMag
                                  where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
                                  select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney,
-                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
-                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND 
+                                case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>0 then  '自发券' end as KIND 
                                 from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
@@ -3397,8 +3397,8 @@ public class CWBBMag
                 }
 
                 string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney,
-                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
-                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>0 then  '自发券' end as KIND
                                 from tb_b_pay a left join tb_b_user b on a.PayUserID=b.UserID 
                                 left join tb_b_mycard c on a.mycardId=c.mycardId 
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
@@ -3408,8 +3408,8 @@ public class CWBBMag
                                 where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + @"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney,
-                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
-                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND
+                                case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>0 then  '自发券' end as KIND
                                 from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
@@ -3418,8 +3418,8 @@ public class CWBBMag
                                  where b.ClientKind=2 and d.status=0 and a.status=0  and d.ZhiFuZT=1 and a.PointsEndTime>=getDate()  " + where + @"
                                  union all
                                  select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'过期' as flag,f.redenvelopeid,f.money as redmoney,
-                                case when g.SaleRecordLX=1 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
-                                when  g.SaleRecordLX<>1 then  '自发券' end as KIND 
+                                case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
+                                when  g.SaleRecordLX<>0 then  '自发券' end as KIND 
                                 from tb_b_mycard a  left join tb_b_user b on a.UserID=b.UserID 
                                 left join tb_b_order d on a.OrderCode=d.OrderCode
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
@@ -4785,7 +4785,7 @@ public class CWBBMag
 
                 //历史销量 购买人数 购买人次
                 string str1 = @"select sum(a.Points) as xl,count(a.BuyUserID) as gmcs,count(distinct a.BuyUserID) as gmrs  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID 
-                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0";
+                where a.status=0 and a.ZhiFuZT=1 ";
                 DataTable dt1 = dbc.ExecuteDataTable(str1);
 
                 string str1_1 = @"select sum(a.Points) points from tb_b_pay a left join tb_b_paisong_detail b on a.PaisongDetailID=b.id
@@ -4801,7 +4801,7 @@ public class CWBBMag
 
                 //历史复购情况
                 string str3 = @"select count(*) as fg from 
-                            (select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())<>0 group by BuyUserID) a
+                            (select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1  group by BuyUserID) a
                             where gmcs>1";
                 DataTable dt3 = dbc.ExecuteDataTable(str3);
 
@@ -4818,13 +4818,13 @@ public class CWBBMag
                                 ) n 
                                 on  m.userid=n.userid
 
-                                select count(userid) as counts,'500以下' as  flag from #jtemp where sq<500
+                                select count(userid) as counts,'500以下（人）' as  flag from #jtemp where sq<500
                                 union all
-                                select count(userid) as counts,'500-1000' as  flag  from #jtemp where sq>=500 and sq<1000
+                                select count(userid) as counts,'500-1000（人）' as  flag  from #jtemp where sq>=500 and sq<1000
                                 union all
-                                select count(userid) as counts,'1000-2000' as  flag  from #jtemp where sq>=1000 and sq<2000
+                                select count(userid) as counts,'1000-2000（人）' as  flag  from #jtemp where sq>=1000 and sq<2000
                                 union all
-                                select count(userid) as counts,'2000以上' as  flag  from #jtemp where sq>=2000 
+                                select count(userid) as counts,'2000以上（人）' as  flag  from #jtemp where sq>=2000 
 
                                 DROP TABLE #jtemp;";
                 DataTable dt5 = dbc.ExecuteDataTable(str5);
@@ -4834,21 +4834,21 @@ public class CWBBMag
                                 (
                                 select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
                                 left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
-                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                where a.status=0 and a.ZhiFuZT=1 
                                 group by a.BuyUserID
                                  )m full join 
-                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())<>0
+                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 
                                 group by sanfanguserid
                                 ) n 
                                 on  m.userid=n.userid
 
-                                select count(userid) as counts,'500以下' as  flag from #jtemp where sq<500
+                                select count(userid) as counts,'500以下（人）' as  flag from #jtemp where sq<500
                                 union all
-                                select count(userid) as counts,'500-1000' as  flag  from #jtemp where sq>=500 and sq<1000
+                                select count(userid) as counts,'500-1000（人）' as  flag  from #jtemp where sq>=500 and sq<1000
                                 union all
-                                select count(userid) as counts,'1000-2000' as  flag  from #jtemp where sq>=1000 and sq<2000
+                                select count(userid) as counts,'1000-2000（人）' as  flag  from #jtemp where sq>=1000 and sq<2000
                                 union all
-                                select count(userid) as counts,'2000以上' as  flag  from #jtemp where sq>=2000 
+                                select count(userid) as counts,'2000以上（人）' as  flag  from #jtemp where sq>=2000 
 
                                 DROP TABLE #jtemp;";
                 DataTable dt6 = dbc.ExecuteDataTable(str6);
@@ -4861,8 +4861,7 @@ public class CWBBMag
                                 where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
                                 group by a.BuyUserID
                                     )m full join 
-                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())=0
-                                group by sanfanguserid
+                                (select PayUserID as userid,sum(isnull(Points,0)) as sq from tb_b_pay where PaisongDetailID is not null and DateDiff(dd,AddTime,getdate())=0 group by PayUserID
                                 ) n 
                                 on  m.userid=n.userid";
                 DataTable dt7 = dbc.ExecuteDataTable(str7);
@@ -4872,11 +4871,10 @@ public class CWBBMag
                                 (
                                 select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
                                 left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
-                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                where a.status=0 and a.ZhiFuZT=1 
                                 group by a.BuyUserID
                                     )m full join 
-                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())<>0
-                                group by sanfanguserid
+                                (select PayUserID as userid,sum(isnull(Points,0)) as sq from tb_b_pay where PaisongDetailID is not null group by PayUserID
                                 ) n 
                                 on  m.userid=n.userid";
                 DataTable dt8 = dbc.ExecuteDataTable(str8);
@@ -4899,8 +4897,7 @@ public class CWBBMag
                 DataTable dt13 = dbc.ExecuteDataTable(str13);
 
                 //历史开通专线统计
-                string str11 = @"select count(*) as ktzx from tb_b_user where ClientKind=1 and IsCanRelease=1 and DqBm is not null
-								and DateDiff(dd,canReleaseTime,getdate())<>0";
+                string str11 = @"select count(*) as ktzx from tb_b_user where ClientKind=1 and IsCanRelease=1 and DqBm is not null";
                 DataTable dt11 = dbc.ExecuteDataTable(str11);
 
                 //今日已有销量专线统计
@@ -4922,7 +4919,7 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select ISNULL(m.xl,0)+ISNULL(n.points,0) as xl,m.dq_mc,m.gmrc from 
+                string str = @"select ISNULL(m.xl,0) as xl,m.dq_mc,m.gmrc from 
 
 (select sum(a.Points) as xl, b.FromRoute as dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                                 left join tb_b_dq c on b.DqBm=c.dq_bm
@@ -4950,16 +4947,16 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select ISNULL(m.xl,0)+ISNULL(n.points,0) as xl,m.dq_mc,m.gmrc from 
+                string str = @"select ISNULL(m.xl,0) as xl,m.dq_mc,m.gmrc from 
 
 (select sum(a.Points) as xl, b.FromRoute as dq_mc,count(BuyUserID) as gmrc from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                                 left join tb_b_dq c on b.DqBm=c.dq_bm
-                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
+                                where a.status=0 and a.ZhiFuZT=1 
                                 group by b.FromRoute) m left join 
 
 								(select sum(a.Points) points,c.FromRoute from tb_b_pay a left join tb_b_paisong_detail b on a.PaisongDetailID=b.id
 								left join tb_b_user c on a.carduserid=c.UserID
-				 where a.PaisongDetailID is not null and  c.clientkind = 1 and DateDiff(dd,b.gettime,getdate())<>0 
+				 where a.PaisongDetailID is not null and  c.clientkind = 1 
 				 group by c.FromRoute) n on m.dq_mc=n.FromRoute";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
@@ -5005,7 +5002,7 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())<>0 group by BuyUserID";
+                string str = @"select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1  group by BuyUserID";
                 DataTable dt = dbc.ExecuteDataTable(str);
 
                 int count1 = 0;
@@ -5032,21 +5029,18 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select sum(a.sq) as sq,c.dq_mc from 
+                string str = @"select sum(a.sq) as sq,b.FromRoute as dq_mc from 
                                 (select case when m.userid is not null then m.userid else n.userid end as userid,isnull(m.sq,0)+isnull(n.sq,0) as sq  from 
                                 (
-                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.SaleUserID as userid  from tb_b_order a 
                                 left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
                                 where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0
-                                group by a.BuyUserID
+                                group by a.SaleUserID
                                 )m full join 
-                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())=0
-                                group by sanfanguserid
+                                (select CardUserID as userid,sum(isnull(Points,0)) as sq from tb_b_pay where PaisongDetailID is not null and DateDiff(dd,AddTime,getdate())=0 group by CardUserID
                                 ) n 
                                 on  m.userid=n.userid) a left join tb_b_user b on a.userid=b.UserID
-                                left join tb_b_dq c on b.DqBm=c.dq_bm
-                                where  (c.dq_mc like '%常州%' or c.dq_mc like '%苏州%')
-                                group by c.dq_bm,c.dq_mc";
+                                group by b.FromRoute";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
             }
@@ -5064,21 +5058,18 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select sum(a.sq) as sq,c.dq_mc from 
+                string str = @"select sum(a.sq) as sq,b.FromRoute as dq_mc from 
                                 (select case when m.userid is not null then m.userid else n.userid end as userid,isnull(m.sq,0)+isnull(n.sq,0) as sq  from 
                                 (
-                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.BuyUserID as userid  from tb_b_order a 
+                                select sum((isnull(a.Points,0)-isnull(a.money,0)+isnull(b.money,0))) as sq ,a.SaleUserID as userid  from tb_b_order a 
                                 left join tb_b_redenvelope  b on a.redenvelopeid=b.redenvelopeid 
-                                where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())<>0
-                                group by a.BuyUserID
+                                where a.status=0 and a.ZhiFuZT=1 
+                                group by a.SaleUserID
                                 )m full join 
-                                (select sanfanguserid as userid,sum(isnull(getpoints,0)) as sq from tb_b_paisong_detail  where status=0 and getstatus=1 and DateDiff(dd,gettime,getdate())<>0
-                                group by sanfanguserid
+                                (select CardUserID as userid,sum(isnull(Points,0)) as sq from tb_b_pay where PaisongDetailID is not null group by CardUserID
                                 ) n 
                                 on  m.userid=n.userid) a left join tb_b_user b on a.userid=b.UserID
-                                left join tb_b_dq c on b.DqBm=c.dq_bm
-                                where  (c.dq_mc like '%常州%' or c.dq_mc like '%苏州%')
-                                group by c.dq_bm,c.dq_mc";
+                                group by b.FromRoute";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;
             }
@@ -5169,7 +5160,7 @@ public class CWBBMag
             {
                 string str = @"select count(b.UserID) as ktzx,dq_mc from tb_b_user b
 								 left join tb_b_dq c on b.DqBm=c.dq_bm
-								 where b.ClientKind=1 and b.IsCanRelease=1 and b.DqBm is not null and DateDiff(dd,canReleaseTime,getdate())<>0 
+								 where b.ClientKind=1 and b.IsCanRelease=1 and b.DqBm is not null 
 								 group by c.dq_mc";
                 DataTable dt = dbc.ExecuteDataTable(str);
                 return dt;

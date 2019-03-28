@@ -435,8 +435,8 @@ public class UserMag
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=2   " + where1 + @"
                                  union all 
                                 select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND,
-                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
                                 from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID
@@ -445,8 +445,8 @@ public class UserMag
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=1   " + where3 + @"
                             union all 
 	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND,
-                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
                             from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                             left join tb_b_user c on a.BuyUserID=c.UserID
                             left join tb_b_salerecord f on a.SaleRecordID=f.SaleRecordID 
@@ -857,8 +857,8 @@ public class UserMag
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=2   " + where1 + @"
                                  union all 
                                 select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND,
-                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
                                 from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID
@@ -867,8 +867,8 @@ public class UserMag
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=1   " + where3 + @"
                             union all 
 	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND,
-                                case when f.SaleRecordLX=1 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>1 then  '自发券' end as FLAG  
+                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
+                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
                             from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                             left join tb_b_user c on a.BuyUserID=c.UserID
                             left join tb_b_salerecord f on a.SaleRecordID=f.SaleRecordID 

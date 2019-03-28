@@ -111,8 +111,8 @@ function BindData() {
             }
             html += '<tr>';
             html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">省钱总额（元）</td>';
-            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="jsq()">' + jsq + '</td>';
-            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="hsq()">' + hsq + '</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="jsq()">' + Math.round(jsq) + '</td>';
+            html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;cursor:pointer;color:#00C" align="center" onclick="hsq()">' + Math.round(hsq) + '</td>';
             html += '</tr>';
             var jscgm = "";
             var hscgm = "";
@@ -539,7 +539,7 @@ function jsq() {
                     if (retVal[i]["dq_mc"]) {
                         html += '<tr>';
                         html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + retVal[i]["dq_mc"] + '</td>';
-                        html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + retVal[i]["sq"] + '</td>';
+                        html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + Math.round(retVal[i]["sq"]) + '</td>';
                         html += '</tr>';
                     }
                 }
@@ -593,7 +593,7 @@ function hsq() {
                     if (retVal[i]["dq_mc"]) {
                         html += '<tr>';
                         html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + retVal[i]["dq_mc"] + '</td>';
-                        html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + retVal[i]["sq"] + '</td>';
+                        html += '<td style="font-size: 18px;line-height: 250%;border: solid 1px #ffffff;background-color: #D2DEEF;" align="center">' + Math.round(retVal[i]["sq"]) + '</td>';
                         html += '</tr>';
                     }
                 }
