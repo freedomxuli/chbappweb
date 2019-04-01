@@ -1,6 +1,7 @@
 ﻿var pageSize = 15;
 var cx_sj;
 var id = "";
+var sj = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
     data: [],
@@ -21,7 +22,19 @@ var store = createSFW4Store({
     }
 });
 
-
+var xsstore = createSFW4Store({
+    data: [],
+    pageSize: pageSize,
+    total: 1,
+    currentPage: 1,
+    fields: [
+       { name: 'UserXM' },
+       { name: 'points' },
+    ],
+    onPageChange: function (sto, nPage, sorters) {
+        getXSList(nPage, sj);
+    }
+});
 
 //************************************数据源*****************************************
 
@@ -36,7 +49,166 @@ function getMRMXList(nPage) {
         });
     }, CS.onError, nPage, pageSize, Ext.getCmp("cx_sj").getValue());
 }
+
+function GetXSList(nPage) {
+    CS('CZCLZ.CWBBMag.GetMRXSList', function (retVal) {
+        xsstore.setData({
+            data: retVal.dt,
+            pageSize: pageSize,
+            total: retVal.ac,
+            currentPage: retVal.cp
+        });
+    }, CS.onError, nPage, pageSize,sj, Ext.getCmp("cx_lx").getValue());
+}
+
+
+function XS(xssj) {
+    sj = xssj;
+    var win = new XSList({ xssj: xssj });
+    win.show(null, function () {
+        GetXSList(1);
+    })
+}
 //************************************页面方法***************************************
+
+//************************************弹出界面***************************************
+Ext.define('XSList', {
+    extend: 'Ext.window.Window',
+
+    height: 422,
+    width: 620,
+    layout: {
+        type: 'fit'
+    },
+    title: '销售明细',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var xssj = me.xssj
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: xsstore,
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'UserXM',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '专线名称'
+                                        },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'points',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '销售总额'
+                                         }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'combobox',
+                                            id: 'cx_lx',
+                                            width: 160,
+                                            fieldLabel: '券类型',
+                                            editable: false,
+                                            labelWidth: 60,
+                                            store: Ext.create('Ext.data.Store', {
+                                                fields: [
+                                                   { name: 'val' },
+                                                   { name: 'txt' }
+                                                ],
+                                                data: [{ 'val': '', 'txt': '全部' },
+                                                        { 'val': 1, 'txt': '耗材券' },
+                                                        { 'val': 2, 'txt': '自发券' }]
+                                            }),
+                                            queryMode: 'local',
+                                            displayField: 'txt',
+                                            valueField: 'val',
+                                            value: ''
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                 {
+                                                     xtype: 'button',
+                                                     iconCls: 'search',
+                                                     text: '查询',
+                                                     handler: function () {
+                                                         GetXSList(1);
+                                                     }
+                                                 }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CWBBMag.GetMRXSListToFile", "专线销售表.xls", xssj, Ext.getCmp("cx_lx").getValue());
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'pagingtoolbar',
+                                    displayInfo: true,
+                                    store: xsstore,
+                                    dock: 'bottom'
+                                }
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
+//************************************弹出界面***************************************
 //************************************主界面*****************************************
 Ext.onReady(function () {
     Ext.define('YhView', {
@@ -102,7 +274,10 @@ Ext.onReady(function () {
                                  sortable: false,
                                  menuDisabled: true,
                                  flex: 1,
-                                 text: "销售券"
+                                 text: "销售券",
+                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                     return "<a onclick='XS(\"" + record.data.sj + "\");'>" + (value == null ? "" : value) + "</a>"
+                                 }
                              }
                     ],
                     viewConfig: {

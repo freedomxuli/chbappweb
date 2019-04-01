@@ -4763,6 +4763,148 @@ public class CWBBMag
         }
 
     }
+
+    [CSMethod("GetMRXSList")]
+    public object GetMRXSList(int pagnum, int pagesize, string sj, string lx)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(sj))
+                {
+                    where += " and (a.AddTime>='"+Convert.ToDateTime(sj).ToString("yyyy-MM-dd")+"' and a.AddTime<'"+Convert.ToDateTime(sj).AddDays(1).ToString("yyyy-MM-dd")+"')";
+                }
+
+                if(!string.IsNullOrEmpty(lx)){
+                    if(Convert.ToInt32(lx)==1){
+                        where+="and (b.SaleRecordLX=0 or b.SaleRecordLX is null)";
+                    }
+                    else if (Convert.ToInt32(lx) == 2)
+                    {
+                        where+="and b.SaleRecordLX<>0";
+                    }
+                }
+
+                string str = @" select sum(a.Points) as points,c.UserXM,a.SaleUserID from tb_b_order a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID
+                            left join tb_b_user c on a.SaleUserID=c.UserID
+                             where a.status=0 and a.ZhiFuZT=1 and b.Status=0   "+where+@" 
+                              group by a.SaleUserID,c.UserXM order by c.UserXM ";
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("GetMRXSListToFile", 2)]
+    public byte[] GetMRXSListToFile(string sj, string lx)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("专线名称");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("销售券额");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(sj))
+                {
+                    where += " and (a.AddTime>='" + Convert.ToDateTime(sj).ToString("yyyy-MM-dd") + "' and a.AddTime<'" + Convert.ToDateTime(sj).AddDays(1).ToString("yyyy-MM-dd") + "')";
+                }
+
+                if (!string.IsNullOrEmpty(lx))
+                {
+                    if (Convert.ToInt32(lx) == 1)
+                    {
+                        where += "and (b.SaleRecordLX=0 or b.SaleRecordLX is null)";
+                    }
+                    else if (Convert.ToInt32(lx) == 2)
+                    {
+                        where += "and b.SaleRecordLX<>0";
+                    }
+                }
+
+                string str = @" select sum(a.Points) as points,c.UserXM,a.SaleUserID from tb_b_order a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID
+                            left join tb_b_user c on a.SaleUserID=c.UserID
+                             where a.status=0 and a.ZhiFuZT=1 and b.Status=0   " + where + @" 
+                              group by a.SaleUserID,c.UserXM order by c.UserXM ";
+
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["points"] != null && dt.Rows[i]["points"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["points"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["UserXM"] != null && dt.Rows[i]["UserXM"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["UserXM"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
     #endregion 
 
 
