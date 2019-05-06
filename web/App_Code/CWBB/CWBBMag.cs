@@ -3232,7 +3232,7 @@ public class CWBBMag
 
     #region 三方交易明细
     [CSMethod("GetSFJYList")]
-    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm,string beg, string end)
+    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm,string beg, string end,string ordercode)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3242,6 +3242,7 @@ public class CWBBMag
                 int ac = 0;
 
                 string where = "";
+                string where1 = "";
 
                 if (!string.IsNullOrEmpty(yhm.Trim()))
                 {
@@ -3261,6 +3262,11 @@ public class CWBBMag
                 {
                     where += " and d.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
+                if (!string.IsNullOrEmpty(ordercode))
+                {
+                    where1 += " and " + dbc.C_Like("c.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("d.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
+                }
 
                 string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney,
                                 case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
@@ -3271,7 +3277,7 @@ public class CWBBMag
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                 left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
-                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where+ @"
+                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + where1 + @"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney,
                                 case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
@@ -3308,7 +3314,7 @@ public class CWBBMag
     }
 
     [CSMethod("GetSFJYListToFile", 2)]
-    public byte[] GetSFJYListToFile(string yhm, string xm, string beg, string end)
+    public byte[] GetSFJYListToFile(string yhm, string xm, string beg, string end, string ordercode)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3376,6 +3382,7 @@ public class CWBBMag
 
 
                 string where = "";
+                string where1 = "";
 
                 if (!string.IsNullOrEmpty(yhm.Trim()))
                 {
@@ -3395,6 +3402,11 @@ public class CWBBMag
                 {
                     where += " and d.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
+                if (!string.IsNullOrEmpty(ordercode))
+                {
+                    where1 += " and " + dbc.C_Like("c.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("d.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
+                }
 
                 string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,f.redenvelopeid,f.money as redmoney,
                                 case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
@@ -3405,7 +3417,7 @@ public class CWBBMag
                                 left join tb_b_redenvelope f on d.redenvelopeid=f.redenvelopeid
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                 left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
-                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + @"
+                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where+where1 + @"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,f.redenvelopeid,f.money as redmoney,
                                 case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
@@ -4906,7 +4918,6 @@ public class CWBBMag
 
     }
     #endregion 
-
 
     #region 销售情况
     [CSMethod("getXSQK")]

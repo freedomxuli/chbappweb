@@ -262,4 +262,47 @@ public class JFSQMag
 
         }
     }
+
+
+    #region 调整额度
+    [CSMethod("GetTZList")]
+    public object GetTZList(int pagnum, int pagesize, string yhm, string xm)
+    {
+
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+                if (!string.IsNullOrEmpty(yhm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserName", yhm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(xm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @"select a.UserID,a.UserName,a.UserXM,b.zed,a.Points as kyed,e.Points as kkfed from tb_b_user a left join 
+                                (select sum(sqjf) as zed,userId from tb_b_jfsq where issq=1 group by userId) b on a.UserID=b.userId
+                                left join tb_b_platpoints e on a.UserID = e.UserID 
+                                where a.ClientKind=1 and a.IsSHPass=1 and b.zed>0 "+where+@"
+                                order  by b.zed desc,a.UserName,a.UserXM";
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+    #endregion
 }

@@ -9,6 +9,9 @@ var cx_yhm;
 var cx_xm;
 var cx_beg;
 var cx_end;
+
+var yuserid;
+
 //************************************数据源*****************************************
 var store = createSFW4Store({
     data: [],
@@ -41,6 +44,43 @@ var store = createSFW4Store({
         getUser(nPage);
     }
 });
+
+var yglsjstore = createSFW4Store({
+    data: [],
+    pageSize: pageSize,
+    total: 1,
+    currentPage: 1,
+    fields: [
+        { name: 'userid' },
+       { name: 'UserName' },
+       { name: 'linkedunit' },
+       { name: 'carnumber' },
+       { name: 'drivermemo' },
+       { name: 'mirrornumber' }
+    ],
+    onPageChange: function (sto, nPage, sorters) {
+        getYGLSJList(nPage);
+    }
+});
+
+var glsjstore = createSFW4Store({
+    data: [],
+    pageSize: pageSize,
+    total: 1,
+    currentPage: 1,
+    fields: [
+        { name: 'userid' },
+       { name: 'UserName' },
+       { name: 'linkedunit' },
+       { name: 'carnumber' },
+       { name: 'drivermemo' },
+       { name: 'mirrornumber' }
+    ],
+    onPageChange: function (sto, nPage, sorters) {
+        getGLSJList(nPage);
+    }
+});
+
 
 
 var roleStore = Ext.create('Ext.data.Store', {
@@ -257,9 +297,353 @@ function LookEWM1(userid) {
         });
     });
 }
+
+function GLSJ(userid) {
+    yuserid = userid;
+    var win = new YGLSJList({ userid: userid });
+    win.show(null, function () {
+        getYGLSJList(1);
+    })
+}
+
+function getYGLSJList(nPage) {
+    CS('CZCLZ.DriverMag.getYGLSJList', function (retVal) {
+        yglsjstore.setData({
+            data: retVal.dt,
+            pageSize: pageSize,
+            total: retVal.ac,
+            currentPage: retVal.cp
+        });
+    }, CS.onError, nPage, pageSize, yuserid);
+}
+
+function getGLSJList(nPage) {
+    CS('CZCLZ.DriverMag.getGLSJList', function (retVal) {
+        glsjstore.setData({
+            data: retVal.dt,
+            pageSize: pageSize,
+            total: retVal.ac,
+            currentPage: retVal.cp
+        });
+    }, CS.onError, nPage, pageSize, yuserid, Ext.getCmp("cx_cp").getValue());
+}
+
+
+function DeleteGL(duserid,userid) {
+    Ext.MessageBox.confirm('确认', '是否删除该关联？', function (btn) {
+        if (btn == 'yes') {
+            CS('CZCLZ.DriverMag.DelGLByDUID', function (retVal) {
+                if (retVal) {
+                    getYGLSJList(1);
+                }
+            }, CS.onError, duserid, userid);
+        }
+    });
+}
+
+
+function GLSJMX(duserid, userid) {
+    CS('CZCLZ.DriverMag.GLSJMX', function (retVal) {
+        if (retVal) {
+            getGLSJList(1);
+            getYGLSJList(1);
+        }
+    }, CS.onError, duserid, userid);
+
+}
+
+
 //************************************页面方法***************************************
 
 //************************************弹出界面***************************************
+Ext.define('YGLSJList', {
+    extend: 'Ext.window.Window',
+
+    height: 450,
+    width: 650,
+    layout: {
+        type: 'fit'
+    },
+    title: '关联司机',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userid = me.userid
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: yglsjstore,
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'UserName',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '司机账号'
+                                        },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'linkedunit',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '挂靠单位'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'carnumber',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '车牌号'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'drivermemo',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '司机备注'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'Mirrornumber',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '后视镜设备编号'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'userid',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '操作',
+                                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                 return "<a onclick='DeleteGL(\"" + value + "\",\"" + userid + "\");'>删除</a>";
+                                             }
+                                         }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                 {
+                                                     xtype: 'button',
+                                                     iconCls: 'add',
+                                                     text: '新增',
+                                                     handler: function () {
+                                                         var win = new GLSJList({ userid: userid });
+                                                         win.show(null, function () {
+                                                             getGLSJList(1);
+                                                         })
+                                                     }
+                                                 }
+                                            ]
+                                        },
+                                        
+                                    ]
+                                },
+                                {
+                                    xtype: 'pagingtoolbar',
+                                    displayInfo: true,
+                                    store: yglsjstore,
+                                    dock: 'bottom'
+                                }
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
+
+Ext.define('GLSJList', {
+    extend: 'Ext.window.Window',
+
+    height: 422,
+    width: 620,
+    layout: {
+        type: 'fit'
+    },
+    title: '可关联司机',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        var userid = me.userid
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: glsjstore,
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'UserName',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            flex: 1,
+                                            text: '司机账号'
+                                        },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'linkedunit',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '挂靠单位'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'carnumber',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '车牌号'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'drivermemo',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '司机备注'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'Mirrornumber',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '后视镜设备编号'
+                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'userid',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '操作',
+                                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                 return "<a onclick='GLSJMX(\"" + value + "\",\"" + userid + "\");'>关联</a>";
+                                             }
+                                         }
+                                    ],
+                                    dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            id: 'cx_cp',
+                                            width: 160,
+                                            fieldLabel: '车牌号',
+                                            labelWidth: 60
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                 {
+                                                     xtype: 'button',
+                                                     iconCls: 'search',
+                                                     text: '查询',
+                                                     handler: function () {
+                                                             getGLSJList(1);
+                                                     }
+                                                 }
+                                            ]
+                                        }
+
+                                    ]
+                                },
+                                {
+                                    xtype: 'pagingtoolbar',
+                                    displayInfo: true,
+                                    store: glsjstore,
+                                    dock: 'bottom'
+                                }
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
+
+
 Ext.define('SelectImg', {
     extend: 'Ext.Img',
 
@@ -923,7 +1307,7 @@ Ext.onReady(function () {
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
                                     if (record.data.ClientKind == 1) {
-                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>";
+                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
                                     } else if (record.data.ClientKind == 2) {
                                         str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a>";
                                     }

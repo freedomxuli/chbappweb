@@ -39,8 +39,9 @@ public class KFGMMag
         {
             string sql = @"select isNULL(a.points,0)+isnull(b.points,0) as points,a.UserID,a.PlatToSaleId, c.UserXM from 
 (select Points as points,UserID,PlatToSaleId from tb_b_plattosale where  UserID=@UserID and status=0 and pointkind=0 ) a left join (
-select sum(Points) as points,SaleUserID from [tb_b_order] where  [SaleUserID]=@UserID and ZhiFuZT=0 and status=0
-group by SaleUserID) b  on a.UserID=b.SaleUserID 
+select sum(a.Points) as points,a.SaleUserID from [tb_b_order] a left join tb_b_salerecord b on a.salerecordid=b.salerecordid 
+where    a.ZhiFuZT=0 and a.status=0 and (b.SaleRecordLX=0 or b.SaleRecordLX is null)
+group by a.SaleUserID) b  on a.UserID=b.SaleUserID 
  left join tb_b_user c on a.UserID = c.UserID";
             SqlCommand cmd = dbc.CreateCommand(sql);
             cmd.Parameters.Add("@UserID", UserID);

@@ -39,7 +39,7 @@ function getUser(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue());
 }
 
 //************************************页面方法***************************************
@@ -197,6 +197,13 @@ Ext.onReady(function () {
                                             width: 150
                                         },
                                         {
+                                            xtype: 'textfield',
+                                            id: 'cx_ordercode',
+                                            width: 240,
+                                            labelWidth: 50,
+                                            fieldLabel: '订单号'
+                                        },
+                                        {
                                             xtype: 'buttongroup',
                                             title: '',
                                             items: [
@@ -213,7 +220,7 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue());
                                                     }
                                                 },
                                             ]
