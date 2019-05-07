@@ -100,10 +100,10 @@ function XJDK(carriageid, carriagestatus) {
     });
 }
 
-function YSHFDK(carriageid, carriagestatus) {
+function YSFDK(carriageid, carriagestatus) {
     Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
         if (obj == "yes") {
-            CS('CZCLZ.CYMag.YSHFDK', function (retVal) {
+            CS('CZCLZ.CYMag.YSFDK', function (retVal) {
                 DataBind(1);
             }, CS.onError, carriageid, carriagestatus);
         }
@@ -221,12 +221,12 @@ Ext.onReady(function() {
                                     str += " <a onclick='QR(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>确认</a>";
                                 } else if (record.data.carriagestatus == 11)
                                     str += " <a onclick='TH(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>退回</a> ";
-                                 if ((record.data.carriagestatus == 20 || record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.isoilpay == 0) {
+                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.isoilpay == 0) {
                                     str += " <a onclick='YKDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>油卡打款</a>";
                                 }
-                                 if ((record.data.carriagestatus == 20 || record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
+                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
                                     str += " <a onclick='XJDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款</a>";
-                                 } if ((record.data.carriagestatus == 20 || record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneynewpay == 0) {
+                                 } if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneynewpay == 0) {
                                      str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
                                  } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
                                     str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";

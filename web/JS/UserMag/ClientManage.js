@@ -565,7 +565,7 @@ Ext.define('GLSJList', {
                                          },
                                          {
                                              xtype: 'gridcolumn',
-                                             dataIndex: 'Mirrornumber',
+                                             dataIndex: 'mirrornumber',
                                              sortable: false,
                                              menuDisabled: true,
                                              width: 100,

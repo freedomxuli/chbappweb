@@ -304,5 +304,77 @@ public class JFSQMag
             }
         }
     }
+
+    [CSMethod("SaveKCYFQ")]
+    public bool SaveKCYFQ(JSReader jsr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                var time = DateTime.Now;
+
+                var kfsj = DateTime.Now.ToString();
+
+                var UserID = jsr["UserID"].ToString();
+                string str = "select * from tb_b_user where UserID=" + dbc.ToSqlValue(UserID);
+                DataTable pdt = dbc.ExecuteDataTable(str);
+
+                if (pdt.Rows.Count > 0)
+                {
+                    if (Convert.ToDecimal(pdt.Rows[0]["Points"].ToString()) - Convert.ToDecimal(jsr["points"].ToString()) < 0)
+                    {
+                        throw new Exception("扣除的运费券不得超过其所有运费券！");
+                    }
+                    else
+                    {
+                        var dt = dbc.GetEmptyDataTable("tb_b_jfsq");
+                        var sr = dt.NewRow();
+                        sr["sqId"] = Guid.NewGuid().ToString();
+                        sr["userId"]=new Guid(UserID);
+                        sr["sqrq"] =DateTime.Now;
+                        sr["memo"] = jsr["memo"];
+                        sr["sqjf"] =-Convert.ToDecimal(jsr["points"].ToString());
+                        sr["issq"] = 1;
+                        sr["shtime"] = DateTime.Now;
+                        sr["shuserId"] = SystemUser.CurrentUser.UserID;
+                        dt.Rows.Add(sr);
+                        dbc.InsertTable(dt);
+
+                        var cdt = dbc.GetEmptyDataTable("tb_b_cancelpoints");
+                        var csr = cdt.NewRow();
+                        csr["cancelid"] = Guid.NewGuid().ToString();
+                        csr["userid"] = new Guid(UserID);
+                        csr["memo"] = jsr["memo"];
+                        csr["points"] = Convert.ToDecimal(jsr["points"].ToString());
+                        csr["addtime"] = DateTime.Now;
+                        csr["adduser"] = SystemUser.CurrentUser.UserID;
+                         csr["status"] =0;
+                        cdt.Rows.Add(csr);
+                        dbc.InsertTable(cdt);
+
+                        var udt = dbc.GetEmptyDataTable("tb_b_user");
+                        var udtt = new SmartFramework4v2.Data.DataTableTracker(udt);
+                        var usr = udt.NewRow();
+                        usr["UserID"] = new Guid(UserID);
+                        usr["Points"] = Convert.ToDecimal(pdt.Rows[0]["Points"].ToString()) - Convert.ToDecimal(jsr["points"].ToString());
+                        udt.Rows.Add(usr);
+                        dbc.UpdateTable(udt, udtt);
+
+                       
+                    }
+
+                }
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
     #endregion
 }

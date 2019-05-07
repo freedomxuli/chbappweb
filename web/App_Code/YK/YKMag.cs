@@ -281,7 +281,7 @@ public class YKMag
 
                 if (!string.IsNullOrEmpty(yhzh.Trim()))
                 {
-                    where += " and " + dbc.C_EQ("a.inuserid", zt.Trim());
+                    where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(zt.Trim()))
