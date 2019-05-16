@@ -4,6 +4,7 @@ var cx_end;
 var cx_isregister;
 var cx_isbuy;
 var cx_tjr;
+var cx_btjr;
 
 var id = "";
 //************************************数据源*****************************************
@@ -37,7 +38,7 @@ function getShareList(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_isregister").getValue(), Ext.getCmp("cx_isbuy").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_tjr").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_isregister").getValue(), Ext.getCmp("cx_isbuy").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_tjr").getValue(), Ext.getCmp("cx_btjr").getValue());
 }
 
 //************************************页面方法***************************************
@@ -236,6 +237,13 @@ Ext.onReady(function () {
                                              labelWidth: 60,
                                              width: 150
                                          },
+                                         {
+                                             id: 'cx_btjr',
+                                             xtype: 'textfield',
+                                             fieldLabel: '被推荐人',
+                                             labelWidth: 60,
+                                             width: 150
+                                         },
                                         {
                                             xtype: 'buttongroup',
                                             title: '',
@@ -246,6 +254,20 @@ Ext.onReady(function () {
                                                     text: '查询',
                                                     handler: function () {
                                                         getShareList(1);
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.YHGLClass.getShareListToFile", "分享明细.xls", Ext.getCmp("cx_isregister").getValue(), Ext.getCmp("cx_isbuy").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_tjr").getValue(), Ext.getCmp("cx_btjr").getValue());
                                                     }
                                                 }
                                             ]
@@ -273,6 +295,7 @@ Ext.onReady(function () {
     cx_end = Ext.getCmp("cx_end").getValue();
     cx_isregister = Ext.getCmp("cx_isregister").getValue();
     cx_isbuy = Ext.getCmp("cx_isbuy").getValue();
+    cx_btjr = Ext.getCmp("cx_btjr").getValue();
     getShareList(1);
 
 })

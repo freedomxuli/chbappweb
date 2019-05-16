@@ -36,7 +36,8 @@ var sfstore = createSFW4Store({
        { name: 'UserName' },
         { name: 'getstatus' },
        { name: 'gettime' },
-       { name: 'getpoints' }
+       { name: 'getpoints' },
+       { name: 'sfsj' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getSFList(nPage, id);
@@ -48,7 +49,7 @@ var sfstore = createSFW4Store({
 
 //************************************页面方法***************************************
 function getPSList(nPage) {
-    CS('CZCLZ.CWBBMag.GetPSList', function (retVal) {
+    CS('CZCLZ.CWBBMag.GetPSListZ', function (retVal) {
         store.setData({
             data: retVal.dt,
             pageSize: pageSize,
@@ -85,7 +86,7 @@ Ext.define('SFList', {
     extend: 'Ext.window.Window',
 
     height: 422,
-    width: 620,
+    width: 720,
     layout: {
         type: 'fit'
     },
@@ -157,8 +158,34 @@ Ext.define('SFList', {
                                             format: 'Y-m-d H:i:s',
                                             sortable: false,
                                             menuDisabled: true,
-                                            width: 100,
+                                            width: 150,
                                             text: '获取时间'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'sfsj',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '是否使用',
+                                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                var str = "";
+                                                if (value!=null&&value!="") {
+                                                    str = "是";
+                                                } else {
+                                                    str = "否";
+                                                }
+                                                return str;
+                                            }
+                                        },
+                                        {
+                                            xtype: 'datecolumn',
+                                            dataIndex: 'sfsj',
+                                            format: 'Y-m-d H:i:s',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 150,
+                                            text: '使用时间'
                                         }
                                     ],
                                     dockedItems: [
@@ -373,7 +400,15 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetPSListToFile", "派送记录.xls",  Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        DownloadFile("CZCLZ.CWBBMag.GetPSListZToFile", "派送记录.xls",  Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                    }
+                                                },
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '批量导出明细',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CWBBMag.GetPSSFToFilePL", "批量派送明细记录.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                     }
                                                 },
                                             ]

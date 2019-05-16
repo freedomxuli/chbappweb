@@ -7,6 +7,8 @@ var pageSize = 15;
 var cx_role;
 var cx_yhm;
 var cx_xm;
+
+var mmck = false;
 //************************************数据源*****************************************
 var store = createSFW4Store({
     data: [],
@@ -57,6 +59,8 @@ function getUser(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
+
+        mmck = retVal.mmck;
     }, CS.onError, nPage, pageSize, Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
 }
 
@@ -85,6 +89,13 @@ function EditUser(id) {
                     Ext.getCmp("UserXM").show();
                 }
                 
+                if (mmck) {
+                    Ext.getCmp("Password").allowBlank = false;
+                    Ext.getCmp("Password").show();
+                } else {
+                    Ext.getCmp("Password").allowBlank = true;
+                    Ext.getCmp("Password").hide();
+                }
             });
             
         }

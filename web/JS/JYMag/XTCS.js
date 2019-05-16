@@ -118,14 +118,13 @@ Ext.define('addWin', {
                                     });
                                     return;
                                 }
-
                                 var me = this;
                                 CS('CZCLZ.YKMag.SaveVision', function (retVal) {
                                     if (retVal) {
                                         me.up('window').close();
                                         DataBind();
                                     }
-                                }, CS.onError, values);
+                                }, CS.onError, values, Ext.getCmp("carriageoil").getValue());
 
                             }
                         }

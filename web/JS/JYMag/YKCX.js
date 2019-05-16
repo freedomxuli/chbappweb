@@ -254,6 +254,20 @@ Ext.onReady(function() {
                                                     }
                                                 }
                                             ]
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            title: '',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    iconCls: 'view',
+                                                    text: '导出',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.YKMag.GetYKDDListToFile", "油卡订单.xls", Ext.getCmp("cx_cardNo").getValue(), Ext.getCmp("cx_orderId").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                    }
+                                                }
+                                            ]
                                         }
                                     ]
                                 },

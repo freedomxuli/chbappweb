@@ -54,12 +54,12 @@ public class CYMag
                 }
                 if (!string.IsNullOrEmpty(end))
                 {
-                    where += " and a.carriagetime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    where += " and a.carriagetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
-                            left join tb_b_user c on a.userid=c.UserID
+                            left join tb_b_user c on a.userid=c.UserID where 1=1 
                                  ";
                 str += where;
 
@@ -338,7 +338,7 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 20 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                    if ((Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 0) && ( Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                     {
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);
@@ -382,7 +382,7 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 20 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                    if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && ( Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                     {
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);
@@ -426,7 +426,7 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 20 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                    if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                     {
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);

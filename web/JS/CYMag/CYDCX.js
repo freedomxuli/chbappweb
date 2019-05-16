@@ -226,13 +226,13 @@ Ext.onReady(function() {
                                 }
                                  if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
                                     str += " <a onclick='XJDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款</a>";
-                                 } if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneynewpay == 0) {
+                                 } if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
                                      str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
                                  } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
                                     str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
                                  }
 
-                                 if (record.data.carriagestatus == 90) {
+                                 if (record.data.carriagestatus >=30 ) {
                                      str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
                                  }
                                 return str;

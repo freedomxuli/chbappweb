@@ -518,7 +518,20 @@ public class UserMag
                 System.Data.DataTable dtPage = new System.Data.DataTable();
                 dtPage = dbc.GetPagedDataTable(str + " order by a.UserName,a.UserXM", pagesize, ref cp, out ac);
 
-                return new { dt = dtPage, cp = cp, ac = ac };
+                var privilege = new SystemUser().GetPrivilegeList(SystemUser.CurrentUser.RoleID);
+
+                var mmck=false;
+                for (int i = 0; i < privilege.Rows.Count; i++)
+                {
+                    if (privilege.Rows[i]["privilegeName"] != null && privilege.Rows[i]["privilegeName"].ToString() != "")
+                    {
+                        if(privilege.Rows[i]["privilegeName"].ToString()=="系统维护中心_人员管理_密码查看"){
+                            mmck = true;
+                        }
+                    }
+                }
+
+                return new { dt = dtPage, cp = cp, ac = ac, mmck = mmck };
             }
             catch (Exception ex)
             {
@@ -2263,7 +2276,7 @@ public class UserMag
 
     #region 分享明细
     [CSMethod("getShareList")]
-    public object getShareList(int pagnum, int pagesize, string isregister, string isbuy,string start,string end,string tjr)
+    public object getShareList(int pagnum, int pagesize, string isregister, string isbuy,string start,string end,string tjr,string btjr)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -2288,11 +2301,16 @@ public class UserMag
                 }
                 if (!string.IsNullOrEmpty(end))
                 {
-                    where += " and a.addtime<'" + Convert.ToDateTime(start).ToString("yyyy-MM-dd") + "'";
+                    where += " and a.addtime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
                 if (!string.IsNullOrEmpty(tjr))
                 {
                     where += " and (" + dbc.C_Like("b.UserName", tjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("b.UserXM", tjr, LikeStyle.LeftAndRightLike)+" )";
+                }
+
+                if (!string.IsNullOrEmpty(btjr))
+                {
+                    where += " and (" + dbc.C_Like("c.UserName", btjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("c.UserXM", btjr, LikeStyle.LeftAndRightLike) + " )";
                 }
 
                 string str = @" select a.*,b.UserName as tjname,b.UserXM as tjxm,c.UserName as btjname,c.UserXM as btjxm from tb_b_share a left join tb_b_user b on a.userid=b.UserID
@@ -2312,19 +2330,196 @@ public class UserMag
         }
 
     }
+
+    [CSMethod("getShareListToFile", 2)]
+    public byte[] getShareListToFile(string isregister, string isbuy, string start, string end, string tjr, string btjr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //为标题设置样式  
+                Style styleTitle = workbook.Styles[workbook.Styles.Add()];
+                styleTitle.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                styleTitle.Font.Name = "宋体";//文字字体
+                styleTitle.Font.Size = 18;//文字大小
+                styleTitle.Font.IsBold = true;//粗体
+
+                //样式1
+                Style style1 = workbook.Styles[workbook.Styles.Add()];
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.Font.IsBold = true;//粗体
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("推荐人登录名");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("推荐人姓名");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("被推荐人登录名");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("被推荐人姓名");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("时间");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 20);
+                cells[0, 5].PutValue("是否注册");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 20);
+                cells[0, 6].PutValue("是否购买");
+                cells[0, 6].SetStyle(style2);
+                cells.SetColumnWidth(6, 20);
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(isregister))
+                {
+                    where += " and " + dbc.C_EQ("a.isregister", isregister);
+                }
+                if (!string.IsNullOrEmpty(isbuy))
+                {
+                    where += " and " + dbc.C_EQ("a.isbuy", isbuy);
+                }
+                if (!string.IsNullOrEmpty(start))
+                {
+                    where += " and a.addtime>='" + Convert.ToDateTime(start).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(tjr))
+                {
+                    where += " and (" + dbc.C_Like("b.UserName", tjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("b.UserXM", tjr, LikeStyle.LeftAndRightLike) + " )";
+                }
+
+                if (!string.IsNullOrEmpty(btjr))
+                {
+                    where += " and (" + dbc.C_Like("c.UserName", btjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("c.UserXM", btjr, LikeStyle.LeftAndRightLike) + " )";
+                }
+
+                string str = @" select a.*,b.UserName as tjname,b.UserXM as tjxm,c.UserName as btjname,c.UserXM as btjxm from tb_b_share a left join tb_b_user b on a.userid=b.UserID
+                                left join tb_b_user c on a.tel=c.UserName   where 1=1";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str + " order  by a.addtime ");
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    cells[i + 1, 0].PutValue(dt.Rows[i]["tjname"]);
+                    cells[i + 1, 0].SetStyle(style4);
+                    cells[i + 1, 1].PutValue(dt.Rows[i]["tjxm"]);
+                    cells[i + 1, 1].SetStyle(style4);
+                    cells[i + 1, 2].PutValue(dt.Rows[i]["btjname"]);
+                    cells[i + 1, 2].SetStyle(style4);
+                    cells[i + 1, 3].PutValue(dt.Rows[i]["btjxm"]);
+                    cells[i + 1, 3].SetStyle(style4);
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd HH:mm:ss"));
+                    }
+                    cells[i + 1, 4].SetStyle(style4);
+
+                    string register = "";
+                    if (dt.Rows[i]["isregister"] != null && dt.Rows[i]["isregister"].ToString() != "")
+                    {
+
+                        if (Convert.ToInt32(dt.Rows[i]["isregister"]) == 0)
+                        {
+                            register = "否";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isregister"]) == 1)
+                        {
+                            register = "是";
+                        }
+                    }
+                    cells[i + 1, 5].PutValue(register);
+                    cells[i + 1, 5].SetStyle(style4);
+
+                    string buy = "";
+                    if (dt.Rows[i]["isbuy"] != null && dt.Rows[i]["isbuy"].ToString() != "")
+                    {
+
+                        if (Convert.ToInt32(dt.Rows[i]["isbuy"]) == 0)
+                        {
+                            buy = "否";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isbuy"]) == 1)
+                        {
+                            buy = "是";
+                        }
+                    }
+                    cells[i + 1, 6].PutValue(buy);
+                    cells[i + 1, 6].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
     #endregion 
 
     [CSMethod("JudgeUser")]
     public object JudgeUser()
     {
-        if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F")
+
+        var privilege = new SystemUser().GetPrivilegeList(SystemUser.CurrentUser.RoleID);
+        var mmck = false;
+        for (int i = 0; i < privilege.Rows.Count; i++)
         {
-            return true;
+            if (privilege.Rows[i]["privilegeName"] != null && privilege.Rows[i]["privilegeName"].ToString() != "")
+            {
+                if (privilege.Rows[i]["privilegeName"].ToString() == "系统维护中心_用户管理_密码查看")
+                {
+                    mmck = true;
+                }
+            }
         }
-        else
-        {
-            return false;
-        }
+
+        return mmck;
     }
 
 

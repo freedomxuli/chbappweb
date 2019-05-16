@@ -72,9 +72,14 @@ function getUser(nPage) {
     CS('CZCLZ.SJSHMag.GetSJList2', function (retVal) {
         if (retVal){
             var result = retVal.evalJSON();
-            console.log(result);
+            var temp=[];
+            for (var i = 0; i < result.list.length; i++) {
+                if (result.list[i].UserXM != "" && result.list[i].UserXM != null) {
+                    temp.push(result.list[i]);
+                }
+            }
             store.setData({
-                data: result.list,
+                data: temp,
                 pageSize: result.pagination.pageSize,
                 total: result.pagination.total,
                 currentPage: result.pagination.current
