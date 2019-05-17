@@ -666,7 +666,7 @@ public class CYMag
                         {
                             if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
                             {
-                                money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"]);
+                                money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"])/100;
                             }
                             else
                             {
@@ -679,7 +679,8 @@ public class CYMag
                         {
                             username = dt.Rows[0]["UserName"],
                             carriagecode = dt.Rows[0]["carriagecode"],
-                            money = money
+                            money = money.ToString(),
+                            type = "1"
                         });
                         var request = (HttpWebRequest)WebRequest.Create(_url);
                         request.Method = "POST";
@@ -752,7 +753,7 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                    if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 50))
                     {
                         decimal money = 0;
                         if (dt.Rows[0]["carriagemoneynew"] != null && dt.Rows[0]["carriagemoneynew"].ToString() != "")
@@ -765,7 +766,8 @@ public class CYMag
                         {
                             username = dt.Rows[0]["UserName"],
                             carriagecode = dt.Rows[0]["carriagecode"],
-                            money = money
+                            money = money.ToString(),
+                            type="2"
                         });
                         var request = (HttpWebRequest)WebRequest.Create(_url);
                         request.Method = "POST";
@@ -811,7 +813,7 @@ public class CYMag
                     }
                     else
                     {
-                        throw new Exception("没有可现金打款的承运单！");
+                        throw new Exception("没有可验收付打款的承运单！");
                     }
                 }
                 else

@@ -229,22 +229,27 @@ Ext.define('PassWin', {
                             CS('CZCLZ.CYMag.QRMM', function (retVal) {
                                 if (retVal) {
                                     if (type == 0) {
-                                        CS('CZCLZ.CYMag.XJDK', function (retVal) {
-                                            DataBind(1);
-                                            this.up('window').close();
+                                        CS('CZCLZ.CYMag.XJDK', function (ret) {
+                                            if (ret) {
+                                                DataBind(1);
+                                                Ext.MessageBox.alert('提示', "打款成功！");
+                                            }
                                         }, CS.onError, carriageid, carriagestatus);
                                     } else if (type == 1) {
                                         CS('CZCLZ.CYMag.YSFDK', function (retVal) {
-                                            DataBind(1);
-                                            this.up('window').close();
+                                            if (ret) {
+                                                DataBind(1);
+                                                Ext.MessageBox.alert('提示', "打款成功！");
+                                            }
                                         }, CS.onError, carriageid, carriagestatus);
                                     }
+
                                 } else {
                                     Ext.MessageBox.alert('提示', "密码错误！");
                                     Ext.getCmp("password").setValue()
                                 }
                             }, CS.onError, Ext.getCmp("password").getValue());
-                            
+                            this.up('window').close();
                         }
                     }
                 ]
