@@ -91,23 +91,26 @@ function YKDK(carriageid, carriagestatus) {
 }
 
 function XJDK(carriageid, carriagestatus) {
-    Ext.MessageBox.confirm("提示", "是否现付打款？", function (obj) {
-        if (obj == "yes") {
-            CS('CZCLZ.CYMag.XJDK', function (retVal) {
-                DataBind(1);
-            }, CS.onError, carriageid, carriagestatus);
-        }
-    });
+    if (privilege("承运模块_承运单查询_打款")) {
+        Ext.MessageBox.confirm("提示", "是否现付打款？", function (obj) {
+            if (obj == "yes") {
+                var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 0 });
+                passwin.show();
+            }
+        });
+    }
 }
 
 function YSFDK(carriageid, carriagestatus) {
-    Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
-        if (obj == "yes") {
-            CS('CZCLZ.CYMag.YSFDK', function (retVal) {
-                DataBind(1);
-            }, CS.onError, carriageid, carriagestatus);
-        }
-    });
+    if (privilege("承运模块_承运单查询_打款")) {
+        Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
+            if (obj == "yes") {
+                var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 1 });
+                passwin.show();
+            }
+        });
+
+    }
 }
 function CKBD(carriageid) {
     CS('CZCLZ.CYMag.getInsure', function (retVal) {
@@ -177,6 +180,73 @@ Ext.define('yjWin', {
                              this.up('window').close();
                          }
                      }
+                ]
+            }
+        ];
+        me.callParent(arguments);
+    }
+});
+
+Ext.define('PassWin', {
+    extend: 'Ext.window.Window',
+
+    height: 120,
+    width: 350,
+    layout: {
+        type: 'fit'
+    },
+    closeAction: 'destroy',
+    modal: true,
+    title: '确认密码',
+    initComponent: function () {
+        var me = this;
+        var carriageid = me.carriageid;
+        var carriagestatus = me.carriagestatus;
+        var type = me.type;
+        me.items = [
+            {
+                xtype: 'form',
+                id: 'passform',
+                bodyPadding: 10,
+                items: [
+                     {
+                         xtype: 'textfield',
+                         id: 'password',
+                         name: 'password',
+                         labelWidth: 70,
+                         fieldLabel: '密码',
+                         allowBlank: false,
+                         inputType: 'password',
+                         anchor: '100%'
+                     }
+                ],
+                buttonAlign: 'center',
+                buttons: [
+                    {
+                        text: '确认',
+                        iconCls: 'dropyes',
+                        handler: function () {
+                            CS('CZCLZ.CYMag.QRMM', function (retVal) {
+                                if (retVal) {
+                                    if (type == 0) {
+                                        CS('CZCLZ.CYMag.XJDK', function (retVal) {
+                                            DataBind(1);
+                                            this.up('window').close();
+                                        }, CS.onError, carriageid, carriagestatus);
+                                    } else if (type == 1) {
+                                        CS('CZCLZ.CYMag.YSFDK', function (retVal) {
+                                            DataBind(1);
+                                            this.up('window').close();
+                                        }, CS.onError, carriageid, carriagestatus);
+                                    }
+                                } else {
+                                    Ext.MessageBox.alert('提示', "密码错误！");
+                                    Ext.getCmp("password").setValue()
+                                }
+                            }, CS.onError, Ext.getCmp("password").getValue());
+                            
+                        }
+                    }
                 ]
             }
         ];
@@ -496,6 +566,19 @@ Ext.onReady(function() {
                                                     text: '查询',
                                                     handler: function () {
                                                         DataBind(1);
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    text: '导出',
+                                                    iconCls: 'view',
+                                                    handler: function () {
+                                                        DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                     }
                                                 }
                                             ]
