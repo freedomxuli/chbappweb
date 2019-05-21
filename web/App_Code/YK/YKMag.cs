@@ -136,7 +136,7 @@ public class YKMag
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @" select * from tb_b_oil_order a left join tb_b_user b on a.userid=b.userid
+                string str = @" select * from tb_b_oil_order a left join tb_b_user b on a.userid=b.userid  where 1=1  
                                  ";
                 str += where;
 
@@ -265,7 +265,7 @@ public class YKMag
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @" select * from tb_b_oil_order a left join tb_b_user b on a.userid=b.userid
+                string str = @" select * from tb_b_oil_order a left join tb_b_user b on a.userid=b.userid where 1=1  
                                  ";
                 str += where;
 

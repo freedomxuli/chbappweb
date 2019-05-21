@@ -61,7 +61,7 @@ public class CYMag
 
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
-                            left join tb_b_user c on a.userid=c.UserID where 1=1 
+                            left join tb_b_user c on a.userid=c.UserID where a.status=0 and 1=1 
                                  ";
                 str += where;
 
@@ -182,7 +182,7 @@ public class CYMag
 
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
-                            left join tb_b_user c on a.userid=c.UserID where 1=1 
+                            left join tb_b_user c on a.userid=c.UserID where a.status=0 and  1=1 
                                  ";
                 str += where;
 
@@ -655,83 +655,108 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                string str = "select a.*,b.UserName from tb_b_carriage a left join tb_b_user b on a.userid=b.UserID where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
+                string str = @"select a.*,b.UserName,b.caruser from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                    if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
                     {
-                        decimal money = 0;
-                        if (dt.Rows[0]["carriagemoney"] != null && dt.Rows[0]["carriagemoney"].ToString() != "")
+                        string sql = "select * from tb_b_user where ClientKind=1 and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        DataTable udt = dbc.ExecuteDataTable(sql);
+                        if (udt.Rows.Count > 0)
                         {
-                            if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
+                            if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                             {
-                                money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"])/100;
+                                decimal money = 0;
+                                if (dt.Rows[0]["carriagemoney"] != null && dt.Rows[0]["carriagemoney"].ToString() != "")
+                                {
+                                    if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
+                                    {
+                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"]) / 100;
+                                    }
+                                    else
+                                    {
+                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
+                                    }
+                                }
+
+                                string _url = ServiceURL + "huabozijin";
+                                string jsonParam = new JavaScriptSerializer().Serialize(new
+                                {
+                                    username = dt.Rows[0]["caruser"],
+                                    carriagecode = dt.Rows[0]["carriagecode"],
+                                    money = money.ToString(),
+                                    type = "1"
+                                });
+                                var request = (HttpWebRequest)WebRequest.Create(_url);
+                                request.Method = "POST";
+                                request.ContentType = "application/json;charset=UTF-8";
+                                var byteData = Encoding.UTF8.GetBytes(jsonParam);
+                                var length = byteData.Length;
+                                request.ContentLength = length;
+                                var writer = request.GetRequestStream();
+                                writer.Write(byteData, 0, length);
+                                writer.Close();
+                                var response = (HttpWebResponse)request.GetResponse();
+                                var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+                                JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
+                                try
+                                {
+                                    if (Convert.ToBoolean(jo["success"].ToString()))
+                                    {
+                                        DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                                        DataTableTracker odtt = new DataTableTracker(odt);
+                                        DataRow odr = odt.NewRow();
+                                        odr["carriageid"] = carriageid;
+                                        odr["ismoneypay"] = 1;
+                                        odt.Rows.Add(odr);
+                                        dbc.UpdateTable(odt, odtt);
+
+                                        DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
+                                        DataRow pfdr = pfdt.NewRow();
+                                        pfdr["carriagepayid"] = Guid.NewGuid().ToString();
+                                        pfdr["carriagepaytype"] = 1;
+                                        pfdr["adduser"] = SystemUser.CurrentUser.UserID;
+                                        pfdr["addtime"] = DateTime.Now;
+                                        pfdr["carriageid"] = carriageid;
+                                        pfdt.Rows.Add(pfdr);
+                                        dbc.InsertTable(pfdt);
+
+                                        dbc.CommitTransaction();
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception("现金打款失败");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception(jo["details"].ToString());
+                                }
                             }
                             else
                             {
-                                money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
+                                throw new Exception("没有可现金打款的承运单！");
                             }
                         }
-
-                        string _url = ServiceURL + "huabozijin";
-                        string jsonParam = new JavaScriptSerializer().Serialize(new
+                        else
                         {
-                            username = dt.Rows[0]["UserName"],
-                            carriagecode = dt.Rows[0]["carriagecode"],
-                            money = money.ToString(),
-                            type = "1"
-                        });
-                        var request = (HttpWebRequest)WebRequest.Create(_url);
-                        request.Method = "POST";
-                        request.ContentType = "application/json;charset=UTF-8";
-                        var byteData = Encoding.UTF8.GetBytes(jsonParam);
-                        var length = byteData.Length;
-                        request.ContentLength = length;
-                        var writer = request.GetRequestStream();
-                        writer.Write(byteData, 0, length);
-                        writer.Close();
-                        var response = (HttpWebResponse)request.GetResponse();
-                        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
-
-                        JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
-                        try
-                        {
-                            if (jo["success"].ToString() == "true")
-                            {
-                                DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
-                                DataTableTracker odtt = new DataTableTracker(odt);
-                                DataRow odr = odt.NewRow();
-                                odr["carriageid"] = carriageid;
-                                odr["ismoneypay"] = 1;
-                                odt.Rows.Add(odr);
-                                dbc.UpdateTable(odt, odtt);
-
-                                DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
-                                DataRow pfdr = pfdt.NewRow();
-                                pfdr["carriagepayid"] = Guid.NewGuid().ToString();
-                                pfdr["carriagepaytype"] = 1;
-                                pfdr["adduser"] = SystemUser.CurrentUser.UserID;
-                                pfdr["addtime"] = DateTime.Now;
-                                pfdr["carriageid"] = carriageid;
-                                pfdt.Rows.Add(pfdr);
-                                dbc.InsertTable(pfdt);
-                            }
+                            throw new Exception("划拨对象不是有效用户，请核实!");
                         }
-                        catch (Exception ex)
-                        {
-                            throw new Exception(jo["details"].ToString());
-                        }        
                     }
                     else
                     {
-                        throw new Exception("没有可现金打款的承运单！");
+                        throw new Exception("对不起，专线用户不存在!");
                     }
-                }else{
-                      throw new Exception("承运单不存在！");
                 }
-                dbc.CommitTransaction();
-                return true;
+                else
+                {
+                    throw new Exception("承运单不存在！");
+                }
+                
             }
             catch (Exception ex)
             {
@@ -749,79 +774,103 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                string str = "select a.*,b.UserName from tb_b_carriage a left join tb_b_user b on a.userid=b.UserID where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
+                string str = @"select a.*,b.UserName,b.caruser from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
+
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 50))
+                    if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
                     {
-                        decimal money = 0;
-                        if (dt.Rows[0]["carriagemoneynew"] != null && dt.Rows[0]["carriagemoneynew"].ToString() != "")
+                        string sql = "select * from tb_b_user where ClientKind=1 and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        DataTable udt = dbc.ExecuteDataTable(sql);
+                        if (udt.Rows.Count > 0)
                         {
-                            money = Convert.ToDecimal(dt.Rows[0]["carriagemoneynew"]);
-                        }
 
-                        string _url = ServiceURL + "huabozijin";
-                        string jsonParam = new JavaScriptSerializer().Serialize(new
-                        {
-                            username = dt.Rows[0]["UserName"],
-                            carriagecode = dt.Rows[0]["carriagecode"],
-                            money = money.ToString(),
-                            type="2"
-                        });
-                        var request = (HttpWebRequest)WebRequest.Create(_url);
-                        request.Method = "POST";
-                        request.ContentType = "application/json;charset=UTF-8";
-                        var byteData = Encoding.UTF8.GetBytes(jsonParam);
-                        var length = byteData.Length;
-                        request.ContentLength = length;
-                        var writer = request.GetRequestStream();
-                        writer.Write(byteData, 0, length);
-                        writer.Close();
-                        var response = (HttpWebResponse)request.GetResponse();
-                        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
-
-
-                        JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
-                        try
-                        {
-                            if (jo["success"].ToString() == "true")
+                            if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 50))
                             {
-                                DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
-                                DataTableTracker odtt = new DataTableTracker(odt);
-                                DataRow odr = odt.NewRow();
-                                odr["carriageid"] = carriageid;
-                                odr["ismoneynewpay"] = 1;
-                                odt.Rows.Add(odr);
-                                dbc.UpdateTable(odt, odtt);
+                                decimal money = 0;
+                                if (dt.Rows[0]["carriagemoneynew"] != null && dt.Rows[0]["carriagemoneynew"].ToString() != "")
+                                {
+                                    money = Convert.ToDecimal(dt.Rows[0]["carriagemoneynew"]);
+                                }
 
-                                DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
-                                DataRow pfdr = pfdt.NewRow();
-                                pfdr["carriagepayid"] = Guid.NewGuid().ToString();
-                                pfdr["carriagepaytype"] = 1;
-                                pfdr["adduser"] = SystemUser.CurrentUser.UserID;
-                                pfdr["addtime"] = DateTime.Now;
-                                pfdr["carriageid"] = carriageid;
-                                pfdt.Rows.Add(pfdr);
-                                dbc.InsertTable(pfdt);
+                                string _url = ServiceURL + "huabozijin";
+                                string jsonParam = new JavaScriptSerializer().Serialize(new
+                                {
+                                    username = dt.Rows[0]["caruser"],
+                                    carriagecode = dt.Rows[0]["carriagecode"],
+                                    money = money.ToString(),
+                                    type = "2"
+                                });
+                                var request = (HttpWebRequest)WebRequest.Create(_url);
+                                request.Method = "POST";
+                                request.ContentType = "application/json;charset=UTF-8";
+                                var byteData = Encoding.UTF8.GetBytes(jsonParam);
+                                var length = byteData.Length;
+                                request.ContentLength = length;
+                                var writer = request.GetRequestStream();
+                                writer.Write(byteData, 0, length);
+                                writer.Close();
+                                var response = (HttpWebResponse)request.GetResponse();
+                                var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+
+                                JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
+                                try
+                                {
+                                    if (Convert.ToBoolean(jo["success"].ToString()))
+                                    {
+                                        DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                                        DataTableTracker odtt = new DataTableTracker(odt);
+                                        DataRow odr = odt.NewRow();
+                                        odr["carriageid"] = carriageid;
+                                        odr["ismoneynewpay"] = 1;
+                                        odt.Rows.Add(odr);
+                                        dbc.UpdateTable(odt, odtt);
+
+                                        DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
+                                        DataRow pfdr = pfdt.NewRow();
+                                        pfdr["carriagepayid"] = Guid.NewGuid().ToString();
+                                        pfdr["carriagepaytype"] = 2;
+                                        pfdr["adduser"] = SystemUser.CurrentUser.UserID;
+                                        pfdr["addtime"] = DateTime.Now;
+                                        pfdr["carriageid"] = carriageid;
+                                        pfdt.Rows.Add(pfdr);
+                                        dbc.InsertTable(pfdt);
+
+                                        dbc.CommitTransaction();
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception("验收付打款失败！");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception(jo["details"].ToString());
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception("没有可验收付打款的承运单！");
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            throw new Exception(jo["details"].ToString());
+                            throw new Exception("划拨对象不是有效用户，请核实!");
                         }
                     }
-                    else
-                    {
-                        throw new Exception("没有可验收付打款的承运单！");
+                    else {
+                        throw new Exception("对不起，专线用户不存在!");
                     }
                 }
                 else
                 {
                     throw new Exception("承运单不存在！");
                 }
-                dbc.CommitTransaction();
-                return true;
+                
             }
             catch (Exception ex)
             {
