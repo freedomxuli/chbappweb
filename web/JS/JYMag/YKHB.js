@@ -45,7 +45,7 @@ function DataBind(nPage) {
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 150,
+    height: 300,
     width: 400,
     layout: {
         type: 'fit'
@@ -92,14 +92,30 @@ Ext.define('addWin', {
                          id: 'carriageoil',
                          name: 'carriageoil',
                          hidden: true
-                     }
-                     //,
-                     //{
-                     //    xtype: "label",
-                     //    id: "zspoint",
-                     //    text: "",
-                     //    style: "padding-left:100px;"
-                     //}
+                     },
+                    {
+                        xtype: 'combobox',
+                        id: 'transfertype',
+                        name:'transfertype',
+                        fieldLabel: '划拨类型',
+                        editable: false,
+                        allowBlank: false,
+                        store: Ext.create('Ext.data.Store', {
+                            fields: [
+                                { name: 'val' },
+                                { name: 'txt' }
+                            ],
+                            data: [
+                                { 'val': 0, 'txt': '干线运输' },
+                                { 'val': 1, 'txt': '油品销售' }]
+
+                        }),
+                        queryMode: 'local',
+                        displayField: 'txt',
+                        valueField: 'val',
+                        value: 0,
+                        anchor: '100%'
+                    }
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -131,7 +147,6 @@ Ext.define('addWin', {
                             var form = Ext.getCmp('addform');
                             if (form.form.isValid()) {
                                 var values = form.form.getValues(false);
-                                console.log(values);
                                 var me = this;
                                 CS('CZCLZ.YKMag.ADDHB', function (retVal) {
                                     if (retVal) {

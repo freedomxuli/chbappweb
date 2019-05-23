@@ -385,6 +385,7 @@ public class YKMag
                         otdr["status"]=0;
                         otdr["addtime"]=DateTime.Now;
                         otdr["updatetime"]= DateTime.Now;
+                        otdr["transfertype"] = Convert.ToInt32(jsr["transfertype"].ToString());
                         otdt.Rows.Add(otdr);
                         dbc.InsertTable(otdt);
 
