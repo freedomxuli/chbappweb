@@ -668,4 +668,58 @@ public class YKMag
             }
         }
     }
+
+    #region 干线运输
+    [CSMethod("GetGXYSList")]
+    public object GetGXYSList(int pagnum, int pagesize, string oilcardcode, string oiltransfercode, string yhzh, string zt, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+                if (!string.IsNullOrEmpty(oilcardcode.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.oilcardcode", oilcardcode.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(oiltransfercode.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.oiltransfercode", oiltransfercode.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(yhzh.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+
+                string str = @"select a.addtime,a.oiltransfercode, a.oilcardcode,a.outuserid,a.money,'查货宝' as zcxm,'' as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh from tb_b_oil_transfer a 
+                            left join tb_b_user b on a.inuserid=b.userid 
+                            where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and transfertype=0 and status=0";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.addtime desc", pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+    #endregion
 }
