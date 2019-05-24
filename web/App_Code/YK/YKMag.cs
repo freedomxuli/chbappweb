@@ -19,11 +19,11 @@ using System.IO;
 public class YKMag
 {
     public YKMag()
-	{
-		//
-		// TODO: 在此处添加构造函数逻辑
-		//
-	}
+    {
+        //
+        // TODO: 在此处添加构造函数逻辑
+        //
+    }
 
     [CSMethod("GetVisionList")]
     public object GetVisionList()
@@ -103,7 +103,7 @@ public class YKMag
 
 
     [CSMethod("GetYKDDList")]
-    public object GetYKDDList(int pagnum, int pagesize, string cardNo,string orderId,string zt, string beg, string end)
+    public object GetYKDDList(int pagnum, int pagesize, string cardNo, string orderId, string zt, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -153,7 +153,7 @@ public class YKMag
         }
     }
 
-    [CSMethod("GetYKDDListToFile",2)]
+    [CSMethod("GetYKDDListToFile", 2)]
     public byte[] GetYKDDListToFile(string cardNo, string orderId, string zt, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
@@ -346,7 +346,7 @@ public class YKMag
             try
             {
                 var inuserzh = jsr["inuserzh"].ToString();
-                int money= Convert.ToInt32(jsr["money"].ToString());
+                int money = Convert.ToInt32(jsr["money"].ToString());
 
                 string str = "select * from tb_b_user where UserName=" + dbc.ToSqlValue(inuserzh);
                 DataTable udt = dbc.ExecuteDataTable(str);
@@ -376,34 +376,34 @@ public class YKMag
 
                         DataTable otdt = dbc.GetEmptyDataTable("tb_b_oil_transfer");
                         DataRow otdr = otdt.NewRow();
-                        otdr["oiltransferid"]=Guid.NewGuid();
-                        otdr["outuserid"]="6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
-                        otdr["inuserid"]=udt.Rows[0]["UserID"];
-                        otdr["money"]=money;
-                        otdr["oilcardcode"]=oilcardcode;
-                        otdr["oiltransfercode"]=oiltransfercode;
-                        otdr["status"]=0;
-                        otdr["addtime"]=DateTime.Now;
-                        otdr["updatetime"]= DateTime.Now;
+                        otdr["oiltransferid"] = Guid.NewGuid();
+                        otdr["outuserid"] = "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9";
+                        otdr["inuserid"] = udt.Rows[0]["UserID"];
+                        otdr["money"] = money;
+                        otdr["oilcardcode"] = oilcardcode;
+                        otdr["oiltransfercode"] = oiltransfercode;
+                        otdr["status"] = 0;
+                        otdr["addtime"] = DateTime.Now;
+                        otdr["updatetime"] = DateTime.Now;
                         otdr["transfertype"] = Convert.ToInt32(jsr["transfertype"].ToString());
                         otdt.Rows.Add(otdr);
                         dbc.InsertTable(otdt);
 
                         DataTable modt = dbc.GetEmptyDataTable("tb_b_myoilcard");
                         DataRow modr = modt.NewRow();
-                        modr["myoilcardId"]=Guid.NewGuid();
-                        modr["oilmoney"]=money;
-                        modr["UserID"]=udt.Rows[0]["UserID"];
+                        modr["myoilcardId"] = Guid.NewGuid();
+                        modr["oilmoney"] = money;
+                        modr["UserID"] = udt.Rows[0]["UserID"];
                         modr["oilcardcode"] = oilcardcode;
-                        modr["oiltransfercode"]=oiltransfercode;
-                        modr["status"]=0;
-                        modr["addtime"]=DateTime.Now;
-                        modr["updatetime"]= DateTime.Now;
+                        modr["oiltransfercode"] = oiltransfercode;
+                        modr["status"] = 0;
+                        modr["addtime"] = DateTime.Now;
+                        modr["updatetime"] = DateTime.Now;
                         modt.Rows.Add(modr);
                         dbc.InsertTable(modt);
 
                         DataTable vndt = dbc.GetEmptyDataTable("tb_b_version");
-                        DataTableTracker vndtt=new DataTableTracker(vndt); 
+                        DataTableTracker vndtt = new DataTableTracker(vndt);
                         DataRow vndr = vndt.NewRow();
                         vndr["id"] = vdt.Rows[0]["id"];
                         vndr["carriageoil"] = carriageoil - money;
@@ -474,7 +474,9 @@ public class YKMag
                     if (Convert.ToInt32(zt) == 0)
                     {//是
                         where += " and " + dbc.C_EQ("a.outuserid", "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9");
-                    }else if(Convert.ToInt32(zt) ==1){
+                    }
+                    else if (Convert.ToInt32(zt) == 1)
+                    {
                         where += " and " + dbc.C_NEQ("a.outuserid", "6E72B59D-BEC6-4835-A66F-8BC70BD82FE9");
                     }
                 }
@@ -669,9 +671,9 @@ public class YKMag
         }
     }
 
-    #region 干线运输
-    [CSMethod("GetGXYSList")]
-    public object GetGXYSList(int pagnum, int pagesize, string oilcardcode, string oiltransfercode, string yhzh, string zt, string beg, string end)
+    #region 干线运输\油品销售
+    [CSMethod("GetHBList")]
+    public object GetHBList(int pagnum, int pagesize, string oilcardcode, string oiltransfercode, string yhzh, string beg, string end, int transfertype)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -704,9 +706,9 @@ public class YKMag
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.addtime,a.oiltransfercode, a.oilcardcode,a.outuserid,a.money,'查货宝' as zcxm,'' as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh from tb_b_oil_transfer a 
+                string str = @"select a.addtime,a.oiltransfercode, a.oilcardcode,a.outuserid,a.money,'查货宝' as zcxm,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh from tb_b_oil_transfer a 
                             left join tb_b_user b on a.inuserid=b.userid 
-                            where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and transfertype=0 and status=0";
+                            where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and " + dbc.C_EQ("transfertype", transfertype) + " and status=0";
                 str += where;
 
                 //开始取分页数据
@@ -714,6 +716,146 @@ public class YKMag
                 dtPage = dbc.GetPagedDataTable(str + " order by a.addtime desc", pagesize, ref cp, out ac);
 
                 return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetHBListToFile", 2)]
+    public byte[] GetHBListToFile(string oilcardcode, string oiltransfercode, string yhzh, string beg, string end, int transfertype)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //为标题设置样式  
+                Style styleTitle = workbook.Styles[workbook.Styles.Add()];
+                styleTitle.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                styleTitle.Font.Name = "宋体";//文字字体
+                styleTitle.Font.Size = 18;//文字大小
+                styleTitle.Font.IsBold = true;//粗体
+
+                //样式1
+                Style style1 = workbook.Styles[workbook.Styles.Add()];
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.Font.IsBold = true;//粗体
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("转出人员");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("转入人员账号");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("转入人员名称");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("转出油卡金额");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("油卡编号");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 20);
+                cells[0, 5].PutValue("油卡划拨编号");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 20);
+                cells[0, 6].PutValue("时间");
+                cells[0, 6].SetStyle(style2);
+                cells.SetColumnWidth(6, 20);
+
+                string where = "";
+                if (!string.IsNullOrEmpty(oilcardcode.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.oilcardcode", oilcardcode.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(oiltransfercode.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.oiltransfercode", oiltransfercode.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(yhzh.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+
+                string str = @"select a.addtime,a.oiltransfercode, a.oilcardcode,a.outuserid,a.money,'查货宝' as zcxm,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh from tb_b_oil_transfer a 
+                            left join tb_b_user b on a.inuserid=b.userid 
+                            where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and " + dbc.C_EQ("transfertype", transfertype) + " and status=0";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str + " order by a.addtime desc");
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    cells[i + 1, 0].PutValue(dt.Rows[i]["zcxm"]);
+                    cells[i + 1, 0].SetStyle(style4);
+                    cells[i + 1, 1].PutValue(dt.Rows[i]["zrzh"]);
+                    cells[i + 1, 1].SetStyle(style4);
+                    cells[i + 1, 2].PutValue(dt.Rows[i]["zrxm"]);
+                    cells[i + 1, 2].SetStyle(style4);
+                    cells[i + 1, 3].PutValue(dt.Rows[i]["money"]);
+                    cells[i + 1, 3].SetStyle(style4);
+                    cells[i + 1, 4].PutValue(dt.Rows[i]["oilcardcode"]);
+                    cells[i + 1, 4].SetStyle(style4);
+                    cells[i + 1, 5].PutValue(dt.Rows[i]["oiltransfercode"]);
+                    cells[i + 1, 5].SetStyle(style4);
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 6].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd HH:mm:ss"));
+                    }
+                    cells[i + 1, 6].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+
+
             }
             catch (Exception ex)
             {
