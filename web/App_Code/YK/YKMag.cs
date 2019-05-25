@@ -866,10 +866,21 @@ public class YKMag
     #endregion
 
     #region 干线运输统计
-    public object GetGxysTj(int transfertype)
+    [CSMethod("GetGxysTj")]
+    public object GetGxysTj(string userxm, string dqmc, int transfertype)
     {
         using (DBConnection dbc = new DBConnection())
         {
+            string sqlw = " where 1=1 ";
+            List<string> wArr = new List<string>();
+            if (!string.IsNullOrEmpty(userxm))
+            {
+                sqlw += " and " + dbc.C_Like("c.UserXM", userxm, LikeStyle.LeftAndRightLike);
+            }
+            if (!string.IsNullOrEmpty(dqmc))
+            {
+                sqlw += " and " + dbc.C_Like("c.dq_mc", dqmc, LikeStyle.LeftAndRightLike);
+            }
             //专线
             var cmd = dbc.CreateCommand();
             cmd.CommandText = @"SELECT a.*,ISNULL(b.YK_XH,0)YK_XH,(ISNULL(a.YK_AMOUNT,0)-ISNULL(b.YK_XH,0))YK_SY,c.DqBm,c.UserXM FROM(
@@ -886,7 +897,11 @@ public class YKMag
 	                                )
 	                                GROUP BY UserID
                                 )b on a.UserID=b.userid
-                                inner join tb_b_user c on a.UserID=c.UserID and c.ClientKind=1 
+                                inner join (
+                                    select t1.*,t2.dq_mc from tb_b_user t1
+                                    left join tb_b_dq t2 on t1.DqBm=t2.dq_bm 
+                                    where t1.ClientKind=1 
+                                ) c on a.UserID=c.UserID " + sqlw + @"
                                 order by c.DqBm";
             cmd.Parameters.AddWithValue("@transfertype", transfertype);
             DataTable dt = dbc.ExecuteDataTable(cmd);
@@ -905,6 +920,8 @@ public class YKMag
                                 )";
             cmd.Parameters.AddWithValue("@transfertype", transfertype);
             decimal XhYk = Convert.ToDecimal(dbc.ExecuteScalar(cmd));
+
+            return new { dt = dt, gxye = AmountYk - XhYk };
         }
     }
     #endregion

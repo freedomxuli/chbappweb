@@ -1,42 +1,158 @@
 ﻿//-----------------------------------------------------------全局变量-----------------------------------------------------------------
-var pageSize = 15;
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
-var gxysStore = createSFW4Store({
-    data: [],
-    pageSize: pageSize,
-    total: 1,
-    currentPage: 1,
-    fields: [
-        { name: 'addtime' },
-        { name: 'oiltransfercode' },
-        { name: 'oilcardcode' },
-        { name: 'outuserid' },
-        { name: 'money' },
-        { name: 'zcxm' },
-        { name: 'inuserid' },
-        { name: 'zrxm' },
-        { name: 'zrzh' }
-    ],
-    onPageChange: function (sto, nPage, sorters) {
-        DataBind(nPage);
-    }
+var gxysStore = Ext.create('Ext.data.Store', {
+    fields: ['UserXM', 'YK_SY']
 });
-
 //-----------------------------------------------------------页面方法-----------------------------------------------------------------
-function DataBind(nPage) {
-    CS('CZCLZ.YKMag.GetHBList', function (retVal) {
-        gxysStore.setData({
-            data: retVal.dt,
-            pageSize: pageSize,
-            total: retVal.ac,
-            currentPage: retVal.cp
-        });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), 0);
+function DataBind() {
+    var mc = Ext.getCmp('cx_userxm').getValue();
+    var dq = Ext.getCmp('cx_dqmc').getValue();
+
+    CS('CZCLZ.YKMag.GetGxysTj', function (retVal) {
+        console.log(retVal);
+        gxysStore.loadData(retVal.dt);
+        Ext.getCmp('tj').setText("干线运输各个专线的总账剩余：" + retVal.gxye);
+    }, CS.onError, mc, dq, 0);
 }
 
+function ShowLine() {
+    var win = new lineWin();
+    win.show(null, function () {
+        
+    })
+}
+
+//-----------------------------------------------------------弹出界面-----------------------------------------------------------------
+Ext.define('lineWin', {
+    extend: 'Ext.window.Window',
+
+    height: document.documentElement.clientHeight,
+    width: document.documentElement.clientWidth,
+    layout: {
+        type: 'fit'
+    },
+    title: '专线油卡明细记录',
+    modal: true,
+
+    initComponent: function () {
+        var me = this;
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'tabpanel',
+                    activeTab: 1,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: {
+                                type: 'fit'
+                            },
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    columnLines: 1,
+                                    border: 1,
+                                    store: xszbstore,
+                                    columns: [
+                                        {
+                                            xtype: 'datecolumn',
+                                            dataIndex: 'rq',
+                                            format: 'Y年m月d日',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 150,
+                                            text: '日期'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'gqje',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '期初金额'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'wsyje',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '油卡划拨',
+                                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                var str;
+                                                str = "<a onclick='CKXSMX(\"" + userId + "\",\"" + record.data.rq + "\");'>" + value + "</a>";
+                                                return str;
+                                            }
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'zje',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '油卡消耗',
+                                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                var str;
+                                                str = "<a onclick='CKXSMX(\"" + userId + "\",\"" + record.data.rq + "\");'>" + value + "</a>";
+                                                return str;
+                                            }
+                                        },
+                                        {
+                                            text: '剩余金额',
+                                            dataIndex: 'zje',
+                                            width: 250,
+                                            sortable: false,
+                                            menuDisabled: true
+                                        }
+                                    ],
+                                    dockedItems: [
+                                        {
+                                            xtype: 'toolbar',
+                                            dock: 'top',
+                                            items: [
+                                                {
+                                                    xtype: 'textfield',
+                                                    id: 'cx_userxm',
+                                                    width: 160,
+                                                    labelWidth: 60,
+                                                    fieldLabel: '专线'
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    id: 'cx_dqmc',
+                                                    width: 160,
+                                                    labelWidth: 60,
+                                                    fieldLabel: '年份'
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '关闭',
+                            handler: function () {
+                                me.close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
 //-----------------------------------------------------------界    面-----------------------------------------------------------------
-Ext.define('GXYSView', {
+Ext.define('myView', {
     extend: 'Ext.container.Viewport',
 
     layout: {
@@ -55,7 +171,7 @@ Ext.define('GXYSView', {
                         Ext.create('Ext.grid.RowNumberer'),
                         {
                             xtype: 'gridcolumn',
-                            dataIndex: 'zxmc',
+                            dataIndex: 'UserXM',
                             sortable: false,
                             menuDisabled: true,
                             text: "专线名称",
@@ -63,22 +179,13 @@ Ext.define('GXYSView', {
                         },
                         {
                             xtype: 'gridcolumn',
-                            dataIndex: 'balance',
+                            dataIndex: 'YK_SY',
                             sortable: false,
                             menuDisabled: true,
                             text: "油卡剩余金额",
-                            flex: 1
-                        },
-                        {
-                            text: '操作',
-                            dataIndex: 'ID',
-                            sortable: false,
-                            menuDisabled: true,
-                            align: 'center',
-                            width: 100,
+                            flex: 1,
                             renderer: function (v, s, r) {
-                                var wh = '<a class="EditItem" href="javascript:void(0);" onclick="delGl(\'' + v + '\')">删除</a>';
-                                return wh;
+                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + v + '\')">' + v + '</a>';
                             }
                         }
                     ],
@@ -92,14 +199,14 @@ Ext.define('GXYSView', {
                             items: [
                                 {
                                     xtype: 'textfield',
-                                    id: 'cx_oilcardcode',
+                                    id: 'cx_userxm',
                                     width: 160,
                                     labelWidth: 60,
                                     fieldLabel: '专线名称'
                                 },
                                 {
                                     xtype: 'textfield',
-                                    id: 'cx_oiltransfercode',
+                                    id: 'cx_dqmc',
                                     width: 160,
                                     labelWidth: 60,
                                     fieldLabel: '归属地'
@@ -113,46 +220,21 @@ Ext.define('GXYSView', {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                DataBind(1);
+                                                DataBind();
                                             }
                                         }
                                     ]
-                                },
-                                //{
-                                //    xtype: 'buttongroup',
-                                //    items: [
-                                //        {
-                                //            xtype: 'button',
-                                //            iconCls: 'add',
-                                //            text: '新增',
-                                //            handler: function () {
-                                //                CS('CZCLZ.YKMag.GetVisionList', function (retVal) {
-                                //                    if (retVal) {
-                                //                        var win = new addWin();
-                                //                        win.show(null, function () {
-                                //                            Ext.getCmp("carriageoil").setValue(retVal[0]["carriageoil"]);
-                                //                        })
-                                //                    }
-                                //                }, CS.onError);
-
-                                //            }
-                                //        }
-                                //    ]
-                                //},
-                                //{
-                                //    xtype: 'buttongroup',
-                                //    title: '',
-                                //    items: [
-                                //        {
-                                //            xtype: 'button',
-                                //            iconCls: 'view',
-                                //            text: '导出',
-                                //            handler: function () {
-                                //                DownloadFile("CZCLZ.YKMag.GetGXYSListToFile", "干线运输划拨.xls", Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), 1);
-                                //            }
-                                //        }
-                                //    ]
-                                //}
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    id: 'tj'
+                                }
                             ]
                         }
                     ]
@@ -163,7 +245,7 @@ Ext.define('GXYSView', {
     }
 });
 
-//Ext.onReady(function () {
-//    new GXYSView();
-//    DataBind();
-//})
+Ext.onReady(function () {
+    new myView();
+    DataBind();
+})
