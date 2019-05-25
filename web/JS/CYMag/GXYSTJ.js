@@ -36,136 +36,6 @@ function DataBind(nPage) {
 }
 
 //-----------------------------------------------------------界    面-----------------------------------------------------------------
-Ext.define('addWin', {
-    extend: 'Ext.window.Window',
-
-    height: 300,
-    width: 400,
-    layout: {
-        type: 'fit'
-    },
-    closeAction: 'destroy',
-    modal: true,
-    title: '新增',
-
-    initComponent: function () {
-        var me = this;
-        me.items = [
-            {
-                xtype: 'form',
-                id: 'addform',
-                bodyPadding: 10,
-                items: [
-                    {
-                        xtype: 'textfield',
-                        fieldLabel: 'ID',
-                        id: 'Oiltransferid',
-                        name: 'Oiltransferid',
-                        hidden: true
-                    },
-                    {
-                        xtype: 'textfield',
-                        fieldLabel: '划拨用户手机号',
-                        id: 'inuserzh',
-                        name: 'inuserzh',
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'numberfield',
-                        fieldLabel: '划拨费用',
-                        id: 'money',
-                        name: 'money',
-                        allowBlank: false,
-                        allowDecimals: false,
-                        allowNegative: false,
-                        minValue: 1,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'numberfield',
-                        id: 'carriageoil',
-                        name: 'carriageoil',
-                        hidden: true
-                    },
-                    {
-                        xtype: 'combobox',
-                        id: 'transfertype',
-                        name: 'transfertype',
-                        fieldLabel: '划拨类型',
-                        editable: false,
-                        allowBlank: false,
-                        store: Ext.create('Ext.data.Store', {
-                            fields: [
-                                { name: 'val' },
-                                { name: 'txt' }
-                            ],
-                            data: [
-                                { 'val': 0, 'txt': '干线运输' }]
-
-                        }),
-                        queryMode: 'local',
-                        displayField: 'txt',
-                        valueField: 'val',
-                        value: 0,
-                        anchor: '100%'
-                    }
-                ],
-                buttonAlign: 'center',
-                buttons: [
-                    {
-                        text: '确定',
-                        iconCls: 'dropyes',
-                        handler: function () {
-                            var point = Ext.getCmp("money").getValue();
-                            if (point < 1) {
-                                Ext.Msg.show({
-                                    title: '提示',
-                                    msg: '划拨油卡费用必须大于0',
-                                    buttons: Ext.MessageBox.OK,
-                                    icon: Ext.MessageBox.INFO
-                                });
-                                return;
-                            }
-
-                            var carriageoil = Ext.getCmp("carriageoil").getValue();
-                            if (point > carriageoil) {
-                                Ext.Msg.show({
-                                    title: '提示',
-                                    msg: '划拨总油量不得超过其所有运费券',
-                                    buttons: Ext.MessageBox.OK,
-                                    icon: Ext.MessageBox.INFO
-                                });
-                                return;
-                            }
-                            var form = Ext.getCmp('addform');
-                            if (form.form.isValid()) {
-                                var values = form.form.getValues(false);
-                                var me = this;
-                                CS('CZCLZ.YKMag.ADDHB', function (retVal) {
-                                    if (retVal) {
-                                        DataBind(1);
-                                        me.up('window').close();
-                                    }
-                                }, CS.onError, values);
-
-                            }
-                        }
-                    },
-                    {
-                        text: '取消',
-                        iconCls: 'back',
-                        handler: function () {
-                            this.up('window').close();
-                        }
-                    }
-                ]
-            }
-        ];
-        me.callParent(arguments);
-    }
-});
-
-//-----------------------------------------------------------界    面-----------------------------------------------------------------
 Ext.define('GXYSView', {
     extend: 'Ext.container.Viewport',
 
@@ -185,60 +55,31 @@ Ext.define('GXYSView', {
                         Ext.create('Ext.grid.RowNumberer'),
                         {
                             xtype: 'gridcolumn',
-                            dataIndex: 'zcxm',
+                            dataIndex: 'zxmc',
                             sortable: false,
                             menuDisabled: true,
-                            text: "转出人员",
+                            text: "专线名称",
                             flex: 1
                         },
                         {
                             xtype: 'gridcolumn',
-                            dataIndex: 'zrzh',
+                            dataIndex: 'balance',
                             sortable: false,
                             menuDisabled: true,
-                            text: "转入人员账号",
+                            text: "油卡剩余金额",
                             flex: 1
                         },
                         {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'zrxm',
+                            text: '操作',
+                            dataIndex: 'ID',
                             sortable: false,
                             menuDisabled: true,
-                            text: "转入人员名称",
-                            flex: 1
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'money',
-                            sortable: false,
-                            menuDisabled: true,
-                            text: "转出油卡金额",
-                            flex: 1
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'oilcardcode',
-                            sortable: false,
-                            menuDisabled: true,
-                            text: "油卡编号",
-                            flex: 1
-                        },
-                        {
-                            xtype: 'gridcolumn',
-                            dataIndex: 'oiltransfercode',
-                            sortable: false,
-                            menuDisabled: true,
-                            text: "油卡划拨编号",
-                            flex: 1
-                        },
-                        {
-                            xtype: 'datecolumn',
-                            dataIndex: 'addtime',
-                            sortable: false,
-                            menuDisabled: true,
-                            format: 'Y-m-d H:i:s',
-                            text: "时间",
-                            flex: 1
+                            align: 'center',
+                            width: 100,
+                            renderer: function (v, s, r) {
+                                var wh = '<a class="EditItem" href="javascript:void(0);" onclick="delGl(\'' + v + '\')">删除</a>';
+                                return wh;
+                            }
                         }
                     ],
                     viewConfig: {
@@ -298,27 +139,21 @@ Ext.define('GXYSView', {
                                 //        }
                                 //    ]
                                 //},
-                                {
-                                    xtype: 'buttongroup',
-                                    title: '',
-                                    items: [
-                                        {
-                                            xtype: 'button',
-                                            iconCls: 'view',
-                                            text: '导出',
-                                            handler: function () {
-                                                DownloadFile("CZCLZ.YKMag.GetGXYSListToFile", "干线运输划拨.xls", Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), 1);
-                                            }
-                                        }
-                                    ]
-                                }
+                                //{
+                                //    xtype: 'buttongroup',
+                                //    title: '',
+                                //    items: [
+                                //        {
+                                //            xtype: 'button',
+                                //            iconCls: 'view',
+                                //            text: '导出',
+                                //            handler: function () {
+                                //                DownloadFile("CZCLZ.YKMag.GetGXYSListToFile", "干线运输划拨.xls", Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), 1);
+                                //            }
+                                //        }
+                                //    ]
+                                //}
                             ]
-                        },
-                        {
-                            xtype: 'pagingtoolbar',
-                            displayInfo: true,
-                            store: gxysStore,
-                            dock: 'bottom'
                         }
                     ]
                 }

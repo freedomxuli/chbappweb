@@ -864,4 +864,48 @@ public class YKMag
         }
     }
     #endregion
+
+    #region 干线运输统计
+    public object GetGxysTj(int transfertype)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            //专线
+            var cmd = dbc.CreateCommand();
+            cmd.CommandText = @"SELECT a.*,ISNULL(b.YK_XH,0)YK_XH,(ISNULL(a.YK_AMOUNT,0)-ISNULL(b.YK_XH,0))YK_SY,c.DqBm,c.UserXM FROM(
+	                                SELECT UserID,ISNULL(SUM(oilmoney),0) YK_AMOUNT FROM tb_b_myoilcard where oiltransfercode in(
+		                                select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+	                                )
+	                                GROUP BY UserID
+                                )a
+                                left join (
+	                                select UserID,ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
+		                                SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
+			                                select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+		                                )
+	                                )
+	                                GROUP BY UserID
+                                )b on a.UserID=b.userid
+                                inner join tb_b_user c on a.UserID=c.UserID and c.ClientKind=1 
+                                order by c.DqBm";
+            cmd.Parameters.AddWithValue("@transfertype", transfertype);
+            DataTable dt = dbc.ExecuteDataTable(cmd);
+
+            //干线
+            cmd.Parameters.Clear();
+            cmd.CommandText = @"select ISNULL(SUM(money),0) from tb_b_oil_transfer where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and transfertype=@transfertype";
+            cmd.Parameters.AddWithValue("@transfertype", transfertype);
+            decimal AmountYk = Convert.ToDecimal(dbc.ExecuteScalar(cmd));
+
+            cmd.Parameters.Clear();
+            cmd.CommandText = @"select ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
+	                                SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
+		                                select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+	                                )
+                                )";
+            cmd.Parameters.AddWithValue("@transfertype", transfertype);
+            decimal XhYk = Convert.ToDecimal(dbc.ExecuteScalar(cmd));
+        }
+    }
+    #endregion
 }
