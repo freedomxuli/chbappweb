@@ -99,9 +99,22 @@ public class YKMag
 
     }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pagnum"></param>
+    /// <param name="pagesize"></param>
+    /// <param name="cardNo"></param>
+    /// <param name="orderId"></param>
+    /// <param name="zt"></param>
+    /// <param name="beg"></param>
+    /// <param name="end"></param>
+    /// <param name="isinvoice">是否开票</param>
+    /// <param name="transfertype">转让类型</param>
+    /// <param name="stair">一级账户名</param>
+    /// <returns></returns>
     [CSMethod("GetYKDDList")]
-    public object GetYKDDList(int pagnum, int pagesize, string cardNo, string orderId, string zt, string beg, string end)
+    public object GetYKDDList(int pagnum, int pagesize, string cardNo, string orderId, string zt, string beg, string end, string isinvoice, string transfertype, string stair)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -134,8 +147,36 @@ public class YKMag
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @" select * from tb_b_oil_order a left join tb_b_user b on a.userid=b.userid  where 1=1  
-                                 ";
+                //
+                if (!string.IsNullOrEmpty(isinvoice))
+                {
+                    where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
+                }
+                if (!string.IsNullOrEmpty(transfertype))
+                {
+                    where += " and " + dbc.C_EQ("b.transfertype", transfertype);
+                }
+                if (!string.IsNullOrEmpty(stair))
+                {
+                    where += " and " + dbc.C_Like("b.UserName", stair, LikeStyle.LeftAndRightLike);
+                }
+                string str = @"select a.* from tb_b_oil_order a 
+										left join(
+											--我的卡包的一些信息：（一级）划拨类型、一级划拨账户
+											select t3.UserID,t3.oilcardcode,t4.transfertype,t4.UserXM,t4.UserName from(
+												--确定划拨明细,得到油卡划拨编号
+												select t1.*,t2.transfertype from tb_b_myoilcard t1
+												left join tb_b_oil_transfer t2 on t1.UserID=t2.inuserid and t1.oiltransfercode=t2.oiltransfercode and t1.oilcardcode=t2.oilcardcode
+												where t1.status=0
+											)t3
+											left join (
+												--得到一级划拨信息
+												select t1.oiltransfercode,t1.oilcardcode,t1.transfertype,t2.UserName,t2.UserXM from tb_b_oil_transfer t1
+												left join tb_b_user t2 on t1.outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and t1.inuserid=t2.UserID
+												where t1.status=0
+											)t4 on t3.oiltransfercode=t4.oiltransfercode and t3.myoilcardId=t4.oilcardcode
+                                )b on a.cardNo=b.oilcardcode and a.userid=b.UserID 
+                                where 1=1 ";
                 str += where;
 
                 //开始取分页数据
@@ -151,8 +192,39 @@ public class YKMag
         }
     }
 
+    /// <summary>
+    /// 开票
+    /// </summary>
+    /// <param name="jsr"></param>
+    [CSMethod("Ykkp")]
+    public void Ykkp(JSReader jsr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                DataTable dt = dbc.GetEmptyDataTable("tb_b_oil_order");
+                DataTableTracker dtt = new DataTableTracker(dt);
+                for (int i = 0; i < jsr.ToArray().Length; i++)
+                {
+                    string id = jsr.ToArray()[i]["oilorderid"].ToString();
+
+                    DataRow dr = dt.NewRow();
+                    dr["oilorderid"] = id;
+                    dr["isinvoice"] = 1;
+                    dt.Rows.Add(dr);
+                }
+                dbc.UpdateTable(dt, dtt);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
     [CSMethod("GetYKDDListToFile", 2)]
-    public byte[] GetYKDDListToFile(string cardNo, string orderId, string zt, string beg, string end)
+    public byte[] GetYKDDListToFile(string cardNo, string orderId, string zt, string beg, string end, string isinvoice, string transfertype, string stair)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -263,8 +335,36 @@ public class YKMag
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @" select * from tb_b_oil_order a left join tb_b_user b on a.userid=b.userid where 1=1  
-                                 ";
+                //
+                if (!string.IsNullOrEmpty(isinvoice))
+                {
+                    where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
+                }
+                if (!string.IsNullOrEmpty(transfertype))
+                {
+                    where += " and " + dbc.C_EQ("b.transfertype", transfertype);
+                }
+                if (!string.IsNullOrEmpty(stair))
+                {
+                    where += " and " + dbc.C_Like("b.UserName", stair, LikeStyle.LeftAndRightLike);
+                }
+                string str = @"select a.* from tb_b_oil_order a 
+										left join(
+											--我的卡包的一些信息：（一级）划拨类型、一级划拨账户
+											select t3.UserID,t3.oilcardcode,t4.transfertype,t4.UserXM,t4.UserName from(
+												--确定划拨明细,得到油卡划拨编号
+												select t1.*,t2.transfertype from tb_b_myoilcard t1
+												left join tb_b_oil_transfer t2 on t1.UserID=t2.inuserid and t1.oiltransfercode=t2.oiltransfercode and t1.oilcardcode=t2.oilcardcode
+												where t1.status=0
+											)t3
+											left join (
+												--得到一级划拨信息
+												select t1.oiltransfercode,t1.oilcardcode,t1.transfertype,t2.UserName,t2.UserXM from tb_b_oil_transfer t1
+												left join tb_b_user t2 on t1.outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and t1.inuserid=t2.UserID
+												where t1.status=0
+											)t4 on t3.oiltransfercode=t4.oiltransfercode and t3.myoilcardId=t4.oilcardcode
+                                )b on a.cardNo=b.oilcardcode and a.userid=b.UserID 
+                                where 1=1 ";
                 str += where;
 
                 //开始取分页数据
