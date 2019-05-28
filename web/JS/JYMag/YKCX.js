@@ -20,7 +20,9 @@ var store = createSFW4Store({
         { name: 'orderId' },
         { name: 'addtime' },
         { name: 'UserTel' },
-        { name: 'UserName' }
+        { name: 'UserName' },
+        { name: 'STAIR' },
+        { name: 'UserTel' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -45,7 +47,6 @@ function DataBind(nPage) {
         Ext.getCmp("cx_isinvoice").getValue(), Ext.getCmp("cx_transfertype").getValue(), Ext.getCmp("cx_stair").getValue()
     );
 }
-
 
 //************************************页面方法***************************************
 
@@ -83,49 +84,65 @@ Ext.onReady(function () {
                         sortable: false,
                         menuDisabled: true,
                         text: "加油卡号",
-                        flex: 1
+                        width:200
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'STAIR',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "一级划拨账户",
+                        width: 100
                     },
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'oilNum',
                         sortable: false,
                         menuDisabled: true,
-                        text: "加油量"
+                        text: "加油量（升）",
+                        width: 100
                     },
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'Price',
                         sortable: false,
                         menuDisabled: true,
-                        text: "单价"
+                        text: "单价（元）",
+                        align:'right',
+                        width: 100
                     },
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'money',
                         sortable: false,
                         menuDisabled: true,
-                        text: "消费总金额"
+                        text: "消费总金额",
+                        align: 'right',
+                        width: 100
                     },
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'oilType',
                         sortable: false,
                         menuDisabled: true,
-                        text: "油品类型"
+                        text: "油品类型（号）",
+                        width: 120
                     },
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'oilName',
                         sortable: false,
                         menuDisabled: true,
-                        text: "油品名称"
+                        text: "油品名称",
+                        width: 100
                     },
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'oilLevel',
                         sortable: false,
                         menuDisabled: true,
-                        text: "油品等级"
+                        text: "油品等级",
+                        width: 90
                     },
                     {
                         xtype: 'gridcolumn',
@@ -133,6 +150,7 @@ Ext.onReady(function () {
                         sortable: false,
                         menuDisabled: true,
                         text: "订单状态",
+                        width: 90,
                         renderer: function (v, m) {
                             str = "";
                             if (v == 0) {
@@ -153,7 +171,7 @@ Ext.onReady(function () {
                         sortable: false,
                         menuDisabled: true,
                         text: "订单号",
-                        flex: 1
+                        width: 180
                     },
                     {
                         xtype: 'gridcolumn',
@@ -161,14 +179,15 @@ Ext.onReady(function () {
                         sortable: false,
                         menuDisabled: true,
                         text: "找油网的交易流水号",
-                        flex: 1
+                        width: 180
                     },
                     {
                         xtype: 'gridcolumn',
-                        dataIndex: 'UserName',
+                        dataIndex: 'UserTel',
                         sortable: false,
                         menuDisabled: true,
-                        text: "用户手机号"
+                        text: "用户手机号",
+                        width: 120
                     },
                     {
                         xtype: 'datecolumn',
@@ -177,6 +196,7 @@ Ext.onReady(function () {
                         menuDisabled: true,
                         format: 'Y-m-d H:i:s',
                         width: 180,
+                        align: 'center',
                         text: "时间"
                     }
                     ],
@@ -342,47 +362,61 @@ Ext.onReady(function () {
                                         {
                                             xtype: 'button',
                                             text: '开票',
+                                            id:'kaipiao',
                                             handler: function () {
-                                                var grid = Ext.getCmp('ykGrid');
-                                                var gx = grid.getSelectionModel().getSelection();
-                                                var arr = [];
-                                                var bo = false;
-                                                var msg = "";
-                                                for (var i = 0; i < gx.length; i++) {
-                                                    if (gx[i].data.status != 1) {
-                                                        //0：待付款；1：支付成功；2：交易取消；3：交易撤销；
-                                                        var ts = "";
-                                                        switch (gx[i].data.status) {
-                                                            case 0: ts = '待付款'
-                                                                break;
-                                                            case 2: ts = '交易取消'
-                                                                break;
-                                                            case 3: ts = '交易撤销'
-                                                                break;
-                                                            default: ts = '支付成功';
-                                                        }
-                                                        msg = "加油卡号[" + gx[i].data.cardNo + "]" + ts + '，不能开票。';
-                                                        bo = true;
-                                                        break;
-                                                    }
-                                                    arr.push(gx[i].data);
-                                                }
-                                                if (bo) {
-                                                    Ext.Msg.show({
-                                                        title: '提示',
-                                                        msg: msg,
-                                                        buttons: Ext.MessageBox.OK,
-                                                        icon: Ext.MessageBox.INFO
-                                                    });
-                                                } else {
-                                                    CS('CZCLZ.YKMag.Ykkp', function (retVal) {
+                                                if (privilege("加油模块_油卡订单查询_开票")) {
+                                                    var grid = Ext.getCmp('ykGrid');
+                                                    var gx = grid.getSelectionModel().getSelection();
+                                                    if (gx.length == 0) {
                                                         Ext.Msg.show({
                                                             title: '提示',
-                                                            msg: "开票成功。",
+                                                            msg: "请勾选需要开票的油卡订单。",
                                                             buttons: Ext.MessageBox.OK,
                                                             icon: Ext.MessageBox.INFO
                                                         });
-                                                    }, CS.onError, arr);
+                                                        return;
+                                                    }
+
+                                                    var arr = [];
+                                                    var bo = false;
+                                                    var msg = "";
+                                                    for (var i = 0; i < gx.length; i++) {
+                                                        if (gx[i].data.status != 1) {
+                                                            //0：待付款；1：支付成功；2：交易取消；3：交易撤销；
+                                                            var ts = "";
+                                                            switch (gx[i].data.status) {
+                                                                case 0: ts = '待付款'
+                                                                    break;
+                                                                case 2: ts = '交易取消'
+                                                                    break;
+                                                                case 3: ts = '交易撤销'
+                                                                    break;
+                                                                default: ts = '支付成功';
+                                                            }
+                                                            msg = "加油卡号[" + gx[i].data.cardNo + "]" + ts + '，不能开票。';
+                                                            bo = true;
+                                                            break;
+                                                        }
+                                                        arr.push(gx[i].data);
+                                                    }
+                                                    if (bo) {
+                                                        Ext.Msg.show({
+                                                            title: '提示',
+                                                            msg: msg,
+                                                            buttons: Ext.MessageBox.OK,
+                                                            icon: Ext.MessageBox.INFO
+                                                        });
+                                                    } else {
+                                                        CS('CZCLZ.YKMag.Ykkp', function (retVal) {
+                                                            Ext.Msg.show({
+                                                                title: '提示',
+                                                                msg: "开票成功。",
+                                                                buttons: Ext.MessageBox.OK,
+                                                                icon: Ext.MessageBox.INFO
+                                                            });
+                                                            DataBind();
+                                                        }, CS.onError, arr);
+                                                    }
                                                 }
                                             }
                                         }
@@ -404,8 +438,9 @@ Ext.onReady(function () {
     });
 
     new YKView();
-
-
+    if (!privilegeBo("加油模块_油卡订单查询_开票")) {
+        Ext.getCmp('kaipiao').disable(true);
+    }
     DataBind();
 })
 //************************************主界面*****************************************

@@ -24,6 +24,7 @@ var store = createSFW4Store({
         { name: 'ispayinsurance' },
         { name: 'insuranceid' },
         { name: 'insurancemoney' },
+        { name: 'carriagemoneynew' },
         { name: 'addtime' },
         { name: 'adduser' },
         { name: 'userid' },
@@ -35,7 +36,8 @@ var store = createSFW4Store({
         { name: 'sjxm' },
         { name: 'sjdh' },
         { name: 'sjcarnumber' },
-        { name: 'zx' }
+        { name: 'zx' },
+        { name: 'isinvoice' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -76,7 +78,7 @@ function WC(carriageid, carriagestatus) {
     }, CS.onError, carriageid, carriagestatus);
 }
 function JJ(carriageid, carriagestatus) {
-    var yjwin = new yjWin({ carriageid: carriageid,carriagestatus:carriagestatus });
+    var yjwin = new yjWin({ carriageid: carriageid, carriagestatus: carriagestatus });
     yjwin.show();
 }
 
@@ -148,15 +150,15 @@ Ext.define('yjWin', {
                 id: 'yjform',
                 bodyPadding: 10,
                 items: [
-                     {
-                         xtype: 'textareafield',
-                         id: 'yj',
-                         name: 'yj',
-                         labelWidth: 70,
-                         fieldLabel: '意见',
-                         allowBlank:false,
-                         anchor: '100%'
-                     }
+                    {
+                        xtype: 'textareafield',
+                        id: 'yj',
+                        name: 'yj',
+                        labelWidth: 70,
+                        fieldLabel: '意见',
+                        allowBlank: false,
+                        anchor: '100%'
+                    }
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -173,13 +175,13 @@ Ext.define('yjWin', {
                             this.up('window').close();
                         }
                     },
-                     {
-                         text: '取消',
-                         iconCls: 'close',
-                         handler: function () {
-                             this.up('window').close();
-                         }
-                     }
+                    {
+                        text: '取消',
+                        iconCls: 'close',
+                        handler: function () {
+                            this.up('window').close();
+                        }
+                    }
                 ]
             }
         ];
@@ -209,16 +211,16 @@ Ext.define('PassWin', {
                 id: 'passform',
                 bodyPadding: 10,
                 items: [
-                     {
-                         xtype: 'textfield',
-                         id: 'password',
-                         name: 'password',
-                         labelWidth: 70,
-                         fieldLabel: '密码',
-                         allowBlank: false,
-                         inputType: 'password',
-                         anchor: '100%'
-                     }
+                    {
+                        xtype: 'textfield',
+                        id: 'password',
+                        name: 'password',
+                        labelWidth: 70,
+                        fieldLabel: '密码',
+                        allowBlank: false,
+                        inputType: 'password',
+                        anchor: '100%'
+                    }
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -262,7 +264,7 @@ Ext.define('PassWin', {
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
-Ext.onReady(function() {
+Ext.onReady(function () {
     Ext.define('CYDView', {
         extend: 'Ext.container.Viewport',
 
@@ -270,19 +272,20 @@ Ext.onReady(function() {
             type: 'fit'
         },
 
-        initComponent: function() {
+        initComponent: function () {
             var me = this;
             me.items = [
                 {
                     xtype: 'gridpanel',
-                    id: 'usergrid',
+                    id: 'cyGrid',
                     title: '',
                     store: store,
-                    columnLines:true,
-                //    selModel: Ext.create('Ext.selection.CheckboxModel', {
-
-                //}),
-                    columns: [Ext.create('Ext.grid.RowNumberer'),//专线名称，司机手机、车牌、是否保险、保费、是否油卡付款、是否现金付款
+                    columnLines: true,
+                    selModel: Ext.create('Ext.selection.CheckboxModel', {
+                        checkOnly: true
+                    }),
+                    columns: [
+                        Ext.create('Ext.grid.RowNumberer'),//专线名称，司机手机、车牌、是否保险、保费、是否油卡付款、是否现金付款
                         {
                             xtype: 'gridcolumn',
                             dataIndex: 'carriageid',
@@ -296,39 +299,54 @@ Ext.onReady(function() {
                                     str += " <a onclick='QR(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>确认</a>";
                                 } else if (record.data.carriagestatus == 11)
                                     str += " <a onclick='TH(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>退回</a> ";
-                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.isoilpay == 0) {
+                                if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.isoilpay == 0) {
                                     str += " <a onclick='YKDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>油卡打款</a>";
                                 }
-                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
+                                if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
                                     str += " <a onclick='XJDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款</a>";
-                                 } if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
-                                     str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
-                                 } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
+                                } if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
+                                    str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
+                                } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
                                     str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
-                                 }
+                                }
 
-                                 if (record.data.carriagestatus >=30 ) {
-                                     str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
-                                 }
+                                if (record.data.carriagestatus >= 30) {
+                                    str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
+                                }
                                 return str;
                             }
                         },
-                         {
-                             xtype: 'gridcolumn',
-                             dataIndex: 'carriageid',
-                             sortable: false,
-                             menuDisabled: true,
-                             text: "拒绝",
-                             width: 80,
-                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                 var str = "";
-                                 if (record.data.carriagestatus == 10) {
-                                     str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a>";
-                                 } else if (record.data.carriagestatus == 11)
-                                     str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a> ";
-                                 return str;
-                             }
-                         },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'carriageid',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "拒绝",
+                            width: 80,
+                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                var str = "";
+                                if (record.data.carriagestatus == 10) {
+                                    str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a>";
+                                } else if (record.data.carriagestatus == 11)
+                                    str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a> ";
+                                return str;
+                            }
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'isinvoice',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "是否开票",
+                            width: 100,
+                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                if (value == 1) {
+                                    return "已开";
+                                } else {
+                                    return "未开";
+                                }
+                            }
+                        },
                         {
                             xtype: 'gridcolumn',
                             dataIndex: 'zx',
@@ -386,22 +404,22 @@ Ext.onReady(function() {
                             text: "下游司机",
                             width: 100
                         },
-                         {
-                             xtype: 'gridcolumn',
-                             dataIndex: 'sjxm',
-                             sortable: false,
-                             menuDisabled: true,
-                             text: "司机姓名",
-                             width: 100
-                         },
-                         {
-                             xtype: 'gridcolumn',
-                             dataIndex: 'sjdh',
-                             sortable: false,
-                             menuDisabled: true,
-                             text: "电话",
-                             width: 100
-                         },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'sjxm',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "司机姓名",
+                            width: 100
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'sjdh',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "电话",
+                            width: 100
+                        },
                         {
                             xtype: 'gridcolumn',
                             dataIndex: 'sjcarnumber',
@@ -423,7 +441,15 @@ Ext.onReady(function() {
                             dataIndex: 'carriagemoney',
                             sortable: false,
                             menuDisabled: true,
-                            text: "现金",
+                            text: "现付现金",
+                            width: 100
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'carriagemoneynew',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "验收付现金",
                             width: 100
                         },
                         {
@@ -436,7 +462,7 @@ Ext.onReady(function() {
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str = "";
                                 if (value != null && value != "") {
-                                    str = value/100
+                                    str = value / 100
                                 }
                                 return str;
                             }
@@ -528,84 +554,125 @@ Ext.onReady(function() {
 
                     },
                     dockedItems: [
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            items: [
                                 {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
+                                    xtype: 'textfield',
+                                    id: 'cx_carriagecode',
+                                    width: 160,
+                                    labelWidth: 60,
+                                    fieldLabel: '承运单号'
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    id: 'cx_UserXM',
+                                    width: 160,
+                                    labelWidth: 60,
+                                    fieldLabel: '承运专线'
+                                },
+                                {
+                                    id: 'cx_beg',
+                                    xtype: 'datefield',
+                                    fieldLabel: '时间',
+                                    format: 'Y-m-d',
+                                    labelWidth: 40,
+                                    width: 170
+                                },
+                                {
+                                    id: 'cx_end',
+                                    xtype: 'datefield',
+                                    format: 'Y-m-d',
+                                    fieldLabel: '至',
+                                    labelWidth: 20,
+                                    width: 150
+                                },
+                                {
+                                    xtype: 'buttongroup',
                                     items: [
                                         {
-                                            xtype: 'textfield',
-                                            id: 'cx_carriagecode',
-                                            width: 160,
-                                            labelWidth: 60,
-                                            fieldLabel: '承运单号'
-                                        },
-                                        {
-                                            xtype: 'textfield',
-                                            id: 'cx_UserXM',
-                                            width: 160,
-                                            labelWidth: 60,
-                                            fieldLabel: '承运专线'
-                                        },
-                                        {
-                                            id: 'cx_beg',
-                                            xtype: 'datefield',
-                                            fieldLabel: '时间',
-                                            format: 'Y-m-d',
-                                            labelWidth: 40,
-                                            width: 170
-                                        },
-                                        {
-                                            id: 'cx_end',
-                                            xtype: 'datefield',
-                                            format: 'Y-m-d',
-                                            fieldLabel: '至',
-                                            labelWidth: 20,
-                                            width: 150
-                                        },
-                                        {
-                                            xtype: 'buttongroup',
-                                            items: [
-                                                {
-                                                    xtype: 'button',
-                                                    iconCls: 'search',
-                                                    text: '查询',
-                                                    handler: function () {
-                                                        DataBind(1);
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'buttongroup',
-                                            items: [
-                                                {
-                                                    xtype: 'button',
-                                                    text: '导出',
-                                                    iconCls: 'view',
-                                                    handler: function () {
-                                                        DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
-                                                    }
-                                                }
-                                            ]
+                                            xtype: 'button',
+                                            iconCls: 'search',
+                                            text: '查询',
+                                            handler: function () {
+                                                DataBind(1);
+                                            }
                                         }
                                     ]
                                 },
                                 {
-                                    xtype: 'pagingtoolbar',
-                                    displayInfo: true,
-                                    store: store,
-                                    dock: 'bottom'
+                                    xtype: 'buttongroup',
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            text: '导出',
+                                            iconCls: 'view',
+                                            handler: function () {
+                                                DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'buttongroup',
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            text: '开票',
+                                            id: 'kaipiao',
+                                            handler: function () {
+                                                if (privilege("承运模块_承运单查询_开票")) {
+                                                    var grid = Ext.getCmp('cyGrid');
+                                                    var gx = grid.getSelectionModel().getSelection();
+                                                    if (gx.length == 0) {
+                                                        Ext.Msg.show({
+                                                            title: '提示',
+                                                            msg: "请勾选需要开票的承运单。",
+                                                            buttons: Ext.MessageBox.OK,
+                                                            icon: Ext.MessageBox.INFO
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    var arr = [];
+                                                    for (var i = 0; i < gx.length; i++) {
+                                                        arr.push(gx[i].data);
+                                                    }
+                                                    CS('CZCLZ.CYMag.Cykp', function (retVal) {
+                                                        Ext.Msg.show({
+                                                            title: '提示',
+                                                            msg: "开票成功。",
+                                                            buttons: Ext.MessageBox.OK,
+                                                            icon: Ext.MessageBox.INFO
+                                                        });
+                                                        DataBind();
+                                                    }, CS.onError, arr);
+                                                }
+                                            }
+                                        }
+                                    ]
                                 }
+                            ]
+                        },
+                        {
+                            xtype: 'pagingtoolbar',
+                            displayInfo: true,
+                            store: store,
+                            dock: 'bottom'
+                        }
                     ]
-        }
+                }
             ];
             me.callParent(arguments);
         }
     });
 
     new CYDView();
+    if (!privilegeBo("承运模块_承运单查询_开票")) {
+        Ext.getCmp('kaipiao').disable(true);
+    }
 
-   
     DataBind();
 })
 //************************************主界面*****************************************

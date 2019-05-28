@@ -243,6 +243,21 @@ function privilege(str)
     return isOk;
 }
 
+function privilegeBo(str) {
+    var isOk = false;
+    for (var i = 0; i < privilegelist.length; i++) {
+        if (privilegelist[i].privilegeName == str) {
+            isOk = true;
+            break;
+        }
+    }
+    if (!isOk) {
+        //Ext.Msg.alert("提示", "您好，你没有该权限，请联系管理员！");
+        return;
+    }
+    return isOk;
+}
+
 Ext.override(Ext.data.Store, {
     loadDataTable: function (dtb) {
         if (dtb.sfwtype!='datatable')

@@ -144,21 +144,30 @@ public class CYMag
                 cells[0, 9].PutValue("油卡");
                 cells[0, 9].SetStyle(style2);
                 cells.SetColumnWidth(9, 20);
-                cells[0, 10].PutValue("现金");
+
+                cells[0, 10].PutValue("现付现金");
                 cells[0, 10].SetStyle(style2);
                 cells.SetColumnWidth(10, 20);
-                cells[0, 11].PutValue("保费");
+
+                cells[0, 11].PutValue("验收付现金");
                 cells[0, 11].SetStyle(style2);
                 cells.SetColumnWidth(11, 20);
-                cells[0, 12].PutValue("是否油卡付款");
+
+                cells[0, 12].PutValue("保费");
                 cells[0, 12].SetStyle(style2);
                 cells.SetColumnWidth(12, 20);
-                cells[0, 13].PutValue("是否现金付款");
+                cells[0, 13].PutValue("是否油卡付款");
                 cells[0, 13].SetStyle(style2);
                 cells.SetColumnWidth(13, 20);
-                cells[0, 14].PutValue("订单状态");
+                cells[0, 14].PutValue("是否现金付款");
                 cells[0, 14].SetStyle(style2);
                 cells.SetColumnWidth(14, 20);
+                cells[0, 15].PutValue("订单状态");
+                cells[0, 15].SetStyle(style2);
+                cells.SetColumnWidth(15, 20);
+                cells[0, 16].PutValue("是否开票");
+                cells[0, 16].SetStyle(style2);
+                cells.SetColumnWidth(16, 20);
 
                 string where = "";
                 if (!string.IsNullOrEmpty(carriagecode.Trim()))
@@ -260,11 +269,18 @@ public class CYMag
                         cells[i + 1, 10].PutValue(dt.Rows[i]["carriagemoney"]);
                     }
                     cells[i + 1, 10].SetStyle(style4);
-                    if (dt.Rows[i]["insurancemoney"] != null && dt.Rows[i]["insurancemoney"].ToString() != "")
+
+                    if (dt.Rows[i]["carriagemoneynew"] != null && dt.Rows[i]["carriagemoneynew"].ToString() != "")
                     {
-                        cells[i + 1, 11].PutValue(Math.Round(Convert.ToDecimal(dt.Rows[i]["insurancemoney"]) / 100, 2));
+                        cells[i + 1, 11].PutValue(dt.Rows[i]["carriagemoneynew"]);
                     }
                     cells[i + 1, 11].SetStyle(style4);
+
+                    if (dt.Rows[i]["insurancemoney"] != null && dt.Rows[i]["insurancemoney"].ToString() != "")
+                    {
+                        cells[i + 1, 12].PutValue(Math.Round(Convert.ToDecimal(dt.Rows[i]["insurancemoney"]) / 100, 2));
+                    }
+                    cells[i + 1, 12].SetStyle(style4);
 
                     var isoilpay = "";
                     if (dt.Rows[i]["isoilpay"] != null && dt.Rows[i]["isoilpay"].ToString() != "")
@@ -278,8 +294,8 @@ public class CYMag
                             isoilpay = "是";
                         }
                     }
-                    cells[i + 1, 12].PutValue(isoilpay);
-                    cells[i + 1, 12].SetStyle(style4);
+                    cells[i + 1, 13].PutValue(isoilpay);
+                    cells[i + 1, 13].SetStyle(style4);
                     var ismoneypay = "";
                     if (dt.Rows[i]["ismoneypay"] != null && dt.Rows[i]["ismoneypay"].ToString() != "")
                     {
@@ -292,8 +308,8 @@ public class CYMag
                             ismoneypay = "是";
                         }
                     }
-                    cells[i + 1, 13].PutValue(ismoneypay);
-                    cells[i + 1, 13].SetStyle(style4);
+                    cells[i + 1, 14].PutValue(ismoneypay);
+                    cells[i + 1, 14].SetStyle(style4);
 
                     string carriagestatus = "";
                     if (dt.Rows[i]["carriagestatus"] != null && dt.Rows[i]["carriagestatus"].ToString() != "")
@@ -335,9 +351,28 @@ public class CYMag
                             carriagestatus = "后台确认结款，承运完成";
                         }
 
-                        cells[i + 1, 14].PutValue(carriagestatus);
-                        cells[i + 1, 14].SetStyle(style4);
+                        cells[i + 1, 15].PutValue(carriagestatus);
+                        cells[i + 1, 15].SetStyle(style4);
                     }
+
+                    var isinvoice = "";
+                    if (dt.Rows[i]["isinvoice"] != null && dt.Rows[i]["isinvoice"].ToString() != "")
+                    {
+                        if (Convert.ToInt32(dt.Rows[i]["isinvoice"]) == 0)
+                        {
+                            isinvoice = "未开";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isinvoice"]) == 1)
+                        {
+                            isinvoice = "已开";
+                        }
+                    }
+                    else
+                    {
+                        isinvoice = "未开";
+                    }
+                    cells[i + 1, 16].PutValue(isinvoice);
+                    cells[i + 1, 16].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -351,6 +386,37 @@ public class CYMag
             }
         }
 
+    }
+
+    /// <summary>
+    /// 开票
+    /// </summary>
+    /// <param name="jsr"></param>
+    [CSMethod("Cykp")]
+    public void Cykp(JSReader jsr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                DataTable dt = dbc.GetEmptyDataTable("tb_b_carriage");
+                DataTableTracker dtt = new DataTableTracker(dt);
+                for (int i = 0; i < jsr.ToArray().Length; i++)
+                {
+                    string id = jsr.ToArray()[i]["carriageid"].ToString();
+
+                    DataRow dr = dt.NewRow();
+                    dr["carriageid"] = id;
+                    dr["isinvoice"] = 1;
+                    dt.Rows.Add(dr);
+                }
+                dbc.UpdateTable(dt, dtt);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 
     [CSMethod("QR")]
