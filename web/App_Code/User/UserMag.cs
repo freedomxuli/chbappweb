@@ -541,6 +541,344 @@ public class UserMag
 
     }
 
+    [CSMethod("GetClientByOpen")]
+    public object GetClientByOpen(int pagnum, int pagesize, string UserXM, string opentype)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(UserXM.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserXM", UserXM.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @"select a.UserID,a.UserName,a.UserXM,a.FromRoute,a.ToRoute,a.AddTime,case when b.num is null then 0 else 1 end opentype from tb_b_user a
+                                left join (select count(1) num,userid from tb_b_user_pc where status = 0 group by userid) b on a.UserID = b.userid
+                                where a.isdriver = 0 and a.ClientKind = 1";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.AddTime desc,a.UserName,a.UserXM", pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("GetModuleByPC")]
+    public DataTable GetModuleByPC(string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string where = "and c.userid = " + dbc.ToSqlValue(userid) + " and c.status = 0";
+                string sql = @"select a.moduleId,a.moduleName,b.id,case when b.id is null then 0 else 1 end moduleType from tb_b_module_pc a
+                                left join tb_b_module_pc_zx b on a.moduleId = b.moduleId
+                                left join tb_b_user_pc c on b.userpcid = c.userpcid ";
+                DataTable dt = dbc.ExecuteDataTable(sql);
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("OpenPc")]
+    public bool OpenPc(string[] ids,string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                var CurrentUserId = SystemUser.CurrentUser.UserID;
+                string sql = "select count(1) num from tb_b_user_pc where status = 0 and userid = " + dbc.ToSqlValue(userid);
+                int num = Convert.ToInt32(dbc.ExecuteScalar(sql).ToString());
+
+                string userpcid = Guid.NewGuid().ToString();
+
+                if (num != 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    #region 插入专线pc用户关联表
+                    DataTable dt = dbc.GetEmptyDataTable("tb_b_user_pc");
+                    DataRow dr = dt.NewRow();
+                    dr["userpcid"] = userpcid;
+                    dr["userid"] = userid;
+                    dr["status"] = 0;
+                    dr["adduser"] = CurrentUserId;
+                    dr["addtime"] = DateTime.Now;
+                    dt.Rows.Add(dr);
+                    dbc.InsertTable(dt);
+                    #endregion
+
+                    #region 插入模块pc关联表
+                    DataTable dt_1 = dbc.GetEmptyDataTable("tb_b_module_pc_zx");
+                    for (var i = 0; i < ids.Length; i++)
+                    {
+                        DataRow dr1 = dt_1.NewRow();
+                        dr1["id"] = Guid.NewGuid();
+                        dr1["moduleId"] = ids[i];
+                        dr1["userpcid"] = userpcid;
+                        dr1["status"] = 0;
+                        dr1["adduser"] = CurrentUserId;
+                        dr1["addtime"] = DateTime.Now;
+                        dt_1.Rows.Add(dr1);
+                    }
+                    dbc.InsertTable(dt_1);
+                    #endregion
+
+                    #region 插入管理员权限表
+                    DataTable dt_2 = dbc.GetEmptyDataTable("tb_b_roledb_pc");
+                    DataRow dr2 = dt_2.NewRow();
+                    dr2["roleId"] = Guid.NewGuid();
+                    dr2["roleName"] = "管理员";
+                    dr2["userpcid"] = userpcid;
+                    dr2["rolePx"] = 0;
+                    dt_2.Rows.Add(dr2);
+                    dbc.InsertTable(dt_2);
+                    #endregion
+
+                    #region 插入用户角色关联表
+                    DataTable dt_3 = dbc.GetEmptyDataTable("tb_b_user_pc_role");
+                    DataRow dr3 = dt_3.NewRow();
+                    dr3["userroleId"] = Guid.NewGuid();
+                    dr3["userId"] = userid;
+                    dr3["roleId"] = dr2["roleId"];
+                    dr3["userpcid"] = userpcid;
+                    dt_3.Rows.Add(dr3);
+                    dbc.InsertTable(dt_3);
+                    #endregion
+
+                    #region 插入菜单模块表
+                    sql = "select menuId from tb_b_menu_pc where " + dbc.C_In("moduleId", ids);
+                    DataTable dt_4 = dbc.ExecuteDataTable(sql);
+
+                    DataTable dt_5 = dbc.GetEmptyDataTable("tb_b_menu_pc_role");
+                    for (var i = 0; i < dt_4.Rows.Count; i++)
+                    {
+                        DataRow dr5 = dt_5.NewRow();
+                        dr5["id"] = Guid.NewGuid();
+                        dr5["menuId"] = dt_4.Rows[i]["menuId"].ToString();
+                        dr5["roleId"] = dr2["roleId"];
+                        dr5["userpcid"] = userpcid;
+                        dt_5.Rows.Add(dr5);
+                    }
+                    dbc.InsertTable(dt_5);
+                    #endregion
+
+                    #region 插入角色权限关联
+                    sql = "select privilegeId from tb_b_privilege_pc where " + dbc.C_In("moduleId", ids);
+                    DataTable dt_6 = dbc.ExecuteDataTable(sql);
+
+                    DataTable dt_7 = dbc.GetEmptyDataTable("tb_b_privilege_pc_role");
+                    for (var i = 0; i < dt_6.Rows.Count; i++)
+                    {
+                        DataRow dr7 = dt_7.NewRow();
+                        dr7["id"] = Guid.NewGuid();
+                        dr7["privilegeId"] = dt_6.Rows[i]["privilegeId"].ToString();
+                        dr7["roleId"] = dr2["roleId"];
+                        dr7["userpcid"] = userpcid;
+                        dt_7.Rows.Add(dr7);
+                    }
+                    dbc.InsertTable(dt_7);
+                    #endregion
+                }
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("ClosePc")]
+    public bool ClosePc(string userid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                dbc.BeginTransaction();
+
+                var CurrentUserId = SystemUser.CurrentUser.UserID;
+                string sql = "select count(1) num from tb_b_user_pc where status = 0 and userid = " + dbc.ToSqlValue(userid);
+                int num = Convert.ToInt32(dbc.ExecuteScalar(sql).ToString());
+
+                if (num != 0)
+                {
+                    sql = "select userpcid from tb_b_user_pc where status = 0 and userid = " + dbc.ToSqlValue(userid);
+                    string userpcid = dbc.ExecuteScalar(sql).ToString();
+
+                    #region 将关联表status置为1
+                    sql = "update tb_b_user_pc set status = 1,updateuser = " + dbc.ToSqlValue(CurrentUserId) + ",updatetime = "+dbc.ToSqlValue(DateTime.Now)+" where userpcid = " + dbc.ToSqlValue(userpcid);
+                    dbc.ExecuteNonQuery(sql);
+                    #endregion
+
+                    #region 删除模块pc关联表
+                    sql = "delete from tb_b_module_pc_zx where userpcid = " + dbc.ToSqlValue(userpcid);
+                    dbc.ExecuteNonQuery(sql);
+                    #endregion
+
+                    #region 删除管理员权限表
+                    sql = "delete from tb_b_roledb_pc where userpcid = " + dbc.ToSqlValue(userpcid);
+                    dbc.ExecuteNonQuery(sql);
+                    #endregion
+
+                    #region 删除用户角色关联表
+                    sql = "delete from tb_b_user_pc_role where userpcid = " + dbc.ToSqlValue(userpcid);
+                    dbc.ExecuteNonQuery(sql);
+                    #endregion
+
+                    #region 删除菜单模块表
+                    sql = "delete from tb_b_menu_pc_role where userpcid = " + dbc.ToSqlValue(userpcid);
+                    dbc.ExecuteNonQuery(sql);
+                    #endregion
+
+                    #region 删除角色权限关联
+                    sql = "delete from tb_b_privilege_pc_role where userpcid = " + dbc.ToSqlValue(userpcid);
+                    dbc.ExecuteNonQuery(sql);
+                    #endregion
+
+                }
+                else {
+                    return false;
+                }
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("SelectModule")]
+    public bool SelectModule(string[] ids, string userid)
+    {
+        using (var dbc = new DBConnection())
+        {
+            try
+            {
+                dbc.BeginTransaction();
+
+                string CurrentUserId = SystemUser.CurrentUser.UserID;
+
+                string sql = "select userpcid from tb_b_user_pc where status = 0 and userid = " + dbc.ToSqlValue(userid);
+                string userpcid = dbc.ExecuteScalar(sql).ToString();
+
+                sql = "select roleId from tb_b_roledb_pc where userpcid = " + dbc.ToSqlValue(userpcid) + @" and roleName = '管理员'";
+                string roleId = dbc.ExecuteScalar(sql).ToString();
+
+                sql = @"select moduleId from (
+                        select moduleId from tb_b_module_pc where moduleId not in (select moduleId from tb_b_module_pc_zx where userpcid = " + dbc.ToSqlValue(userpcid) + @")
+                        ) a where " + dbc.C_In("a.moduleId", ids);
+                DataTable dt_module = dbc.ExecuteDataTable(sql);
+
+                #region 删除去掉的模块
+                sql = "delete from tb_b_menu_pc_role where menuId in (select menuId from tb_b_menu_pc where " + dbc.C_NotIn("moduleId", ids) + ") and userpcid = " + dbc.ToSqlValue(userpcid);
+                dbc.ExecuteNonQuery(sql);
+
+                sql = "delete from tb_b_privilege_pc_role where privilegeId in (select privilegeId from tb_b_privilege_pc where " + dbc.C_NotIn("moduleId", ids) + ") and userpcid = " + dbc.ToSqlValue(userpcid);
+                dbc.ExecuteNonQuery(sql);
+
+                sql = "delete from tb_b_module_pc_zx where " + dbc.C_NotIn("moduleId", ids) + " and userpcid = " + dbc.ToSqlValue(userpcid);
+                dbc.ExecuteNonQuery(sql);
+                #endregion
+
+                #region 插入新增的模块
+                if (dt_module.Rows.Count > 0)
+                {
+                    List<string> ids_new = new List<string>();
+                    #region 插入模块pc关联表
+                    DataTable dt_1 = dbc.GetEmptyDataTable("tb_b_module_pc_zx");
+                    for (var i = 0; i < dt_module.Rows.Count; i++)
+                    {
+                        DataRow dr1 = dt_1.NewRow();
+                        dr1["id"] = Guid.NewGuid();
+                        dr1["moduleId"] = dt_module.Rows[i]["moduleId"].ToString();
+                        dr1["userpcid"] = userpcid;
+                        dr1["status"] = 0;
+                        dr1["adduser"] = CurrentUserId;
+                        dr1["addtime"] = DateTime.Now;
+                        dt_1.Rows.Add(dr1);
+                        ids_new.Add(dt_module.Rows[i]["moduleId"].ToString());
+                    }
+                    dbc.InsertTable(dt_1);
+                    #endregion
+
+                    #region 插入菜单模块表
+                    sql = "select menuId from tb_b_menu_pc where " + dbc.C_In("moduleId", ids_new.ToArray());
+                    DataTable dt_4 = dbc.ExecuteDataTable(sql);
+
+                    DataTable dt_5 = dbc.GetEmptyDataTable("tb_b_menu_pc_role");
+                    for (var i = 0; i < dt_4.Rows.Count; i++)
+                    {
+                        DataRow dr5 = dt_5.NewRow();
+                        dr5["id"] = Guid.NewGuid();
+                        dr5["menuId"] = dt_4.Rows[i]["menuId"].ToString();
+                        dr5["roleId"] = roleId;
+                        dr5["userpcid"] = userpcid;
+                        dt_5.Rows.Add(dr5);
+                    }
+                    dbc.InsertTable(dt_5);
+                    #endregion
+
+                    #region 插入角色权限关联
+                    sql = "select privilegeId from tb_b_privilege_pc where " + dbc.C_In("moduleId", ids_new.ToArray());
+                    DataTable dt_6 = dbc.ExecuteDataTable(sql);
+
+                    DataTable dt_7 = dbc.GetEmptyDataTable("tb_b_privilege_pc_role");
+                    for (var i = 0; i < dt_6.Rows.Count; i++)
+                    {
+                        DataRow dr7 = dt_7.NewRow();
+                        dr7["id"] = Guid.NewGuid();
+                        dr7["privilegeId"] = dt_6.Rows[i]["privilegeId"].ToString();
+                        dr7["roleId"] = roleId;
+                        dr7["userpcid"] = userpcid;
+                        dt_7.Rows.Add(dr7);
+                    }
+                    dbc.InsertTable(dt_7);
+                    #endregion
+                }
+                #endregion
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
     [CSMethod("GetClientList")]
     public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm,string beg,string end)
     {
