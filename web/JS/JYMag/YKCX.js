@@ -99,7 +99,7 @@ Ext.onReady(function () {
                         dataIndex: 'oilNum',
                         sortable: false,
                         menuDisabled: true,
-                        text: "加油量（升）",
+                        text: "加油量（L）",
                         width: 100
                     },
                     {
@@ -107,7 +107,7 @@ Ext.onReady(function () {
                         dataIndex: 'Price',
                         sortable: false,
                         menuDisabled: true,
-                        text: "单价（元）",
+                        text: "单价（元/L）",
                         align:'right',
                         width: 100
                     },
