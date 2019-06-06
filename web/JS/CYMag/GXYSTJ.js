@@ -486,9 +486,11 @@ Ext.define('lineWin', {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                CS('CZCLZ.YKMag.GetLine', function (retVal) {
-                                                    linestore.loadData(retVal);
-                                                }, CS.onError, zxid, Ext.getCmp('ny').getValue(), 0);
+                                                if (privilege("承运模块_干线运输统计表_查看")) {
+                                                    CS('CZCLZ.YKMag.GetLine', function (retVal) {
+                                                        linestore.loadData(retVal);
+                                                    }, CS.onError, zxid, Ext.getCmp('ny').getValue(), 0);
+                                                }
                                             }
                                         },
                                         {
@@ -496,7 +498,9 @@ Ext.define('lineWin', {
                                             iconCls: 'view',
                                             text: '导出',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.YKMag.GetLineToFile", "专线油卡明细.xls", zxid, Ext.getCmp('ny').getValue(), 0);
+                                                if (privilege("承运模块_干线运输统计表_导出")) {
+                                                    DownloadFile("CZCLZ.YKMag.GetLineToFile", "专线油卡明细.xls", zxid, Ext.getCmp('ny').getValue(), 0);
+                                                }
                                             }
                                         }
                                     ]
@@ -590,7 +594,9 @@ Ext.define('myView', {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                DataBind();
+                                                if (privilege("承运模块_干线运输统计表_查看")) {
+                                                    DataBind();
+                                                }
                                             }
                                         }
                                     ]

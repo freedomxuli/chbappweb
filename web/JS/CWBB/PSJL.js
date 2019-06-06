@@ -392,7 +392,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getPSList(1);
+                                                        if (privilege("财务报表_派送记录_查看")) {
+                                                            getPSList(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -400,7 +402,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetPSListZToFile", "派送记录.xls",  Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        if (privilege("财务报表_派送记录_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetPSListZToFile", "派送记录.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -408,7 +412,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '批量导出明细',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetPSSFToFilePL", "批量派送明细记录.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        if (privilege("财务报表_派送记录_批量导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetPSSFToFilePL", "批量派送明细记录.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]

@@ -59,7 +59,7 @@ public class CYMag
                     where += " and a.carriagetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx
+                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
                             left join tb_b_user c on a.userid=c.UserID where a.status=0 and 1=1 
                                  ";

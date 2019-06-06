@@ -331,7 +331,9 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                DataBind(1);
+                                                if (privilege("加油模块_油卡订单查询_查看")) {
+                                                    DataBind(1);
+                                                }
                                             }
                                         }
                                     ]
@@ -345,12 +347,14 @@ Ext.onReady(function () {
                                             iconCls: 'view',
                                             text: '导出',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.YKMag.GetYKDDListToFile", "油卡订单.xls",
-                                                    Ext.getCmp("cx_cardNo").getValue(), Ext.getCmp("cx_orderId").getValue(),
-                                                    Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(),
-                                                    Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue(),
-                                                    Ext.getCmp("cx_transfertype").getValue(), Ext.getCmp("cx_stair").getValue()
-                                                );
+                                                if (privilege("加油模块_油卡订单查询_导出")) {
+                                                    DownloadFile("CZCLZ.YKMag.GetYKDDListToFile", "油卡订单.xls",
+                                                        Ext.getCmp("cx_cardNo").getValue(), Ext.getCmp("cx_orderId").getValue(),
+                                                        Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(),
+                                                        Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue(),
+                                                        Ext.getCmp("cx_transfertype").getValue(), Ext.getCmp("cx_stair").getValue()
+                                                    );
+                                                }
                                             }
                                         }
                                     ]

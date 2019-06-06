@@ -275,7 +275,9 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                getList(1);
+                                                if (privilege("申请运费券_调整申请额度_查看")) {
+                                                    getList(1);
+                                                }
                                             }
                                         }
                                     ]

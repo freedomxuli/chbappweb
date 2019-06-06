@@ -157,7 +157,9 @@ Ext.define('XSList', {
                                                      iconCls: 'search',
                                                      text: '查询',
                                                      handler: function () {
-                                                         GetXSList(1);
+                                                         if (privilege("财务报表_每日明细_查看")) {
+                                                             GetXSList(1);
+                                                         }
                                                      }
                                                  }
                                             ]
@@ -171,7 +173,9 @@ Ext.define('XSList', {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetMRXSListToFile", "专线销售表.xls", xssj, Ext.getCmp("cx_lx").getValue());
+                                                        if (privilege("财务报表_每日明细_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetMRXSListToFile", "专线销售表.xls", xssj, Ext.getCmp("cx_lx").getValue());
+                                                        }
                                                     }
                                                 }
                                             ]

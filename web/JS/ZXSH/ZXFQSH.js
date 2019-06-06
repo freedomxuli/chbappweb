@@ -80,7 +80,7 @@ function getUser(nPage) {
 }
 
 function sq(id) {
-    if (privilege("专线审核_审核专线自发券_编辑")) {
+    if (privilege("专线审核_审核专线自发券_编辑") && privilege("专线审核_审核专线自发券_审核")) {
         Ext.MessageBox.confirm('提示', '是否要通过!', function (obj) {
             if (obj == "yes") {
                 CS('CZCLZ.ZXSHMag.ZFQSH', function (retVal) {
@@ -374,7 +374,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("专线审核_审核专线自发券_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 }
                                             ]
@@ -388,7 +390,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.ZXSHMag.getZFQListToFile", "审核专线自发券.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue());
+                                                        if (privilege("专线审核_审核专线自发券_导出")) {
+                                                            DownloadFile("CZCLZ.ZXSHMag.getZFQListToFile", "审核专线自发券.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue());
+                                                        }
                                                     }
                                                 }]
                                         }

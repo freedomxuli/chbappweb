@@ -134,7 +134,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getDYZXList(1);
+                                                        if (privilege("财务报表_当月情况_查看")) {
+                                                            getDYZXList(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -142,7 +144,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.getDYZXListToFile", "当月情况.xls", Ext.getCmp("cx_zxmc").getValue());
+                                                        if (privilege("财务报表_当月情况_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.getDYZXListToFile", "当月情况.xls", Ext.getCmp("cx_zxmc").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]

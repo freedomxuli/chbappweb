@@ -34,7 +34,8 @@ var store = createSFW4Store({
        { name: 'paramphoto4' },
        { name: 'paramphoto5' },
        { name: 'status' },
-       { name: 'param' }
+       { name: 'param' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -70,9 +71,9 @@ var KindStore = Ext.create('Ext.data.Store', {
 //************************************页面方法***************************************
 function getUser(nPage) {
     CS('CZCLZ.SJSHMag.GetSJList2', function (retVal) {
-        if (retVal){
+        if (retVal) {
             var result = retVal.evalJSON();
-            var temp=[];
+            var temp = [];
             for (var i = 0; i < result.list.length; i++) {
                 if (result.list[i].UserXM != "" && result.list[i].UserXM != null) {
                     temp.push(result.list[i]);
@@ -85,95 +86,98 @@ function getUser(nPage) {
                 currentPage: result.pagination.current
             });
         }
-        }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
 }
 
 
 function ck(id) {
-    var r = store.findRecord("id", id).data;
-    var win = new addWin({id:id});
-    win.show(null, function () { })
-    Ext.getCmp("UserTel").setValue(r.UserTel);
-    Ext.getCmp("UserXM").setValue(r.param.userxm);
-    Ext.getCmp("carnumber").setValue(r.param.carnumber);
-    Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
-    Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
-    Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
-    if (r.paramphoto0.fileList) {
-        if (r.paramphoto0.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto0.fileList[0].fileFullUrl,
-                fileid: r.paramphoto0.fileList[0].fjId
-            }));
+    if (privilege("承运模块_司机审核_查看")) {
+        var r = store.findRecord("id", id).data;
+        var win = new addWin({ id: id });
+        win.show(null, function () { })
+        Ext.getCmp("UserTel").setValue(r.UserTel);
+        Ext.getCmp("UserXM").setValue(r.param.userxm);
+        Ext.getCmp("carnumber").setValue(r.param.carnumber);
+        Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
+        Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
+        Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
+        if (r.paramphoto0.fileList) {
+            if (r.paramphoto0.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto0.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto0.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto1.fileList) {
-        if (r.paramphoto1.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto1.fileList[0].fileFullUrl,
-                fileid: r.paramphoto1.fileList[0].fjId
-            }));
+        if (r.paramphoto1.fileList) {
+            if (r.paramphoto1.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto1.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto1.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto2.fileList) {
-        if (r.paramphoto2.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto2.fileList[0].fileFullUrl,
-                fileid: r.paramphoto2.fileList[0].fjId
-            }));
+        if (r.paramphoto2.fileList) {
+            if (r.paramphoto2.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto2.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto2.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto3.fileList) {
-        if (r.paramphoto3.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto3.fileList[0].fileFullUrl,
-                fileid: r.paramphoto3.fileList[0].fjId
-            }));
+        if (r.paramphoto3.fileList) {
+            if (r.paramphoto3.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto3.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto3.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto4.fileList) {
-        if (r.paramphoto4.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto4.fileList[0].fileFullUrl,
-                fileid: r.paramphoto4.fileList[0].fjId
-            }));
+        if (r.paramphoto4.fileList) {
+            if (r.paramphoto4.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto4.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto4.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto5.fileList) {
-        if (r.paramphoto5.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto5.fileList[0].fileFullUrl,
-                fileid: r.paramphoto5.fileList[0].fjId
-            }));
+        if (r.paramphoto5.fileList) {
+            if (r.paramphoto5.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto5.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto5.fileList[0].fjId
+                }));
+            }
         }
+        Ext.getCmp("btn1").hide();
+        Ext.getCmp("btn2").hide();
+        Ext.getCmp("btn3").show();
     }
-    Ext.getCmp("btn1").hide();
-    Ext.getCmp("btn2").hide();
-    Ext.getCmp("btn3").show();
 }
 
 function sh(id) {
-    var r = store.findRecord("id", id).data;
-    var win = new addWin({ id: id });
-    win.show(null, function () { })
-    Ext.getCmp("UserTel").setValue(r.UserTel);
-    Ext.getCmp("UserXM").setValue(r.param.userxm);
-    Ext.getCmp("carnumber").setValue(r.param.carnumber);
-    Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
-    Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
-    Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
+    if (privilege("承运模块_司机审核_操作审核")) {
+        var r = store.findRecord("id", id).data;
+        var win = new addWin({ id: id });
+        win.show(null, function () { })
+        Ext.getCmp("UserTel").setValue(r.UserTel);
+        Ext.getCmp("UserXM").setValue(r.param.userxm);
+        Ext.getCmp("carnumber").setValue(r.param.carnumber);
+        Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
+        Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
+        Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
         if (r.paramphoto0.fileList) {
             if (r.paramphoto0.fileList.length > 0) {
                 var isDefault = false;
@@ -235,10 +239,11 @@ function sh(id) {
             }
         }
 
-   
-    Ext.getCmp("btn1").show();
-    Ext.getCmp("btn2").show();
-    Ext.getCmp("btn3").hide();
+
+        Ext.getCmp("btn1").show();
+        Ext.getCmp("btn2").show();
+        Ext.getCmp("btn3").hide();
+    }
 }
 
 //************************************页面方法***************************************
@@ -284,7 +289,7 @@ Ext.define('SelectImg', {
 
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
-    id:"addWin",
+    id: "addWin",
     height: 550,
     width: 600,
     layout: {
@@ -373,7 +378,7 @@ Ext.define('addWin', {
                     {
                         text: '通过',
                         iconCls: 'dropyes',
-                        id:"btn1",
+                        id: "btn1",
                         handler: function () {
                             if (privilege("承运模块_司机审核_编辑")) {
                                 Ext.MessageBox.confirm('提示', '是否通过!', function (obj) {
@@ -402,9 +407,9 @@ Ext.define('addWin', {
                          handler: function () {
                              if (privilege("承运模块_司机审核_编辑")) {
                                  this.up('window').close();
-                                var yjwin = new yjWin({ id: id });
-                                yjwin.show();
-                               
+                                 var yjwin = new yjWin({ id: id });
+                                 yjwin.show();
+
                              }
                          }
                      },
@@ -466,7 +471,7 @@ Ext.define('yjWin', {
                                         if (result.success) {
                                             Ext.MessageBox.alert('提示', "审核成功！");
                                         }
-                                        
+
                                     }
                                 }, CS.onError, id, Ext.getCmp("yj").getValue());
                             }
@@ -511,7 +516,7 @@ Ext.onReady(function () {
                                 xtype: 'gridcolumn',
                                 sortable: false,
                                 menuDisabled: true,
-                                flex:1,
+                                flex: 1,
                                 text: "司机名称",
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     return record.data.param.userxm;
@@ -581,10 +586,10 @@ Ext.onReady(function () {
                                 width: 150,
                                 text: "是否通过",
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    var str="";
+                                    var str = "";
                                     if (value == 0) {
                                         str += "待审核"
-                                    }else if (value == 1) {
+                                    } else if (value == 1) {
                                         str += "通过"
                                     }
                                     else if (value == 2) {
@@ -600,20 +605,18 @@ Ext.onReady(function () {
                                 dataIndex: 'id',
                                 text: '操作',
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-
                                     var str = "";
                                     if (record.data.status == 0) {
                                         str = "<a href='JavaScript:void(0)' onclick='sh(\"" + value + "\")'>审核</a>";
                                     } else if (record.data.status == 1) {
                                         str = "<a href='JavaScript:void(0)' onclick='ck(\"" + value + "\")'>查看</a>";
-                                    }
-                                    else if (record.data.status == 2) {
+                                    } else if (record.data.status == 2 ) {
                                         str = "<a href='JavaScript:void(0)' onclick='ck(\"" + value + "\")'>查看</a>";
                                     }
                                     return str;
                                 }
                             }
-                            
+
                     ],
                     viewConfig: {
 
@@ -659,7 +662,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("承运模块_司机审核_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 }
                                             ]
@@ -673,7 +678,9 @@ Ext.onReady(function () {
                                                      iconCls: 'view',
                                                      text: '导出',
                                                      handler: function () {
-                                                         DownloadFile("CZCLZ.SJSHMag.GetSJList2ToFile", "司机信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
+                                                         if (privilege("承运模块_司机审核_导出")) {
+                                                             DownloadFile("CZCLZ.SJSHMag.GetSJList2ToFile", "司机信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
+                                                         }
                                                      }
                                                  }]
                                          }

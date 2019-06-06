@@ -816,7 +816,9 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                getList(1);
+                                                if (privilege("开放购买运费券_开放购买运费券_查看")) {
+                                                    getList(1);
+                                                }
                                             }
                                         }
                                     ]
@@ -830,7 +832,9 @@ Ext.onReady(function () {
                                             text: '导出',
                                             iconCls: 'download',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.KFGMMag.GetKFGMToFile", "开放购买运费券.xls", Ext.getCmp("cx_yhm").getValue());
+                                                if (privilege("开放购买运费券_开放购买运费券_导出")) {
+                                                    DownloadFile("CZCLZ.KFGMMag.GetKFGMToFile", "开放购买运费券.xls", Ext.getCmp("cx_yhm").getValue());
+                                                }
                                             }
                                         }
                                     ]

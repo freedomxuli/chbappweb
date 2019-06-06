@@ -201,7 +201,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        GetSXJList(1);
+                                                        if (privilege("财务报表_上下架明细表_查看")) {
+                                                            GetSXJList(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -209,7 +211,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetSXJListToFile", "上下架明细.xls", Ext.getCmp("cx_sxj").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        if (privilege("财务报表_上下架明细表_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetSXJListToFile", "上下架明细.xls", Ext.getCmp("cx_sxj").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]

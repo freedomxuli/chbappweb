@@ -83,90 +83,93 @@ function getUser(nPage) {
 
 
 function ck(id) {
-    var r = store.findRecord("id", id).data;
-    var win = new addWin({id:id});
-    win.show(null, function () { })
-    Ext.getCmp("UserContent").setValue(r.param.usercontent);
-    Ext.getCmp("Address").setValue(r.param.address);
-    Ext.getCmp("UserTel").setValue(r.param.usertel);
-    Ext.getCmp("UserXM").setValue(r.UserXM);
-    Ext.getCmp("FromRoute").setValue(r.param.fromroute);
-    Ext.getCmp("ToRoute").setValue(r.param.toroute);
-    if (r.paramphoto0.fileList) {
-        if (r.paramphoto0.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto0.fileList[0].fileFullUrl,
-                fileid: r.paramphoto0.fileList[0].fjId
-            }));
+    if (privilege("专线审核_基础信息审核_查看")) {
+        var r = store.findRecord("id", id).data;
+        var win = new addWin({ id: id });
+        win.show(null, function () { })
+        Ext.getCmp("UserContent").setValue(r.param.usercontent);
+        Ext.getCmp("Address").setValue(r.param.address);
+        Ext.getCmp("UserTel").setValue(r.param.usertel);
+        Ext.getCmp("UserXM").setValue(r.UserXM);
+        Ext.getCmp("FromRoute").setValue(r.param.fromroute);
+        Ext.getCmp("ToRoute").setValue(r.param.toroute);
+        if (r.paramphoto0.fileList) {
+            if (r.paramphoto0.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto0.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto0.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto1.fileList) {
-        if (r.paramphoto1.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto1.fileList[0].fileFullUrl,
-                fileid: r.paramphoto1.fileList[0].fjId
-            }));
+        if (r.paramphoto1.fileList) {
+            if (r.paramphoto1.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto1.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto1.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto2.fileList) {
-        if (r.paramphoto2.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto2.fileList[0].fileFullUrl,
-                fileid: r.paramphoto2.fileList[0].fjId
-            }));
+        if (r.paramphoto2.fileList) {
+            if (r.paramphoto2.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto2.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto2.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto3.fileList) {
-        if (r.paramphoto3.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto3.fileList[0].fileFullUrl,
-                fileid: r.paramphoto3.fileList[0].fjId
-            }));
+        if (r.paramphoto3.fileList) {
+            if (r.paramphoto3.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto3.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto3.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto4.fileList) {
-        if (r.paramphoto4.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto4.fileList[0].fileFullUrl,
-                fileid: r.paramphoto4.fileList[0].fjId
-            }));
+        if (r.paramphoto4.fileList) {
+            if (r.paramphoto4.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto4.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto4.fileList[0].fjId
+                }));
+            }
         }
-    }
-    if (r.paramphoto5.fileList) {
-        if (r.paramphoto5.fileList.length > 0) {
-            var isDefault = false;
-            Ext.getCmp('uploadproductpic').add(new SelectImg({
-                isSelected: isDefault,
-                src: r.paramphoto5.fileList[0].fileFullUrl,
-                fileid: r.paramphoto5.fileList[0].fjId
-            }));
+        if (r.paramphoto5.fileList) {
+            if (r.paramphoto5.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto5.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto5.fileList[0].fjId
+                }));
+            }
         }
+        Ext.getCmp("btn1").hide();
+        Ext.getCmp("btn2").hide();
+        Ext.getCmp("btn3").show();
     }
-    Ext.getCmp("btn1").hide();
-    Ext.getCmp("btn2").hide();
-    Ext.getCmp("btn3").show();
 }
 
 function sh(id) {
-    var r = store.findRecord("id", id).data;
-    var win = new addWin({ id: id });
-    win.show(null, function () { })
-    Ext.getCmp("UserContent").setValue(r.param.usercontent);
-    Ext.getCmp("Address").setValue(r.param.address);
-    Ext.getCmp("UserTel").setValue(r.param.usertel);
-    Ext.getCmp("UserXM").setValue(r.UserXM);
-    Ext.getCmp("FromRoute").setValue(r.param.fromroute);
-    Ext.getCmp("ToRoute").setValue(r.param.toroute);
+    if (privilege("专线审核_基础信息审核_审核")) {
+        var r = store.findRecord("id", id).data;
+        var win = new addWin({ id: id });
+        win.show(null, function () { })
+        Ext.getCmp("UserContent").setValue(r.param.usercontent);
+        Ext.getCmp("Address").setValue(r.param.address);
+        Ext.getCmp("UserTel").setValue(r.param.usertel);
+        Ext.getCmp("UserXM").setValue(r.UserXM);
+        Ext.getCmp("FromRoute").setValue(r.param.fromroute);
+        Ext.getCmp("ToRoute").setValue(r.param.toroute);
         if (r.paramphoto0.fileList) {
             if (r.paramphoto0.fileList.length > 0) {
                 var isDefault = false;
@@ -228,10 +231,11 @@ function sh(id) {
             }
         }
 
-   
-    Ext.getCmp("btn1").show();
-    Ext.getCmp("btn2").show();
-    Ext.getCmp("btn3").hide();
+
+        Ext.getCmp("btn1").show();
+        Ext.getCmp("btn2").show();
+        Ext.getCmp("btn3").hide();
+    }
 }
 
 //************************************页面方法***************************************
@@ -643,7 +647,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("专线审核_基础信息审核_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 }
                                             ]
@@ -657,7 +663,9 @@ Ext.onReady(function () {
                                                      iconCls: 'view',
                                                      text: '导出',
                                                      handler: function () {
-                                                         DownloadFile("CZCLZ.ZXSHMag.GetZXList2ToFile", "基础信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
+                                                         if (privilege("专线审核_基础信息审核_导出")) {
+                                                             DownloadFile("CZCLZ.ZXSHMag.GetZXList2ToFile", "基础信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_ispass").getValue());
+                                                         }
                                                      }
                                                  }]
                                          }

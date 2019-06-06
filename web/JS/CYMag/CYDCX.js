@@ -37,7 +37,8 @@ var store = createSFW4Store({
         { name: 'sjdh' },
         { name: 'sjcarnumber' },
         { name: 'zx' },
-        { name: 'isinvoice' }
+        { name: 'isinvoice' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -548,6 +549,14 @@ Ext.onReady(function () {
                                 }
                                 return str;
                             }
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'caruser',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "车主账号",
+                            width: 100
                         }
                     ],
                     viewConfig: {
@@ -596,7 +605,9 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                DataBind(1);
+                                                if (privilege("承运模块_承运单查询_查看")) {
+                                                    DataBind(1);
+                                                }
                                             }
                                         }
                                     ]
@@ -609,7 +620,9 @@ Ext.onReady(function () {
                                             text: '导出',
                                             iconCls: 'view',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                if (privilege("承运模块_承运单查询_导出")) {
+                                                    DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                }
                                             }
                                         }
                                     ]

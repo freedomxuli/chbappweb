@@ -629,7 +629,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("财务报表_微信公众号统计_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -637,7 +639,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetWXGZHListToFile", "微信公众号数据统计表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        if (privilege("财务报表_微信公众号统计_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetWXGZHListToFile", "微信公众号数据统计表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]

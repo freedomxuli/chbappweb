@@ -125,7 +125,9 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                getList(1);
+                                                if (privilege("运费券下架_运费券清理_查看")) {
+                                                    getList(1);
+                                                }
                                             }
                                         }
                                     ]

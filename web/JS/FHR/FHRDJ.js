@@ -167,7 +167,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUserList(1);
+                                                        if (privilege("财务报表_发货人等级_查看")) {
+                                                            getUserList(1);
+                                                        }
                                                     }
                                                 }
                                             ]
@@ -180,7 +182,9 @@ Ext.onReady(function () {
                                                         xtype: 'button',
                                                         text: '导出',
                                                         handler: function () {
-                                                            DownloadFile("CZCLZ.FHRMag.GetUserListToFile", "发货人等级.xls", Ext.getCmp("cx_name").getValue(), Ext.getCmp("cx_dj").getValue());
+                                                            if (privilege("财务报表_发货人等级_导出")) {
+                                                                DownloadFile("CZCLZ.FHRMag.GetUserListToFile", "发货人等级.xls", Ext.getCmp("cx_name").getValue(), Ext.getCmp("cx_dj").getValue());
+                                                            }
                                                         }
                                                     }]
                                          }

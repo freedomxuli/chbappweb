@@ -212,7 +212,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("财务报表_三方交易明细_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -220,7 +222,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue());
+                                                        if (privilege("财务报表_三方交易明细_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]

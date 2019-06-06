@@ -590,7 +590,9 @@ Ext.define('myView', {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                DataBind();
+                                                if (privilege("承运模块_油品销售统计表_查看")) {
+                                                    DataBind();
+                                                }
                                             }
                                         }
                                     ]

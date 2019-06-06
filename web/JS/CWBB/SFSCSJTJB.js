@@ -921,7 +921,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("财务报表_市场数据统计表--三方_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -929,7 +931,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetSFSJListToFile", "三方市场数据统计表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        if (privilege("财务报表_市场数据统计表--三方_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetSFSJListToFile", "三方市场数据统计表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]

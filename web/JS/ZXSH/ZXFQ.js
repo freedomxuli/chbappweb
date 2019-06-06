@@ -413,7 +413,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("专线审核_自行发布运费券_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 }
                                             ]
@@ -427,7 +429,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.ZXSHMag.GetZXListToFile", "基础信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_iscanrelease").getValue());
+                                                        if (privilege("专线审核_自行发布运费券_导出")) {
+                                                            DownloadFile("CZCLZ.ZXSHMag.GetZXListToFile", "基础信息审核.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_iscanrelease").getValue());
+                                                        }
                                                     }
                                                 }]
                                         }

@@ -185,7 +185,9 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                getList(1);
+                                                if (privilege("申请运费券_运费券授权_查看")) {
+                                                    getList(1);
+                                                }
                                             }
                                         }
                                     ]
@@ -199,7 +201,9 @@ Ext.onReady(function () {
                                             text: '导出',
                                             iconCls: 'download',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.JFSQMag.GetJFSQToFile", "运费券申请.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
+                                                if (privilege("申请运费券_运费券授权_导出")) {
+                                                    DownloadFile("CZCLZ.JFSQMag.GetJFSQToFile", "运费券申请.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
+                                                }
                                             }
                                         }
                                     ]

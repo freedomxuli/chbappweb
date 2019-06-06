@@ -114,11 +114,13 @@ function getUser(nPage) {
 }
 
 function CKXSZB(id) {
-    userId = id;
-    var win = new XSZBList({ userId: userId });
-    win.show(null, function () {
-        getXSZBList(1);
-    })
+    if (privilege("财务报表_耗材券总表_查看")) {
+        userId = id;
+        var win = new XSZBList({ userId: userId });
+        win.show(null, function () {
+            getXSZBList(1);
+        })
+    }
 }
 
 function getXSZBList(nPage) {
@@ -910,7 +912,9 @@ Ext.onReady(function () {
                                                     iconCls: 'search',
                                                     text: '查询',
                                                     handler: function () {
-                                                        getUser(1);
+                                                        if (privilege("财务报表_耗材券总表_查看")) {
+                                                            getUser(1);
+                                                        }
                                                     }
                                                 },
                                                 {
@@ -918,7 +922,9 @@ Ext.onReady(function () {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetHCQListToFile", "耗材券总表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_sc").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        if (privilege("财务报表_耗材券总表_导出")) {
+                                                            DownloadFile("CZCLZ.CWBBMag.GetHCQListToFile", "耗材券总表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_sc").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                        }
                                                     }
                                                 },
                                             ]
