@@ -490,8 +490,8 @@ public class YKMag
                     }
                     else
                     {
-                        var oilcardcode = "CHB_" + GetStrAscii(6) + DateTime.Now.ToString("yyyyMMddHHmmssffff");
-                        var oiltransfercode = GetStrAscii(6) + DateTime.Now.ToString("yyyyMMddHHmmssffff");
+                        var oilcardcode = "CHB_" + GetStrAscii(DateTime.Now, 6) + DateTime.Now.ToString("yyyyMMddHHmmssffff");
+                        var oiltransfercode = GetStrAscii(DateTime.Now.AddMilliseconds(10), 6) + DateTime.Now.AddMilliseconds(10).ToString("yyyyMMddHHmmssffff");
 
                         DataTable otdt = dbc.GetEmptyDataTable("tb_b_oil_transfer");
                         DataRow otdr = otdt.NewRow();
@@ -547,13 +547,13 @@ public class YKMag
         }
     }
 
-    private string GetStrAscii(int nLength)
+    private string GetStrAscii(DateTime time, int nLength)
     {
         int nStrLength = nLength;
         string strString = "1234567890";
         //string  strString   = "1234567890qwertyuioplkjhgfdsazxcvbnmASDFGHJKLMNBVCXZQWERTYUIOP";
         StringBuilder strtemp = new StringBuilder();
-        Random random = new Random((int)DateTime.Now.Ticks);
+        Random random = new Random((int)time.Ticks);
         for (int i = 0; i < nStrLength; i++)
         {
             random = new Random(unchecked(random.Next() * 1000));

@@ -168,6 +168,10 @@ public class CYMag
                 cells[0, 16].PutValue("是否开票");
                 cells[0, 16].SetStyle(style2);
                 cells.SetColumnWidth(16, 20);
+                cells[0, 17].PutValue("承运单号");
+                cells[0, 17].SetStyle(style2);
+                cells.SetColumnWidth(17, 20);
+
 
                 string where = "";
                 if (!string.IsNullOrEmpty(carriagecode.Trim()))
@@ -373,6 +377,12 @@ public class CYMag
                     }
                     cells[i + 1, 16].PutValue(isinvoice);
                     cells[i + 1, 16].SetStyle(style4);
+
+                    if (dt.Rows[i]["carriagecode"] != null && dt.Rows[i]["carriagecode"].ToString() != "")
+                    {
+                        cells[i + 1, 17].PutValue(dt.Rows[i]["carriagecode"]);
+                    }
+                    cells[i + 1, 17].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -728,7 +738,7 @@ public class CYMag
                 {
                     if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
                     {
-                        string sql = "select * from tb_b_user where ClientKind=1 and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
                         DataTable udt = dbc.ExecuteDataTable(sql);
                         if (udt.Rows.Count > 0)
                         {
@@ -848,7 +858,7 @@ public class CYMag
                 {
                     if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
                     {
-                        string sql = "select * from tb_b_user where ClientKind=1 and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
                         DataTable udt = dbc.ExecuteDataTable(sql);
                         if (udt.Rows.Count > 0)
                         {
