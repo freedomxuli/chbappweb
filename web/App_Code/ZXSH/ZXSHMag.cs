@@ -880,6 +880,7 @@ public class ZXSHMag
                         sr1["PlatToSaleId"] = sdt1.Rows[0]["PlatToSaleId"];
                         sr1["SaleRecordVerifyType"] = issh;
                         sr1["SaleRecordVerifyTime"] = time;
+                        sr1["SaleRecordTime"] = sdt.Rows[0]["SaleRecordTime"];
                         dt1.Rows.Add(sr1);
                         dbc.UpdateTable(dt1, dtt1);
 
