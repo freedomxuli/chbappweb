@@ -161,20 +161,20 @@ public class YKMag
                     where += " and " + dbc.C_Like("b.UserName", stair, LikeStyle.LeftAndRightLike);
                 }
                 string str = @"select a.*,b.UserName STAIR,c.UserTel from tb_b_oil_order a 
-										left join(
-											--我的卡包的一些信息：（一级）划拨类型、一级划拨账户
-											select t3.UserID,t3.oilcardcode,t4.transfertype,t4.UserXM,t4.UserName from(
-												--确定划拨明细,得到油卡划拨编号
-												select t1.*,t2.transfertype from tb_b_myoilcard t1
-												left join tb_b_oil_transfer t2 on t1.UserID=t2.inuserid and t1.oiltransfercode=t2.oiltransfercode and t1.oilcardcode=t2.oilcardcode
-												where t1.status=0
-											)t3
-											left join (
-												--得到一级划拨信息
-												select t1.oiltransfercode,t1.oilcardcode,t1.transfertype,t2.UserName,t2.UserXM from tb_b_oil_transfer t1
-												left join tb_b_user t2 on t1.inuserid=t2.UserID
-												where t1.status=0 and t1.outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-											)t4 on t3.oiltransfercode=t4.oiltransfercode
+							    left join(
+								    --我的卡包的一些信息：（一级）划拨类型、一级划拨账户
+								    select t3.UserID,t3.oilcardcode,t4.transfertype,t4.UserXM,t4.UserName from(
+									    --确定划拨明细,得到油卡划拨编号
+									    select t1.*,t2.transfertype from tb_b_myoilcard t1
+									    left join tb_b_oil_transfer t2 on t1.UserID=t2.inuserid and t1.oiltransfercode=t2.oiltransfercode and t1.oilcardcode=t2.oilcardcode
+									    where t1.status=0
+								    )t3
+								    left join (
+									    --得到一级划拨信息
+									    select t1.oiltransfercode,t1.oilcardcode,t1.transfertype,t2.UserName,t2.UserXM from tb_b_oil_transfer t1
+									    left join tb_b_user t2 on t1.inuserid=t2.UserID
+									    where t1.status=0 and t1.outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+								    )t4 on t3.oiltransfercode=t4.oiltransfercode
                                 )b on a.cardNo=b.oilcardcode and a.userid=b.UserID 
                                 left join tb_b_user c on a.userid=c.UserID
                                 where 1=1 ";
@@ -284,11 +284,11 @@ public class YKMag
                 cells[0, 1].SetStyle(style2);
                 cells.SetColumnWidth(1, 14);
 
-                cells[0, 2].PutValue("加油量");
+                cells[0, 2].PutValue("加油量（L）");
                 cells[0, 2].SetStyle(style2);
                 cells.SetColumnWidth(2, 20);
 
-                cells[0, 3].PutValue("单价");
+                cells[0, 3].PutValue("单价(元/L)");
                 cells[0, 3].SetStyle(style2);
                 cells.SetColumnWidth(3, 20);
 
@@ -296,7 +296,7 @@ public class YKMag
                 cells[0, 4].SetStyle(style2);
                 cells.SetColumnWidth(4, 20);
 
-                cells[0, 5].PutValue("油品类型");
+                cells[0, 5].PutValue("油品类型（号）");
                 cells[0, 5].SetStyle(style2);
                 cells.SetColumnWidth(5, 20);
 
@@ -312,21 +312,25 @@ public class YKMag
                 cells[0, 8].SetStyle(style2);
                 cells.SetColumnWidth(8, 20);
 
-                cells[0, 9].PutValue("订单号");
+                cells[0, 9].PutValue("是否开票");
                 cells[0, 9].SetStyle(style2);
                 cells.SetColumnWidth(9, 20);
 
-                cells[0, 10].PutValue("找有网的交易流水号");
+                cells[0, 10].PutValue("订单号");
                 cells[0, 10].SetStyle(style2);
                 cells.SetColumnWidth(10, 20);
 
-                cells[0, 11].PutValue("用户手机号");
+                cells[0, 11].PutValue("找有网的交易流水号");
                 cells[0, 11].SetStyle(style2);
                 cells.SetColumnWidth(11, 20);
 
-                cells[0, 12].PutValue("时间");
+                cells[0, 12].PutValue("用户手机号");
                 cells[0, 12].SetStyle(style2);
                 cells.SetColumnWidth(12, 20);
+
+                cells[0, 13].PutValue("时间");
+                cells[0, 13].SetStyle(style2);
+                cells.SetColumnWidth(13, 20);
 
                 string where = "";
                 if (!string.IsNullOrEmpty(cardNo.Trim()))
@@ -432,17 +436,33 @@ public class YKMag
 
                     cells[i + 1, 8].PutValue(status);
                     cells[i + 1, 8].SetStyle(style4);
-                    cells[i + 1, 9].PutValue(dt.Rows[i]["oilordercode"]);
+
+                    string invoice = "";
+                    if (dt.Rows[i]["isinvoice"] != null && dt.Rows[i]["isinvoice"].ToString() != "")
+                    {
+                        if (Convert.ToInt32(dt.Rows[i]["isinvoice"].ToString()) == 0)
+                        {
+                            invoice = "未开";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isinvoice"].ToString()) == 1)
+                        {
+                            invoice = "已开";
+                        }
+                    }
+                    cells[i + 1, 9].PutValue(invoice);
                     cells[i + 1, 9].SetStyle(style4);
-                    cells[i + 1, 10].PutValue(dt.Rows[i]["orderId"]);
+
+                    cells[i + 1, 10].PutValue(dt.Rows[i]["oilordercode"]);
                     cells[i + 1, 10].SetStyle(style4);
-                    cells[i + 1, 11].PutValue(dt.Rows[i]["UserTel"]);
+                    cells[i + 1, 11].PutValue(dt.Rows[i]["orderId"]);
                     cells[i + 1, 11].SetStyle(style4);
+                    cells[i + 1, 12].PutValue(dt.Rows[i]["UserTel"]);
+                    cells[i + 1, 12].SetStyle(style4);
                     if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
                     {
-                        cells[i + 1, 12].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd HH:mm:ss"));
+                        cells[i + 1, 13].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd HH:mm:ss"));
                     }
-                    cells[i + 1, 12].SetStyle(style4);
+                    cells[i + 1, 13].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
