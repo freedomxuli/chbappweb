@@ -22,7 +22,8 @@ var store = createSFW4Store({
         { name: 'UserTel' },
         { name: 'UserName' },
         { name: 'STAIR' },
-        { name: 'UserTel' }
+        { name: 'UserTel' },
+        { name: 'isinvoice' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -163,6 +164,21 @@ Ext.onReady(function () {
                                 str = "交易撤销";
                             }
                             return str;
+                        }
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'isinvoice',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "是否开票",
+                        width: 100,
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            if (value == 1) {
+                                return "已开";
+                            } else {
+                                return "未开";
+                            }
                         }
                     },
                     {

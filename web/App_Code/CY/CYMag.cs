@@ -168,9 +168,16 @@ public class CYMag
                 cells[0, 16].PutValue("是否开票");
                 cells[0, 16].SetStyle(style2);
                 cells.SetColumnWidth(16, 20);
+
                 cells[0, 17].PutValue("车主账号");
                 cells[0, 17].SetStyle(style2);
                 cells.SetColumnWidth(17, 20);
+
+                cells[0, 18].PutValue("承运单号");
+                cells[0, 18].SetStyle(style2);
+                cells.SetColumnWidth(18, 20);
+
+
 
                 string where = "";
                 if (!string.IsNullOrEmpty(carriagecode.Trim()))
@@ -377,11 +384,18 @@ public class CYMag
                     cells[i + 1, 16].PutValue(isinvoice);
                     cells[i + 1, 16].SetStyle(style4);
 
+
                     if (dt.Rows[i]["caruser"] != null && dt.Rows[i]["caruser"].ToString() != "")
                     {
                         cells[i + 1, 17].PutValue(dt.Rows[i]["caruser"].ToString());
                     }
-                    cells[i + 1, 17].SetStyle(style4);
+
+                    if (dt.Rows[i]["carriagecode"] != null && dt.Rows[i]["carriagecode"].ToString() != "")
+                    {
+                        cells[i + 1, 18].PutValue(dt.Rows[i]["carriagecode"]);
+
+                    }
+                    cells[i + 1, 18].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -458,10 +472,29 @@ public class CYMag
                     dbc.InsertTable(ofdt);
                 }
 
-                dbc.CommitTransaction();
-
                 string str = "select * from tb_b_carriage where status=0 and carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
+
+                if (dt.Rows.Count > 0)
+                {
+                    var request2 = (HttpWebRequest)WebRequest.Create(ServiceURL + "payAndInsure");
+                    request2.Method = "POST";
+                    request2.ContentType = "application/json;charset=UTF-8";
+                    var byteData = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                    {
+                        tradeCode = "payAndInsure",
+                        carriageid = carriageid,
+                        carriagestatus = 30,
+                        userid = dt.Rows[0]["userid"]
+                    }));
+                    var length = byteData.Length;
+                    request2.ContentLength = length;
+                    var writer = request2.GetRequestStream();
+                    writer.Write(byteData, 0, length);
+                    writer.Close();
+                }
+
+                dbc.CommitTransaction();
 
                 if (dt.Rows.Count > 0)
                 {
@@ -486,13 +519,24 @@ public class CYMag
                         carriageid = carriageid
                     }));
                     var length1 = byteData1.Length;
-                    request1.ContentLength = length;
+                    request1.ContentLength = length1;
                     var writer1 = request1.GetRequestStream();
-                    writer1.Write(byteData1, 0, length);
+                    writer1.Write(byteData1, 0, length1);
                     writer1.Close();
-                }
 
-                
+                    var request3 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/verify/tocaruser");
+                    request3.Method = "POST";
+                    request3.ContentType = "application/json;charset=UTF-8";
+                    var byteData3 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                    {
+                        carriageid = carriageid
+                    }));
+                    var length3 = byteData3.Length;
+                    request3.ContentLength = length3;
+                    var writer3 = request3.GetRequestStream();
+                    writer3.Write(byteData3, 0, length3);
+                    writer3.Close();
+                }
 
                 return true;
             }
@@ -563,9 +607,9 @@ public class CYMag
                         carriageid = carriageid
                     }));
                     var length1 = byteData1.Length;
-                    request1.ContentLength = length;
+                    request1.ContentLength = length1;
                     var writer1 = request1.GetRequestStream();
-                    writer1.Write(byteData1, 0, length);
+                    writer1.Write(byteData1, 0, length1);
                     writer1.Close();
                 }
                 return true;
@@ -668,6 +712,33 @@ public class CYMag
                 writer.Write(byteData, 0, length);
                 writer.Close();
 
+
+                var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/finish/tocaruser");
+                request1.Method = "POST";
+                request1.ContentType = "application/json;charset=UTF-8";
+                var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                {
+                    carriageid = carriageid
+                }));
+                var length1 = byteData1.Length;
+                request1.ContentLength = length1;
+                var writer1 = request1.GetRequestStream();
+                writer1.Write(byteData1, 0, length1);
+                writer1.Close();
+
+                var request3 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/finish/tocaruser");
+                request3.Method = "POST";
+                request3.ContentType = "application/json;charset=UTF-8";
+                var byteData3 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                {
+                    carriageid = carriageid
+                }));
+                var length3 = byteData3.Length;
+                request3.ContentLength = length3;
+                var writer3 = request3.GetRequestStream();
+                writer3.Write(byteData3, 0, length3);
+                writer3.Close();
+
                 return true;
             }
             catch (Exception ex)
@@ -737,7 +808,7 @@ public class CYMag
                 {
                     if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
                     {
-                        string sql = "select * from tb_b_user where ClientKind=1 and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
                         DataTable udt = dbc.ExecuteDataTable(sql);
                         if (udt.Rows.Count > 0)
                         {
@@ -800,6 +871,22 @@ public class CYMag
                                         dbc.InsertTable(pfdt);
 
                                         dbc.CommitTransaction();
+
+                                        if (dt.Rows.Count > 0)
+                                        {
+                                            var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pay/tocaruser");
+                                            request1.Method = "POST";
+                                            request1.ContentType = "application/json;charset=UTF-8";
+                                            var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                                            {
+                                                carriageid = carriageid
+                                            }));
+                                            var length1 = byteData1.Length;
+                                            request1.ContentLength = length1;
+                                            var writer1 = request1.GetRequestStream();
+                                            writer1.Write(byteData1, 0, length1);
+                                            writer1.Close();
+                                        }
                                         return true;
                                     }
                                     else
@@ -857,7 +944,7 @@ public class CYMag
                 {
                     if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
                     {
-                        string sql = "select * from tb_b_user where ClientKind=1 and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
                         DataTable udt = dbc.ExecuteDataTable(sql);
                         if (udt.Rows.Count > 0)
                         {

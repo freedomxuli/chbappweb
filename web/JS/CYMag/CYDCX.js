@@ -519,6 +519,14 @@ Ext.onReady(function () {
                                 return str;
                             }
                         },
+                         {
+                             xtype: 'gridcolumn',
+                             dataIndex: 'carriagecode',
+                             sortable: false,
+                             menuDisabled: true,
+                             text: "承运单号",
+                             width: 200
+                         },
                         {
                             xtype: 'gridcolumn',
                             dataIndex: 'carriagestatus',
