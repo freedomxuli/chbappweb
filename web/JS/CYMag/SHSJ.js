@@ -76,8 +76,12 @@ function getUser(nPage) {
             var temp = [];
             for (var i = 0; i < result.list.length; i++) {
                 if (result.list[i].UserXM != "" && result.list[i].UserXM != null) {
+                    if (result.list[i].caruser == null) {
+                        result.list[i].caruser = '';
+                    }
                     temp.push(result.list[i]);
                 }
+
             }
             store.setData({
                 data: temp,
@@ -600,6 +604,14 @@ Ext.onReady(function () {
                             },
                             {
                                 xtype: 'gridcolumn',
+                                dataIndex: 'caruser',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "车主账号",
+                                width: 100
+                            },
+                            {
+                                xtype: 'gridcolumn',
                                 sortable: false,
                                 menuDisabled: true,
                                 dataIndex: 'id',
@@ -610,7 +622,7 @@ Ext.onReady(function () {
                                         str = "<a href='JavaScript:void(0)' onclick='sh(\"" + value + "\")'>审核</a>";
                                     } else if (record.data.status == 1) {
                                         str = "<a href='JavaScript:void(0)' onclick='ck(\"" + value + "\")'>查看</a>";
-                                    } else if (record.data.status == 2 ) {
+                                    } else if (record.data.status == 2) {
                                         str = "<a href='JavaScript:void(0)' onclick='ck(\"" + value + "\")'>查看</a>";
                                     }
                                     return str;

@@ -168,6 +168,9 @@ public class CYMag
                 cells[0, 16].PutValue("是否开票");
                 cells[0, 16].SetStyle(style2);
                 cells.SetColumnWidth(16, 20);
+                cells[0, 17].PutValue("车主账号");
+                cells[0, 17].SetStyle(style2);
+                cells.SetColumnWidth(17, 20);
 
                 string where = "";
                 if (!string.IsNullOrEmpty(carriagecode.Trim()))
@@ -189,7 +192,7 @@ public class CYMag
                     where += " and a.carriagetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx
+                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
                             left join tb_b_user c on a.userid=c.UserID where a.status=0 and  1=1 
                                  ";
@@ -373,6 +376,12 @@ public class CYMag
                     }
                     cells[i + 1, 16].PutValue(isinvoice);
                     cells[i + 1, 16].SetStyle(style4);
+
+                    if (dt.Rows[i]["caruser"] != null && dt.Rows[i]["caruser"].ToString() != "")
+                    {
+                        cells[i + 1, 17].PutValue(dt.Rows[i]["caruser"].ToString());
+                    }
+                    cells[i + 1, 17].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();

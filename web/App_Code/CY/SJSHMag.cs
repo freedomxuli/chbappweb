@@ -329,6 +329,7 @@ public class SJSHMag
         public string id { get; set; }
         public string status { get; set; }
         public string mirrornumber { get; set; }
+        public string caruser { get; set; }
         public param param;
     }
     public struct param
@@ -406,6 +407,9 @@ public class SJSHMag
                 cells[0, 7].PutValue("是否通过");
                 cells[0, 7].SetStyle(style2);
                 cells.SetColumnWidth(7, 20);
+                cells[0, 8].PutValue("车主账号");
+                cells[0, 8].SetStyle(style2);
+                cells.SetColumnWidth(8, 20);
 
                 string _url = ServiceURL + "tbbdriverapply.selectApply";
                 string jsonParam = new JavaScriptSerializer().Serialize(new
@@ -492,6 +496,8 @@ public class SJSHMag
                         }
                         cells[i + 1, 7].PutValue(shzt);
                         cells[i + 1, 7].SetStyle(style4);
+                        cells[i + 1, 8].PutValue(list[i].caruser);
+                        cells[i + 1, 8].SetStyle(style4);
                     }
                 }
 
