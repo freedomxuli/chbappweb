@@ -2029,6 +2029,7 @@ public class UserMag
                     dr["searchAddress"] = jsr["searchAddress"].ToString();
                     dr["DqBm"] = jsr["DqBm"].ToString();
                     dr["IDCard"] = jsr["IDCard"].ToString();
+                    dr["caruser"] = jsr["caruser"].ToString();
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2069,6 +2070,7 @@ public class UserMag
                     dr["searchAddress"] = jsr["searchAddress"].ToString();
                     dr["DqBm"] = jsr["DqBm"].ToString();
                     dr["IDCard"] = jsr["IDCard"].ToString();
+                    dr["caruser"] = jsr["caruser"].ToString();
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);
 

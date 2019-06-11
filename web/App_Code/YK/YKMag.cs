@@ -583,7 +583,7 @@ public class YKMag
     }
 
     [CSMethod("GetYKHBList")]
-    public object GetYKHBList(int pagnum, int pagesize, string oilcardcode, string oiltransfercode, string yhzh, string zt, string beg, string end)
+    public object GetYKHBList(int pagnum, int pagesize, string oilcardcode, string oiltransfercode, string yhzh, string zczh,string zt, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -607,6 +607,10 @@ public class YKMag
                 {
                     where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
                 }
+                if (!string.IsNullOrEmpty(zczh.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.zczh", zczh.Trim(), LikeStyle.LeftAndRightLike);
+                }
 
                 if (!string.IsNullOrEmpty(zt.Trim()))
                 {
@@ -629,13 +633,15 @@ public class YKMag
                 }
 
                 string str = @" select * from (select a.addtime,a.oiltransfercode, a.oilcardcode,a.outuserid,a.money,'查货宝' as zcxm,'' as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh 
-  from tb_b_oil_transfer a left join tb_b_user b on a.inuserid=b.userid 
-  where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0
-  union all
-  select a.addtime,a.oiltransfercode,a.oilcardcode,a.outuserid,a.money,c.UserXM as zcxm,c.UserName as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh 
-  from tb_b_oil_transfer a left join tb_b_user b on a.inuserid=b.userid 
-  left join tb_b_user c on a.outuserid=c.UserID
-  where outuserid<>'6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0) a where 1=1
+                                  from tb_b_oil_transfer a 
+                                    left join tb_b_user b on a.inuserid=b.userid 
+                                  where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0
+                                  union all
+                                  select a.addtime,a.oiltransfercode,a.oilcardcode,a.outuserid,a.money,c.UserXM as zcxm,c.UserName as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh 
+                                  from tb_b_oil_transfer a 
+                                    left join tb_b_user b on a.inuserid=b.userid 
+                                  left join tb_b_user c on a.outuserid=c.UserID
+                                  where outuserid<>'6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0) a where 1=1
                                  ";
                 str += where;
 
@@ -654,7 +660,7 @@ public class YKMag
 
 
     [CSMethod("GetYKHBListToFile", 2)]
-    public byte[] GetYKHBListToFile(string oilcardcode, string oiltransfercode, string yhzh, string zt, string beg, string end)
+    public byte[] GetYKHBListToFile(string oilcardcode, string oiltransfercode, string yhzh, string zczh, string zt, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -703,26 +709,36 @@ public class YKMag
 
 
                 cells.SetRowHeight(0, 20);
-                cells[0, 0].PutValue("装出人员");
+                cells[0, 0].PutValue("转出人员名称");
                 cells[0, 0].SetStyle(style2);
                 cells.SetColumnWidth(0, 20);
-                cells[0, 1].PutValue("转入人员账号");
+
+                cells[0, 1].PutValue("转出人员账号");
                 cells[0, 1].SetStyle(style2);
                 cells.SetColumnWidth(1, 20);
-                cells[0, 2].PutValue("转入人员名称");
+
+                cells[0, 2].PutValue("转入人员账号");
                 cells[0, 2].SetStyle(style2);
-                cells.SetColumnWidth(2, 20);
-                cells[0, 3].PutValue("转出油卡金额");
+                cells.SetColumnWidth(1, 20);
+
+                cells[0, 3].PutValue("转入人员名称");
                 cells[0, 3].SetStyle(style2);
-                cells.SetColumnWidth(3, 20);
-                cells[0, 4].PutValue("油卡编号");
+                cells.SetColumnWidth(2, 20);
+
+                cells[0, 4].PutValue("转出油卡金额");
                 cells[0, 4].SetStyle(style2);
-                cells.SetColumnWidth(4, 20);
-                cells[0, 5].PutValue("油卡划拨编号");
+                cells.SetColumnWidth(3, 20);
+
+                cells[0, 5].PutValue("油卡编号");
                 cells[0, 5].SetStyle(style2);
-                cells.SetColumnWidth(5, 20);
-                cells[0, 6].PutValue("时间");
+                cells.SetColumnWidth(4, 20);
+
+                cells[0, 6].PutValue("油卡划拨编号");
                 cells[0, 6].SetStyle(style2);
+                cells.SetColumnWidth(5, 20);
+
+                cells[0, 7].PutValue("时间");
+                cells[0, 7].SetStyle(style2);
                 cells.SetColumnWidth(6, 20);
 
                 string where = "";
@@ -739,6 +755,10 @@ public class YKMag
                 if (!string.IsNullOrEmpty(yhzh.Trim()))
                 {
                     where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(zczh.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.zczh", zczh.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(zt.Trim()))
@@ -780,21 +800,29 @@ public class YKMag
                 {
                     cells[i + 1, 0].PutValue(dt.Rows[i]["zcxm"]);
                     cells[i + 1, 0].SetStyle(style4);
-                    cells[i + 1, 1].PutValue(dt.Rows[i]["zrzh"]);
+
+                    cells[i + 1, 1].PutValue(dt.Rows[i]["zczh"]);
                     cells[i + 1, 1].SetStyle(style4);
-                    cells[i + 1, 2].PutValue(dt.Rows[i]["zrxm"]);
+
+                    cells[i + 1, 2].PutValue(dt.Rows[i]["zrzh"]);
                     cells[i + 1, 2].SetStyle(style4);
-                    cells[i + 1, 3].PutValue(dt.Rows[i]["money"]);
+
+                    cells[i + 1, 3].PutValue(dt.Rows[i]["zrxm"]);
                     cells[i + 1, 3].SetStyle(style4);
-                    cells[i + 1, 4].PutValue(dt.Rows[i]["oilcardcode"]);
+
+                    cells[i + 1, 4].PutValue(dt.Rows[i]["money"]);
                     cells[i + 1, 4].SetStyle(style4);
-                    cells[i + 1, 5].PutValue(dt.Rows[i]["oiltransfercode"]);
+
+                    cells[i + 1, 5].PutValue(dt.Rows[i]["oilcardcode"]);
                     cells[i + 1, 5].SetStyle(style4);
+
+                    cells[i + 1, 6].PutValue(dt.Rows[i]["oiltransfercode"]);
+                    cells[i + 1, 6].SetStyle(style4);
                     if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
                     {
-                        cells[i + 1, 6].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd HH:mm:ss"));
+                        cells[i + 1, 7].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd HH:mm:ss"));
                     }
-                    cells[i + 1, 6].SetStyle(style4);
+                    cells[i + 1, 7].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -834,7 +862,7 @@ public class YKMag
 
                 if (!string.IsNullOrEmpty(yhzh.Trim()))
                 {
-                    where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("b.UserName", yhzh.Trim(), LikeStyle.LeftAndRightLike);
                 }
                 if (!string.IsNullOrEmpty(beg))
                 {
@@ -948,7 +976,7 @@ public class YKMag
 
                 if (!string.IsNullOrEmpty(yhzh.Trim()))
                 {
-                    where += " and " + dbc.C_Like("a.zrzh", yhzh.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("b.UserName", yhzh.Trim(), LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(beg))

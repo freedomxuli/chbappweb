@@ -35,7 +35,7 @@ function DataBind(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_yhzh_zc").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
 }
 
 
@@ -206,6 +206,14 @@ Ext.onReady(function() {
                         },
                         {
                             xtype: 'gridcolumn',
+                            dataIndex: 'zczh',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "转出账号",
+                            flex:1
+                        },
+                        {
+                            xtype: 'gridcolumn',
                             dataIndex: 'zrzh',
                             sortable: false,
                             menuDisabled: true,
@@ -282,8 +290,21 @@ Ext.onReady(function() {
                                             id: 'cx_yhzh',
                                             width: 160,
                                             labelWidth: 60,
-                                            fieldLabel: '用户账号'
+                                            fieldLabel: '转入账号'
                                         },
+                                        {
+                                            xtype: 'textfield',
+                                            id: 'cx_yhzh_zc',
+                                            width: 160,
+                                            labelWidth: 60,
+                                            fieldLabel: '转出账号'
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
                                         {
                                             xtype: 'combobox',
                                             id: 'cx_zt',
@@ -355,7 +376,7 @@ Ext.onReady(function() {
                                                                 })
                                                             }
                                                         }, CS.onError);
-                                                     
+
                                                     }
                                                 }
                                             ]
@@ -370,7 +391,7 @@ Ext.onReady(function() {
                                                     text: '导出',
                                                     handler: function () {
                                                         if (privilege("加油模块_油卡划拨_导出")) {
-                                                            DownloadFile("CZCLZ.YKMag.GetYKHBListToFile", "油卡划拨.xls", Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                            DownloadFile("CZCLZ.YKMag.GetYKHBListToFile", "油卡划拨.xls", Ext.getCmp("cx_oilcardcode").getValue(), Ext.getCmp("cx_oiltransfercode").getValue(), Ext.getCmp("cx_yhzh").getValue(), Ext.getCmp("cx_yhzh_zc").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                         }
                                                     }
                                                 }

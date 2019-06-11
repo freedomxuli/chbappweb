@@ -38,7 +38,8 @@ var store = createSFW4Store({
        { name: 'AddTime' },
        { name: 'searchAddress' },
        { name: 'ewmbs' },
-       {name:'IDCard'}
+       { name: 'IDCard' },
+       { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -138,18 +139,18 @@ var moneystore = Ext.create('Ext.data.Store', {
 });
 
 var dqstore = Ext.create('Ext.data.Store', {
-        fields: [
-            { name: 'dq_mc' },
-            { name: 'dq_bm' }
-        ]
-    });
+    fields: [
+        { name: 'dq_mc' },
+        { name: 'dq_bm' }
+    ]
+});
 
 var sdqstore = Ext.create('Ext.data.Store', {
-        fields: [
-            { name: 'dq_mc' },
-            { name: 'dq_bm' }
-        ]
-    });
+    fields: [
+        { name: 'dq_mc' },
+        { name: 'dq_bm' }
+    ]
+});
 
 
 //************************************数据源*****************************************
@@ -242,7 +243,7 @@ function AddPhoto(v) {
 
         var result = retVal.evalJSON();
         //for (var i = 0; i < result.length; i++) {
-            var isDefault = false;
+        var isDefault = false;
         //    //if (result[i].ISDEFAULT == 1)
         //    //    isDefault = true;
         if (result.data.length > 0) {
@@ -260,8 +261,7 @@ function AddPhoto(v) {
     win.show();
 }
 
-function LookLists(id)
-{
+function LookLists(id) {
     var win = new OrderList();
     win.show(null, function () {
         CS('CZCLZ.YHGLClass.GetOrderList', function (retVal) {
@@ -329,7 +329,7 @@ function getGLSJList(nPage) {
 }
 
 
-function DeleteGL(duserid,userid) {
+function DeleteGL(duserid, userid) {
     Ext.MessageBox.confirm('确认', '是否删除该关联？', function (btn) {
         if (btn == 'yes') {
             CS('CZCLZ.DriverMag.DelGLByDUID', function (retVal) {
@@ -446,7 +446,7 @@ Ext.define('YGLSJList', {
                                     xtype: 'toolbar',
                                     dock: 'top',
                                     items: [
-                                        
+
                                         {
                                             xtype: 'buttongroup',
                                             title: '',
@@ -464,7 +464,7 @@ Ext.define('YGLSJList', {
                                                  }
                                             ]
                                         },
-                                        
+
                                     ]
                                 },
                                 {
@@ -604,7 +604,7 @@ Ext.define('GLSJList', {
                                                      iconCls: 'search',
                                                      text: '查询',
                                                      handler: function () {
-                                                             getGLSJList(1);
+                                                         getGLSJList(1);
                                                      }
                                                  }
                                             ]
@@ -768,7 +768,7 @@ Ext.define('phWin', {
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 450,
+    height: 475,
     width: 400,
     layout: {
         type: 'fit'
@@ -848,7 +848,7 @@ Ext.define('addWin', {
                                 Ext.getCmp("DqBm").setValue();
                                 CS('CZCLZ.YHGLClass.GetDQ', function (retVal) {
                                     dqstore.loadData(retVal);
-                                }, CS.onError,Ext.getCmp("dqS").getValue());
+                                }, CS.onError, Ext.getCmp("dqS").getValue());
                             }
                         }
                     },
@@ -921,6 +921,14 @@ Ext.define('addWin', {
                          labelWidth: 70,
                          fieldLabel: '搜索地址',
                          anchor: '100%'
+                     },
+                     {
+                         xtype: 'textfield',
+                         fieldLabel: '车主账号',
+                         id: 'caruser',
+                         name: 'caruser',
+                         labelWidth: 70,
+                         anchor: '100%'
                      }
                 ],
                 buttonAlign: 'center',
@@ -977,10 +985,10 @@ Ext.define('EWMWin', {
                 xtype: 'panel',
                 region: 'center',
                 width: 150,
-                html:'<table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top:30px;">'
-                   +    ' <tr>'
-                   +      '   <td align="center"> <div id="qrcodeTable"></div></td>'
-                  +     ' </tr>'
+                html: '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top:30px;">'
+                   + ' <tr>'
+                   + '   <td align="center"> <div id="qrcodeTable"></div></td>'
+                  + ' </tr>'
                   + '</table>',
                 buttonAlign: 'center',
                 buttons: [
@@ -1072,7 +1080,7 @@ Ext.define('OrderList', {
                                 type: 'fit'
                             },
                             title: '交易记录',
-                            hidden:true,
+                            hidden: true,
                             items: [
                                 {
                                     xtype: 'gridpanel',
@@ -1085,7 +1093,7 @@ Ext.define('OrderList', {
                                             dataIndex: 'KIND',
                                             sortable: false,
                                             menuDisabled: true,
-                                            flex:1,
+                                            flex: 1,
                                             text: '类别'
                                         },
                                         {
@@ -1206,8 +1214,7 @@ Ext.onReady(function () {
                                 menuDisabled: true,
                                 text: "角色",
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    switch (value)
-                                    {
+                                    switch (value) {
                                         case 1:
                                             return "专线";
                                             break;
@@ -1236,7 +1243,7 @@ Ext.onReady(function () {
                                 dataIndex: 'FromRoute',
                                 sortable: false,
                                 menuDisabled: true,
-                                hidden:true,
+                                hidden: true,
                                 text: "起点"
                             },
                             {
@@ -1254,7 +1261,7 @@ Ext.onReady(function () {
                                 text: "线路",
                                 width: 240,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    var str="";
+                                    var str = "";
                                     if (record.data.FromRoute) {
                                         str += record.data.FromRoute
                                     }
