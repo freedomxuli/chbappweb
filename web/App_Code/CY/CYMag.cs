@@ -477,68 +477,56 @@ public class CYMag
 
                 if (dt.Rows.Count > 0)
                 {
-                    var request2 = (HttpWebRequest)WebRequest.Create(ServiceURL + "payAndInsure");
-                    request2.Method = "POST";
-                    request2.ContentType = "application/json;charset=UTF-8";
-                    var byteData = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                    {
-                        tradeCode = "payAndInsure",
-                        carriageid = carriageid,
-                        carriagestatus = 30,
-                        userid = dt.Rows[0]["userid"]
-                    }));
-                    var length = byteData.Length;
-                    request2.ContentLength = length;
-                    var writer = request2.GetRequestStream();
-                    writer.Write(byteData, 0, length);
-                    writer.Close();
+                    
+                        dbc.CommitTransaction();
+
+                        if (dt.Rows.Count > 0)
+                        {
+                            var request2 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pass/tozx");
+                            request2.Method = "POST";
+                            request2.ContentType = "application/json;charset=UTF-8";
+                            var byteData2 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                            {
+                                id = dt.Rows[0]["userid"]
+                            }));
+                            var length2 = byteData2.Length;
+                            request2.ContentLength = length2;
+                            var writer2 = request2.GetRequestStream();
+                            writer2.Write(byteData2, 0, length2);
+                            writer2.Close();
+
+                            var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pass/todriver");
+                            request1.Method = "POST";
+                            request1.ContentType = "application/json;charset=UTF-8";
+                            var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                            {
+                                carriageid = carriageid
+                            }));
+                            var length1 = byteData1.Length;
+                            request1.ContentLength = length1;
+                            var writer1 = request1.GetRequestStream();
+                            writer1.Write(byteData1, 0, length1);
+                            writer1.Close();
+
+                            var request3 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/verify/tocaruser");
+                            request3.Method = "POST";
+                            request3.ContentType = "application/json;charset=UTF-8";
+                            var byteData3 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                            {
+                                carriageid = carriageid
+                            }));
+                            var length3 = byteData3.Length;
+                            request3.ContentLength = length3;
+                            var writer3 = request3.GetRequestStream();
+                            writer3.Write(byteData3, 0, length3);
+                            writer3.Close();
+                        }
+                        return true;
                 }
-
-                dbc.CommitTransaction();
-
-                if (dt.Rows.Count > 0)
+                else
                 {
-                    var request = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pass/tozx");
-                    request.Method = "POST";
-                    request.ContentType = "application/json;charset=UTF-8";
-                    var byteData = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                    {
-                        id = dt.Rows[0]["userid"]
-                    }));
-                    var length = byteData.Length;
-                    request.ContentLength = length;
-                    var writer = request.GetRequestStream();
-                    writer.Write(byteData, 0, length);
-                    writer.Close();
-
-                    var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pass/todriver");
-                    request1.Method = "POST";
-                    request1.ContentType = "application/json;charset=UTF-8";
-                    var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                    {
-                        carriageid = carriageid
-                    }));
-                    var length1 = byteData1.Length;
-                    request1.ContentLength = length1;
-                    var writer1 = request1.GetRequestStream();
-                    writer1.Write(byteData1, 0, length1);
-                    writer1.Close();
-
-                    var request3 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/verify/tocaruser");
-                    request3.Method = "POST";
-                    request3.ContentType = "application/json;charset=UTF-8";
-                    var byteData3 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                    {
-                        carriageid = carriageid
-                    }));
-                    var length3 = byteData3.Length;
-                    request3.ContentLength = length3;
-                    var writer3 = request3.GetRequestStream();
-                    writer3.Write(byteData3, 0, length3);
-                    writer3.Close();
+                    throw new Exception("该订单不存在！");
                 }
-
-                return true;
             }
             catch (Exception ex)
             {

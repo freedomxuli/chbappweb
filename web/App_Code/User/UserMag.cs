@@ -584,10 +584,10 @@ public class UserMag
         {
             try
             {
-                string where = "and c.userid = " + dbc.ToSqlValue(userid) + " and c.status = 0";
+                string where = "c.userid = " + dbc.ToSqlValue(userid) + " and c.status = 0";
                 string sql = @"select a.moduleId,a.moduleName,b.id,case when b.id is null then 0 else 1 end moduleType from tb_b_module_pc a
                                 left join tb_b_module_pc_zx b on a.moduleId = b.moduleId
-                                left join tb_b_user_pc c on b.userpcid = c.userpcid ";
+                                left join tb_b_user_pc c on b.userpcid = c.userpcid where " + where;
                 DataTable dt = dbc.ExecuteDataTable(sql);
                 return dt;
             }

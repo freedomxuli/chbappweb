@@ -1,4 +1,5 @@
-﻿var pageSize = 15;
+﻿inline_include("approot/r/js/jquery-1.6.4.js");
+var pageSize = 15;
 var cx_yhm;
 //************************************数据源*****************************************
 var store = createSFW4Store({
@@ -61,10 +62,44 @@ function DataBind(nPage) {
 }
 
 
-function QR(carriageid, carriagestatus) {
+function QR(carriageid, carriagestatus, userid) {
+    
     CS('CZCLZ.CYMag.QR', function (retVal) {
-        DataBind(1);
+        if (retVal) {
+            $.ajax({
+                url: "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure",
+                type: 'post',
+                dataType: 'json',
+                headers: { 'Content-Type': 'application/json' },
+                data: JSON.stringify({
+                    tradeCode: "payAndInsure",
+                    carriageid: carriageid,
+                    carriagestatus: 30,
+                    userid: userid
+                }),
+                success: function (data) {
+                    try {
+                        if (data.success) {
+                            Ext.MessageBox.alert('提示', "确认成功！");
+                            DataBind(1);
+                        }
+                        else {
+                            Ext.MessageBox.alert('提示', data.details);
+                        }
+                    }
+                    catch (e) {
+                        Ext.MessageBox.alert('提示', data.details);
+                    }
+                },
+                error: function (j, t, e) {
+                    console.log(j);
+                    console.log("发生未知错误，错误:" + t, e);
+                }
+            });
+        }
     }, CS.onError, carriageid, carriagestatus);
+    
+
 }
 
 function TH(carriageid, carriagestatus) {
@@ -297,7 +332,7 @@ Ext.onReady(function () {
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str = "";
                                 if (record.data.carriagestatus == 10) {
-                                    str += " <a onclick='QR(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>确认</a>";
+                                    str += " <a onclick='QR(\"" + value + "\",\"" + record.data.carriagestatus + "\",\"" + record.data.userid + "\");'>确认</a>";
                                 } else if (record.data.carriagestatus == 11)
                                     str += " <a onclick='TH(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>退回</a> ";
                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.isoilpay == 0) {
