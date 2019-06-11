@@ -445,43 +445,41 @@ public class CYMag
     [CSMethod("QR")]
     public object QR(string carriageid, int carriagestatus)
     {
-       using (DBConnection dbc = new DBConnection())
+        using (DBConnection dbc = new DBConnection())
         {
             dbc.BeginTransaction();
             try
             {
-                if (carriagestatus == 10)
-                {
-                    DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
-                    DataTableTracker odtt = new DataTableTracker(odt);
-                    DataRow odr = odt.NewRow();
-                    odr["carriageid"] = carriageid;
-                    odr["carriagestatus"] = 20;
-                    odt.Rows.Add(odr);
-                    dbc.UpdateTable(odt, odtt);
-
-                    DataTable ofdt = dbc.GetEmptyDataTable("tb_b_carriage_flow");
-                    DataRow ofdr = ofdt.NewRow();
-                    ofdr["carriageflowid"] = Guid.NewGuid().ToString();
-                    ofdr["carriageid"] = carriageid;
-                    ofdr["carriagestatus"] = 20;
-                    ofdr["status"] = 0;
-                    ofdr["adduser"] = SystemUser.CurrentUser.UserID;
-                    ofdr["addtime"] = DateTime.Now;
-                    ofdt.Rows.Add(ofdr);
-                    dbc.InsertTable(ofdt);
-                }
-
                 string str = "select * from tb_b_carriage where status=0 and carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
 
                 if (dt.Rows.Count > 0)
                 {
-                    
-                        dbc.CommitTransaction();
-
-                        if (dt.Rows.Count > 0)
+                    if (dt.Rows[0]["carriagestatus"] != null && dt.Rows[0]["carriagestatus"].ToString() != "")
+                    {
+                        if (carriagestatus == 10 && Convert.ToInt32(dt.Rows[0]["carriagestatus"].ToString())==10)
                         {
+                            DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                            DataTableTracker odtt = new DataTableTracker(odt);
+                            DataRow odr = odt.NewRow();
+                            odr["carriageid"] = carriageid;
+                            odr["carriagestatus"] = 20;
+                            odt.Rows.Add(odr);
+                            dbc.UpdateTable(odt, odtt);
+
+                            DataTable ofdt = dbc.GetEmptyDataTable("tb_b_carriage_flow");
+                            DataRow ofdr = ofdt.NewRow();
+                            ofdr["carriageflowid"] = Guid.NewGuid().ToString();
+                            ofdr["carriageid"] = carriageid;
+                            ofdr["carriagestatus"] = 20;
+                            ofdr["status"] = 0;
+                            ofdr["adduser"] = SystemUser.CurrentUser.UserID;
+                            ofdr["addtime"] = DateTime.Now;
+                            ofdt.Rows.Add(ofdr);
+                            dbc.InsertTable(ofdt);
+
+                            dbc.CommitTransaction();
+
                             var request2 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pass/tozx");
                             request2.Method = "POST";
                             request2.ContentType = "application/json;charset=UTF-8";
@@ -520,8 +518,18 @@ public class CYMag
                             var writer3 = request3.GetRequestStream();
                             writer3.Write(byteData3, 0, length3);
                             writer3.Close();
+                            return true;
                         }
-                        return true;
+                        else
+                        {
+                            throw new Exception("无法操作该订单！");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("无法操作该订单！");
+                    }
+                   
                 }
                 else
                 {
