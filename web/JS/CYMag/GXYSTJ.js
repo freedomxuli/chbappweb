@@ -79,7 +79,7 @@ function ykxh(zxid, rq) {
     var win = new ykxhWin({ zxid: zxid, rq: rq });
     win.show(null, function () {
         CS('CZCLZ.YKMag.GetYkxhLine', function (retVal) {
-            ykhbStore.loadData(retVal);
+            ykxhStore.loadData(retVal);
         }, CS.onError, zxid, rq, 0);
     });
 }
@@ -428,8 +428,8 @@ Ext.define('lineWin', {
                                     dataIndex: 'YK_HB',
                                     sortable: false,
                                     menuDisabled: true,
-                                    width: 130,
-                                    text: '油卡划拨',
+                                    width: 160,
+                                    text: '油卡划拨（包含转出）',
                                     align: 'right',
                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                         var str = '<a href="javascript:void(0);" onclick="ykhb(\'' + record.data.ZXID + '\',\'' + record.data.RQ + '\')">' + value + '</a>';
@@ -441,7 +441,7 @@ Ext.define('lineWin', {
                                     dataIndex: 'YK_XH',
                                     sortable: false,
                                     menuDisabled: true,
-                                    width: 130,
+                                    width: 160,
                                     text: '油卡消耗',
                                     align: 'right',
                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
