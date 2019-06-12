@@ -485,7 +485,7 @@ public class CYMag
                             request2.ContentType = "application/json;charset=UTF-8";
                             var byteData2 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
                             {
-                                id = dt.Rows[0]["userid"]
+                                userid= dt.Rows[0]["userid"]
                             }));
                             var length2 = byteData2.Length;
                             request2.ContentLength = length2;
