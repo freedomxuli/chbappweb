@@ -19,27 +19,27 @@ var store = createSFW4Store({
     total: 1,
     currentPage: 1,
     fields: [
-       { name: 'UserID' },
-       { name: 'UserName' },
-       { name: 'Password' },
-       { name: 'roleId' },
-       { name: 'roleName' },
-       { name: 'UserXM' },
-       { name: 'ClientKind' },
-       { name: 'Address' },
-       { name: 'UserTel' },
-       { name: 'FromRoute' },
-       { name: 'ToRoute' },
-       { name: 'Points' },
-       { name: 'SalePoints' },
-       { name: 'KFGMPoints' },
-       { name: 'dqS' },
-       { name: 'DqBm' },
-       { name: 'AddTime' },
-       { name: 'searchAddress' },
-       { name: 'ewmbs' },
-       { name: 'IDCard' },
-       { name: 'caruser' }
+        { name: 'UserID' },
+        { name: 'UserName' },
+        { name: 'Password' },
+        { name: 'roleId' },
+        { name: 'roleName' },
+        { name: 'UserXM' },
+        { name: 'ClientKind' },
+        { name: 'Address' },
+        { name: 'UserTel' },
+        { name: 'FromRoute' },
+        { name: 'ToRoute' },
+        { name: 'Points' },
+        { name: 'SalePoints' },
+        { name: 'KFGMPoints' },
+        { name: 'dqS' },
+        { name: 'DqBm' },
+        { name: 'AddTime' },
+        { name: 'searchAddress' },
+        { name: 'ewmbs' },
+        { name: 'IDCard' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -53,11 +53,11 @@ var yglsjstore = createSFW4Store({
     currentPage: 1,
     fields: [
         { name: 'userid' },
-       { name: 'UserName' },
-       { name: 'linkedunit' },
-       { name: 'carnumber' },
-       { name: 'drivermemo' },
-       { name: 'mirrornumber' }
+        { name: 'UserName' },
+        { name: 'linkedunit' },
+        { name: 'carnumber' },
+        { name: 'drivermemo' },
+        { name: 'mirrornumber' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getYGLSJList(nPage);
@@ -71,11 +71,11 @@ var glsjstore = createSFW4Store({
     currentPage: 1,
     fields: [
         { name: 'userid' },
-       { name: 'UserName' },
-       { name: 'linkedunit' },
-       { name: 'carnumber' },
-       { name: 'drivermemo' },
-       { name: 'mirrornumber' }
+        { name: 'UserName' },
+        { name: 'linkedunit' },
+        { name: 'carnumber' },
+        { name: 'drivermemo' },
+        { name: 'mirrornumber' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getGLSJList(nPage);
@@ -86,8 +86,8 @@ var glsjstore = createSFW4Store({
 
 var roleStore = Ext.create('Ext.data.Store', {
     fields: [
-       { name: 'ClientKind' },
-       { name: 'ClientName' }
+        { name: 'ClientKind' },
+        { name: 'ClientName' }
     ],
     data: [
         {
@@ -107,8 +107,8 @@ var roleStore = Ext.create('Ext.data.Store', {
 
 var roleStore1 = Ext.create('Ext.data.Store', {
     fields: [
-       { name: 'ClientKind' },
-       { name: 'ClientName' }
+        { name: 'ClientKind' },
+        { name: 'ClientName' }
     ],
     data: [
         {
@@ -352,7 +352,25 @@ function GLSJMX(duserid, userid) {
 
 }
 
-
+function IsBdBf(username) {
+    CS('CZCLZ.YHGLClass.IsBdBf', function (retVal) {
+        if (retVal.success) {
+            Ext.Msg.show({
+                title: '提示',
+                msg: '已绑定宝付账号',
+                buttons: Ext.MessageBox.OK,
+                icon: Ext.MessageBox.INFO
+            });
+        } else {
+            Ext.Msg.show({
+                title: '提示',
+                msg: '未绑定宝付账号',
+                buttons: Ext.MessageBox.OK,
+                icon: Ext.MessageBox.INFO
+            });
+        }
+    }, CS.onError, username);
+}
 //************************************页面方法***************************************
 
 //************************************弹出界面***************************************
@@ -397,82 +415,82 @@ Ext.define('YGLSJList', {
                                             flex: 1,
                                             text: '司机账号'
                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'linkedunit',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '挂靠单位'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'carnumber',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '车牌号'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'drivermemo',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '司机备注'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'Mirrornumber',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '后视镜设备编号'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'userid',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '操作',
-                                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                 return "<a onclick='DeleteGL(\"" + value + "\",\"" + userid + "\");'>删除</a>";
-                                             }
-                                         }
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'linkedunit',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '挂靠单位'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'carnumber',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '车牌号'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'drivermemo',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '司机备注'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'Mirrornumber',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '后视镜设备编号'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'userid',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '操作',
+                                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                return "<a onclick='DeleteGL(\"" + value + "\",\"" + userid + "\");'>删除</a>";
+                                            }
+                                        }
                                     ],
                                     dockedItems: [
-                                {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
-                                    items: [
-
                                         {
-                                            xtype: 'buttongroup',
-                                            title: '',
+                                            xtype: 'toolbar',
+                                            dock: 'top',
                                             items: [
-                                                 {
-                                                     xtype: 'button',
-                                                     iconCls: 'add',
-                                                     text: '新增',
-                                                     handler: function () {
-                                                         var win = new GLSJList({ userid: userid });
-                                                         win.show(null, function () {
-                                                             getGLSJList(1);
-                                                         })
-                                                     }
-                                                 }
+
+                                                {
+                                                    xtype: 'buttongroup',
+                                                    title: '',
+                                                    items: [
+                                                        {
+                                                            xtype: 'button',
+                                                            iconCls: 'add',
+                                                            text: '新增',
+                                                            handler: function () {
+                                                                var win = new GLSJList({ userid: userid });
+                                                                win.show(null, function () {
+                                                                    getGLSJList(1);
+                                                                })
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+
                                             ]
                                         },
-
-                                    ]
-                                },
-                                {
-                                    xtype: 'pagingtoolbar',
-                                    displayInfo: true,
-                                    store: yglsjstore,
-                                    dock: 'bottom'
-                                }
+                                        {
+                                            xtype: 'pagingtoolbar',
+                                            displayInfo: true,
+                                            store: yglsjstore,
+                                            dock: 'bottom'
+                                        }
                                     ]
                                 }
                             ]
@@ -539,85 +557,85 @@ Ext.define('GLSJList', {
                                             flex: 1,
                                             text: '司机账号'
                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'linkedunit',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '挂靠单位'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'carnumber',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '车牌号'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'drivermemo',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '司机备注'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'mirrornumber',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '后视镜设备编号'
-                                         },
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'userid',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '操作',
-                                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                 return "<a onclick='GLSJMX(\"" + value + "\",\"" + userid + "\");'>关联</a>";
-                                             }
-                                         }
-                                    ],
-                                    dockedItems: [
-                                {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
-                                    items: [
                                         {
-                                            xtype: 'textfield',
-                                            id: 'cx_cp',
-                                            width: 160,
-                                            fieldLabel: '车牌号',
-                                            labelWidth: 60
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'linkedunit',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '挂靠单位'
                                         },
                                         {
-                                            xtype: 'buttongroup',
-                                            title: '',
-                                            items: [
-                                                 {
-                                                     xtype: 'button',
-                                                     iconCls: 'search',
-                                                     text: '查询',
-                                                     handler: function () {
-                                                         getGLSJList(1);
-                                                     }
-                                                 }
-                                            ]
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'carnumber',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '车牌号'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'drivermemo',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '司机备注'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'mirrornumber',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '后视镜设备编号'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'userid',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '操作',
+                                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                return "<a onclick='GLSJMX(\"" + value + "\",\"" + userid + "\");'>关联</a>";
+                                            }
                                         }
+                                    ],
+                                    dockedItems: [
+                                        {
+                                            xtype: 'toolbar',
+                                            dock: 'top',
+                                            items: [
+                                                {
+                                                    xtype: 'textfield',
+                                                    id: 'cx_cp',
+                                                    width: 160,
+                                                    fieldLabel: '车牌号',
+                                                    labelWidth: 60
+                                                },
+                                                {
+                                                    xtype: 'buttongroup',
+                                                    title: '',
+                                                    items: [
+                                                        {
+                                                            xtype: 'button',
+                                                            iconCls: 'search',
+                                                            text: '查询',
+                                                            handler: function () {
+                                                                getGLSJList(1);
+                                                            }
+                                                        }
+                                                    ]
+                                                }
 
-                                    ]
-                                },
-                                {
-                                    xtype: 'pagingtoolbar',
-                                    displayInfo: true,
-                                    store: glsjstore,
-                                    dock: 'bottom'
-                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'pagingtoolbar',
+                                            displayInfo: true,
+                                            store: glsjstore,
+                                            dock: 'bottom'
+                                        }
                                     ]
                                 }
                             ]
@@ -883,53 +901,53 @@ Ext.define('addWin', {
                         labelWidth: 70,
                         anchor: '100%'
                     },
-                     {
-                         xtype: 'combobox',
-                         id: 'roleId',
-                         name: 'roleId',
-                         anchor: '100%',
-                         fieldLabel: '角色',
-                         allowBlank: false,
-                         editable: false,
-                         labelWidth: 70,
-                         store: roleStore1,
-                         queryMode: 'local',
-                         displayField: 'ClientName',
-                         valueField: 'ClientKind',
-                         value: ''
-                     },
-                     {
-                         xtype: 'textfield',
-                         fieldLabel: '身份证号',
-                         id: 'IDCard',
-                         name: 'IDCard',
-                         labelWidth: 70,
-                         anchor: '100%'
-                     },
-                     {
-                         xtype: 'textareafield',
-                         id: 'Address',
-                         name: 'Address',
-                         labelWidth: 70,
-                         fieldLabel: '地址',
-                         anchor: '100%'
-                     },
-                     {
-                         xtype: 'textareafield',
-                         id: 'searchAddress',
-                         name: 'searchAddress',
-                         labelWidth: 70,
-                         fieldLabel: '搜索地址',
-                         anchor: '100%'
-                     },
-                     {
-                         xtype: 'textfield',
-                         fieldLabel: '车主账号',
-                         id: 'caruser',
-                         name: 'caruser',
-                         labelWidth: 70,
-                         anchor: '100%'
-                     }
+                    {
+                        xtype: 'combobox',
+                        id: 'roleId',
+                        name: 'roleId',
+                        anchor: '100%',
+                        fieldLabel: '角色',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 70,
+                        store: roleStore1,
+                        queryMode: 'local',
+                        displayField: 'ClientName',
+                        valueField: 'ClientKind',
+                        value: ''
+                    },
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: '身份证号',
+                        id: 'IDCard',
+                        name: 'IDCard',
+                        labelWidth: 70,
+                        anchor: '100%'
+                    },
+                    {
+                        xtype: 'textareafield',
+                        id: 'Address',
+                        name: 'Address',
+                        labelWidth: 70,
+                        fieldLabel: '地址',
+                        anchor: '100%'
+                    },
+                    {
+                        xtype: 'textareafield',
+                        id: 'searchAddress',
+                        name: 'searchAddress',
+                        labelWidth: 70,
+                        fieldLabel: '搜索地址',
+                        anchor: '100%'
+                    },
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: '车主账号',
+                        id: 'caruser',
+                        name: 'caruser',
+                        labelWidth: 70,
+                        anchor: '100%'
+                    }
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -951,13 +969,13 @@ Ext.define('addWin', {
                             }
                         }
                     },
-                     {
-                         text: '取消',
-                         iconCls: 'back',
-                         handler: function () {
-                             this.up('window').close();
-                         }
-                     }
+                    {
+                        text: '取消',
+                        iconCls: 'back',
+                        handler: function () {
+                            this.up('window').close();
+                        }
+                    }
                 ]
             }
         ];
@@ -986,19 +1004,19 @@ Ext.define('EWMWin', {
                 region: 'center',
                 width: 150,
                 html: '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top:30px;">'
-                   + ' <tr>'
-                   + '   <td align="center"> <div id="qrcodeTable"></div></td>'
-                  + ' </tr>'
-                  + '</table>',
+                    + ' <tr>'
+                    + '   <td align="center"> <div id="qrcodeTable"></div></td>'
+                    + ' </tr>'
+                    + '</table>',
                 buttonAlign: 'center',
                 buttons: [
-                     {
-                         text: '取消',
-                         iconCls: 'back',
-                         handler: function () {
-                             this.up('window').close();
-                         }
-                     }
+                    {
+                        text: '取消',
+                        iconCls: 'back',
+                        handler: function () {
+                            this.up('window').close();
+                        }
+                    }
                 ]
             }
         ];
@@ -1027,25 +1045,25 @@ Ext.define('EWMWin1', {
                 region: 'center',
                 width: 150,
                 html: '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top:10px;">'
-                   + ' <tr>'
-                   + '   <td align="center"> <div id="qrcodeTable1"></div></td>'
-                  + ' </tr>'
-                  + '</table>',
+                    + ' <tr>'
+                    + '   <td align="center"> <div id="qrcodeTable1"></div></td>'
+                    + ' </tr>'
+                    + '</table>',
                 buttonAlign: 'center',
                 buttons: [
-                     {
-                         text: '下载',
-                         handler: function () {
-                             DownloadFile("CZCLZ.YHGLClass.GetEWMToFile1", "二维码.jpg", id);
-                         }
-                     },
-                     {
-                         text: '取消',
-                         iconCls: 'back',
-                         handler: function () {
-                             this.up('window').close();
-                         }
-                     }
+                    {
+                        text: '下载',
+                        handler: function () {
+                            DownloadFile("CZCLZ.YHGLClass.GetEWMToFile1", "二维码.jpg", id);
+                        }
+                    },
+                    {
+                        text: '取消',
+                        iconCls: 'back',
+                        handler: function () {
+                            this.up('window').close();
+                        }
+                    }
                 ]
             }
         ];
@@ -1200,263 +1218,263 @@ Ext.onReady(function () {
 
                     }),
                     columns: [Ext.create('Ext.grid.RowNumberer'),
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'UserName',
-                                sortable: false,
-                                menuDisabled: true,
-                                text: "登录名"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'ClientKind',
-                                sortable: false,
-                                menuDisabled: true,
-                                text: "角色",
-                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    switch (value) {
-                                        case 1:
-                                            return "专线";
-                                            break;
-                                        case 2:
-                                            return "三方";
-                                            break;
-                                    }
-                                }
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'UserXM',
-                                sortable: false,
-                                menuDisabled: true,
-                                text: "姓名"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'UserTel',
-                                sortable: false,
-                                menuDisabled: true,
-                                text: "电话"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'FromRoute',
-                                sortable: false,
-                                menuDisabled: true,
-                                hidden: true,
-                                text: "起点"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'ToRoute',
-                                sortable: false,
-                                menuDisabled: true,
-                                hidden: true,
-                                text: "终点"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                sortable: false,
-                                menuDisabled: true,
-                                text: "线路",
-                                width: 240,
-                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    var str = "";
-                                    if (record.data.FromRoute) {
-                                        str += record.data.FromRoute
-                                    }
-                                    if (record.data.ToRoute) {
-                                        str += "─" + record.data.ToRoute;
-                                    }
-                                    return str;
-                                }
-
-                            },
-                            {
-                                xtype: 'datecolumn',
-                                dataIndex: 'AddTime',
-                                format: 'Y-m-d',
-                                sortable: false,
-                                menuDisabled: true,
-                                width: 110,
-                                text: '注册时间'
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'KFGMPoints',
-                                width: 140,
-                                sortable: false,
-                                menuDisabled: true,
-                                text: "可开放购买运费券"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'Points',
-                                sortable: false,
-                                menuDisabled: true,
-                                width: 140,
-                                text: "专线用户剩余运费券"
-                            },
-                            {
-                                xtype: 'gridcolumn',
-                                dataIndex: 'SalePoints',
-                                sortable: false,
-                                menuDisabled: true,
-                                width: 140,
-                                text: "专线用户在售运费券"
-                            },
-                            {
-                                text: '操作',
-                                dataIndex: 'UserID',
-                                width: 350,
-                                sortable: false,
-                                menuDisabled: true,
-                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    var str;
-                                    if (record.data.ClientKind == 1) {
-                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
-                                    } else if (record.data.ClientKind == 2) {
-                                        str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a>";
-                                    }
-                                    return str;
-                                }
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'UserName',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "登录名"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'ClientKind',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "角色",
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            switch (value) {
+                                case 1:
+                                    return "专线";
+                                    break;
+                                case 2:
+                                    return "三方";
+                                    break;
                             }
+                        }
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'UserXM',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "姓名"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'UserTel',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "电话"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'FromRoute',
+                        sortable: false,
+                        menuDisabled: true,
+                        hidden: true,
+                        text: "起点"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'ToRoute',
+                        sortable: false,
+                        menuDisabled: true,
+                        hidden: true,
+                        text: "终点"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "线路",
+                        width: 240,
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            var str = "";
+                            if (record.data.FromRoute) {
+                                str += record.data.FromRoute
+                            }
+                            if (record.data.ToRoute) {
+                                str += "─" + record.data.ToRoute;
+                            }
+                            return str;
+                        }
+
+                    },
+                    {
+                        xtype: 'datecolumn',
+                        dataIndex: 'AddTime',
+                        format: 'Y-m-d',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 110,
+                        text: '注册时间'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'KFGMPoints',
+                        width: 140,
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "可开放购买运费券"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'Points',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 140,
+                        text: "专线用户剩余运费券"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'SalePoints',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 140,
+                        text: "专线用户在售运费券"
+                    },
+                    {
+                        text: '操作',
+                        dataIndex: 'UserID',
+                        width: 450,
+                        sortable: false,
+                        menuDisabled: true,
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            var str;
+                            if (record.data.ClientKind == 1) {
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
+                            } else if (record.data.ClientKind == 2) {
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a>";
+                            }
+                            return str;
+                        }
+                    }
                     ],
                     viewConfig: {
 
                     },
                     dockedItems: [
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            items: [
                                 {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
-                                    items: [
-                                        {
-                                            xtype: 'combobox',
-                                            id: 'cx_role',
-                                            width: 160,
-                                            fieldLabel: '角色',
-                                            editable: false,
-                                            labelWidth: 40,
-                                            store: roleStore,
-                                            queryMode: 'local',
-                                            displayField: 'ClientName',
-                                            valueField: 'ClientKind',
-                                            value: ''
-                                        },
-                                        {
-                                            xtype: 'textfield',
-                                            id: 'cx_yhm',
-                                            width: 140,
-                                            labelWidth: 50,
-                                            fieldLabel: '用户名'
-                                        },
-                                        {
-                                            xtype: 'textfield',
-                                            id: 'cx_xm',
-                                            width: 160,
-                                            labelWidth: 70,
-                                            fieldLabel: '真实姓名'
-                                        },
-                                        {
-                                            id: 'cx_beg',
-                                            xtype: 'datefield',
-                                            fieldLabel: '注册时间',
-                                            format: 'Y-m-d',
-                                            labelWidth: 80,
-                                            width: 210
-                                        },
-                                        {
-                                            id: 'cx_end',
-                                            xtype: 'datefield',
-                                            format: 'Y-m-d',
-                                            fieldLabel: '至',
-                                            labelWidth: 20,
-                                            width: 150
-                                        },
-                                        {
-                                            xtype: 'buttongroup',
-                                            title: '',
-                                            items: [
-                                                {
-                                                    xtype: 'button',
-                                                    iconCls: 'search',
-                                                    text: '查询',
-                                                    handler: function () {
-                                                        getUser(1);
-                                                    }
-                                                },
-                                                //{
-                                                //    xtype: 'button',
-                                                //    iconCls: 'delete',
-                                                //    text: '删除',
-                                                //    handler: function () {
-                                                //        var idlist = [];
-                                                //        var grid = Ext.getCmp("usergrid");
-                                                //        var rds = grid.getSelectionModel().getSelection();
-                                                //        if (rds.length == 0) {
-                                                //            Ext.Msg.show({
-                                                //                title: '提示',
-                                                //                msg: '请选择至少一条要删除的记录!',
-                                                //                buttons: Ext.MessageBox.OK,
-                                                //                icon: Ext.MessageBox.INFO
-                                                //            });
-                                                //            return;
-                                                //        }
-
-                                                //        Ext.MessageBox.confirm('删除提示', '是否要删除数据!', function (obj) {
-                                                //            if (obj == "yes") {
-                                                //                for (var n = 0, len = rds.length; n < len; n++) {
-                                                //                    var rd = rds[n];
-
-                                                //                    idlist.push(rd.get("UserID"));
-                                                //                }
-
-                                                //                CS('CZCLZ.YHGLClass.DelUser', function (retVal) {
-                                                //                    if (retVal) {
-                                                //                        getUser(1);
-                                                //                    }
-                                                //                }, CS.onError, idlist);
-                                                //            }
-                                                //            else {
-                                                //                return;
-                                                //            }
-                                                //        });
-                                                //    }
-                                                //},
-                                                {
-                                                    xtype: 'button',
-                                                    iconCls: 'view',
-                                                    text: '导出专线用户统计表',
-                                                    handler: function () {
-                                                        DownloadFile("CZCLZ.YHGLClass.GetZXUSERToFile", "专线用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
-                                                    }
-                                                },
-                                                {
-                                                    xtype: 'button',
-                                                    iconCls: 'view',
-                                                    text: '导出三方用户统计表',
-                                                    handler: function () {
-                                                        DownloadFile("CZCLZ.YHGLClass.GetSFUSERToFile", "三方用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
-                                                    }
-                                                },
-                                                {
-                                                    xtype: 'button',
-                                                    iconCls: 'view',
-                                                    text: '导出三方用户剩余运费券',
-                                                    handler: function () {
-                                                        DownloadFile("CZCLZ.YHGLClass.GetSFYFQToFile", "三方用户剩余运费券.xls", Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
+                                    xtype: 'combobox',
+                                    id: 'cx_role',
+                                    width: 160,
+                                    fieldLabel: '角色',
+                                    editable: false,
+                                    labelWidth: 40,
+                                    store: roleStore,
+                                    queryMode: 'local',
+                                    displayField: 'ClientName',
+                                    valueField: 'ClientKind',
+                                    value: ''
                                 },
                                 {
-                                    xtype: 'pagingtoolbar',
-                                    displayInfo: true,
-                                    store: store,
-                                    dock: 'bottom'
+                                    xtype: 'textfield',
+                                    id: 'cx_yhm',
+                                    width: 140,
+                                    labelWidth: 50,
+                                    fieldLabel: '用户名'
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    id: 'cx_xm',
+                                    width: 160,
+                                    labelWidth: 70,
+                                    fieldLabel: '真实姓名'
+                                },
+                                {
+                                    id: 'cx_beg',
+                                    xtype: 'datefield',
+                                    fieldLabel: '注册时间',
+                                    format: 'Y-m-d',
+                                    labelWidth: 80,
+                                    width: 210
+                                },
+                                {
+                                    id: 'cx_end',
+                                    xtype: 'datefield',
+                                    format: 'Y-m-d',
+                                    fieldLabel: '至',
+                                    labelWidth: 20,
+                                    width: 150
+                                },
+                                {
+                                    xtype: 'buttongroup',
+                                    title: '',
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            iconCls: 'search',
+                                            text: '查询',
+                                            handler: function () {
+                                                getUser(1);
+                                            }
+                                        },
+                                        //{
+                                        //    xtype: 'button',
+                                        //    iconCls: 'delete',
+                                        //    text: '删除',
+                                        //    handler: function () {
+                                        //        var idlist = [];
+                                        //        var grid = Ext.getCmp("usergrid");
+                                        //        var rds = grid.getSelectionModel().getSelection();
+                                        //        if (rds.length == 0) {
+                                        //            Ext.Msg.show({
+                                        //                title: '提示',
+                                        //                msg: '请选择至少一条要删除的记录!',
+                                        //                buttons: Ext.MessageBox.OK,
+                                        //                icon: Ext.MessageBox.INFO
+                                        //            });
+                                        //            return;
+                                        //        }
+
+                                        //        Ext.MessageBox.confirm('删除提示', '是否要删除数据!', function (obj) {
+                                        //            if (obj == "yes") {
+                                        //                for (var n = 0, len = rds.length; n < len; n++) {
+                                        //                    var rd = rds[n];
+
+                                        //                    idlist.push(rd.get("UserID"));
+                                        //                }
+
+                                        //                CS('CZCLZ.YHGLClass.DelUser', function (retVal) {
+                                        //                    if (retVal) {
+                                        //                        getUser(1);
+                                        //                    }
+                                        //                }, CS.onError, idlist);
+                                        //            }
+                                        //            else {
+                                        //                return;
+                                        //            }
+                                        //        });
+                                        //    }
+                                        //},
+                                        {
+                                            xtype: 'button',
+                                            iconCls: 'view',
+                                            text: '导出专线用户统计表',
+                                            handler: function () {
+                                                DownloadFile("CZCLZ.YHGLClass.GetZXUSERToFile", "专线用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                            }
+                                        },
+                                        {
+                                            xtype: 'button',
+                                            iconCls: 'view',
+                                            text: '导出三方用户统计表',
+                                            handler: function () {
+                                                DownloadFile("CZCLZ.YHGLClass.GetSFUSERToFile", "三方用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                            }
+                                        },
+                                        {
+                                            xtype: 'button',
+                                            iconCls: 'view',
+                                            text: '导出三方用户剩余运费券',
+                                            handler: function () {
+                                                DownloadFile("CZCLZ.YHGLClass.GetSFYFQToFile", "三方用户剩余运费券.xls", Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
+                                            }
+                                        }
+                                    ]
                                 }
+                            ]
+                        },
+                        {
+                            xtype: 'pagingtoolbar',
+                            displayInfo: true,
+                            store: store,
+                            dock: 'bottom'
+                        }
                     ]
                 }
             ];

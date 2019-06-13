@@ -18,6 +18,8 @@ using System.Net;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using ThoughtWorks.QRCode.Codec;
+using WxPayAPI;
+using LitJson;
 /// <summary>
 ///UserMag 的摘要说明
 /// </summary>
@@ -79,7 +81,7 @@ public class UserMag
     public object UploadPicForProduct(FileData[] fds, string UserID)
     {
         string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
-        WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL+"uploadMultipleFiles");
+        WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL + "uploadMultipleFiles");
         MsMultiPartFormData form = new MsMultiPartFormData();
         form.AddFormField("devilField", "中国人");
         form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
@@ -159,7 +161,7 @@ public class UserMag
     public object GetProductImages(string pid)
     {
 
-        string _url =System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString()+ "tbbuserphoto.selectUserphoto";
+        string _url = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString() + "tbbuserphoto.selectUserphoto";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
             tradeCode = "tbbuserphoto.selectUserphoto",
@@ -179,7 +181,7 @@ public class UserMag
         var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
 
         return responseString;
-        
+
     }
 
     /// <summary>
@@ -323,7 +325,7 @@ public class UserMag
                 if (!string.IsNullOrEmpty(kind))
                 {
                     switch (kind)
-                    { 
+                    {
                         case "1":
                             where1 = " and a.CardUserID = '0'";
                             where2 = " and a.UserID = '0'";
@@ -473,7 +475,7 @@ public class UserMag
     }
 
     [CSMethod("GetUserList")]
-    public object GetUserList(int pagnum, int pagesize, string roleId, string yhm,string xm)
+    public object GetUserList(int pagnum, int pagesize, string roleId, string yhm, string xm)
     {
         if (!string.IsNullOrEmpty(roleId))
         {
@@ -520,12 +522,13 @@ public class UserMag
 
                 var privilege = new SystemUser().GetPrivilegeList(SystemUser.CurrentUser.RoleID);
 
-                var mmck=false;
+                var mmck = false;
                 for (int i = 0; i < privilege.Rows.Count; i++)
                 {
                     if (privilege.Rows[i]["privilegeName"] != null && privilege.Rows[i]["privilegeName"].ToString() != "")
                     {
-                        if(privilege.Rows[i]["privilegeName"].ToString()=="系统维护中心_人员管理_密码查看"){
+                        if (privilege.Rows[i]["privilegeName"].ToString() == "系统维护中心_人员管理_密码查看")
+                        {
                             mmck = true;
                         }
                     }
@@ -598,7 +601,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("OpenPc")]
-    public bool OpenPc(string[] ids,string userid)
+    public bool OpenPc(string[] ids, string userid)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -732,7 +735,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     string userpcid = dbc.ExecuteScalar(sql).ToString();
 
                     #region 将关联表status置为1
-                    sql = "update tb_b_user_pc set status = 1,updateuser = " + dbc.ToSqlValue(CurrentUserId) + ",updatetime = "+dbc.ToSqlValue(DateTime.Now)+" where userpcid = " + dbc.ToSqlValue(userpcid);
+                    sql = "update tb_b_user_pc set status = 1,updateuser = " + dbc.ToSqlValue(CurrentUserId) + ",updatetime = " + dbc.ToSqlValue(DateTime.Now) + " where userpcid = " + dbc.ToSqlValue(userpcid);
                     dbc.ExecuteNonQuery(sql);
                     #endregion
 
@@ -762,7 +765,8 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     #endregion
 
                 }
-                else {
+                else
+                {
                     return false;
                 }
 
@@ -879,7 +883,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetClientList")]
-    public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm,string beg,string end)
+    public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1374,7 +1378,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     cells[i + 1, 2].SetStyle(style4);
                     cells[i + 1, 3].PutValue(dt.Rows[i]["UserTel"]);
                     cells[i + 1, 3].SetStyle(style4);
-                    
+
                     var xl = "";
                     if (dt.Rows[i]["FromRoute"] != null && dt.Rows[i]["FromRoute"].ToString() != "")
                     {
@@ -1475,10 +1479,11 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 cells[0, 4].PutValue("注册时间");
                 cells[0, 4].SetStyle(style2);
                 cells.SetColumnWidth(4, 20);
-                if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" ){
-                cells[0, 5].PutValue("身份证号");
-                cells[0, 5].SetStyle(style2);
-                cells.SetColumnWidth(5, 20);
+                if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F")
+                {
+                    cells[0, 5].PutValue("身份证号");
+                    cells[0, 5].SetStyle(style2);
+                    cells.SetColumnWidth(5, 20);
                 }
 
                 string where = "";
@@ -1514,7 +1519,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     cells[i + 1, 3].SetStyle(style4);
                     cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["AddTime"]).ToString("yyyy-MM-dd"));
                     cells[i + 1, 4].SetStyle(style4);
-                    if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F" )
+                    if (SystemUser.CurrentUser.RoleID == "80A7DD89-A0A3-445D-9CD9-552AE71AD69F")
                     {
                         cells[i + 1, 5].PutValue(dt.Rows[i]["IDCard"]);
                         cells[i + 1, 5].SetStyle(style4);
@@ -1669,15 +1674,15 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     [CSMethod("GetUserAndJs")]
     public object GetUserAndJs(string UserId)
     {
-        
+
         using (DBConnection dbc = new DBConnection())
         {
             string sqlStrUser = "select * from tb_b_Users where User_ID='" + UserId + "'";
-            DataTable dtuser=dbc.ExecuteDataTable(sqlStrUser);
+            DataTable dtuser = dbc.ExecuteDataTable(sqlStrUser);
             string sqlStrJs = "select distinct JS_ID from tb_b_User_JS_Gl where delflag=0 and User_ID='" + UserId + "'";
-            DataTable dtjs=dbc.ExecuteDataTable(sqlStrJs);
+            DataTable dtjs = dbc.ExecuteDataTable(sqlStrJs);
 
-            return new { dtuser = dtuser, dtjs = dtjs};
+            return new { dtuser = dtuser, dtjs = dtjs };
         }
     }
 
@@ -1713,7 +1718,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetDWByJsid")]
-    public DataTable GetDWByJsid(string UserId,string jsid)
+    public DataTable GetDWByJsid(string UserId, string jsid)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1780,7 +1785,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetDWAndGl")]
-    public object GetDWAndGl( string jsid,string UserId)
+    public object GetDWAndGl(string jsid, string UserId)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1827,7 +1832,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                                 if (UserId != null)
                                 {
                                     string str3 = "select a.PRIVILEGECODE,b.MODULENAME from tb_b_YH_YHQX a left join tb_b_YH_QX b on a.PRIVILEGECODE=b.PRIVILEGECODE where USERID='" + UserId + "'";
-                                    dtqxgl = dbc.ExecuteDataTable(str3); 
+                                    dtqxgl = dbc.ExecuteDataTable(str3);
                                 }
                                 break;
                         }
@@ -2235,7 +2240,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     //                else
     //                {
     //                    con = ",QY_ID=null";
-                        
+
     //                }
     //                string sqlstr = "update tb_b_Users set LoginName=@LoginName,Password=@Password,User_DM=@User_DM,User_XM=@User_XM,User_ZW=@User_ZW,User_DH=@User_DH,User_SJ=@User_SJ,User_Email=@User_Email,User_DZ=@User_DZ,User_Enable=@User_Enable,updatetime=@updatetime,updateuser=@updateuser " + con + " where User_ID=@User_ID";
     //                SqlCommand cmd = new SqlCommand(sqlstr);
@@ -2448,7 +2453,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     cmd.Parameters.AddWithValue("@Updateuser", userid);
                     cmd.Parameters.AddWithValue("@user_id", jsr.ToArray()[i].ToString());
                     dbc.ExecuteNonQuery(cmd);
-                    
+
                 }
 
                 dbc.CommitTransaction();
@@ -2459,7 +2464,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 dbc.RoolbackTransaction();
                 throw ex;
             }
-           
+
         }
     }
 
@@ -2599,23 +2604,23 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     public Bitmap QRCodeBimapForString(string nr)
-{
-   string enCodeString = nr;
-   QRCodeEncoder qrCodeEncoder = new QRCodeEncoder();
-   //编码方式(注意：BYTE能支持中文，ALPHA_NUMERIC扫描出来的都是数字)
-   qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.BYTE;
-   qrCodeEncoder.QRCodeScale = 4;//大小(值越大生成的二维码图片像素越高)
-   //版本(注意：设置为0主要是防止编码的字符串太长时发生错误)
-   qrCodeEncoder.QRCodeVersion = 7;
-   //错误效验、错误更正(有4个等级)
-   qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
+    {
+        string enCodeString = nr;
+        QRCodeEncoder qrCodeEncoder = new QRCodeEncoder();
+        //编码方式(注意：BYTE能支持中文，ALPHA_NUMERIC扫描出来的都是数字)
+        qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.BYTE;
+        qrCodeEncoder.QRCodeScale = 4;//大小(值越大生成的二维码图片像素越高)
+                                      //版本(注意：设置为0主要是防止编码的字符串太长时发生错误)
+        qrCodeEncoder.QRCodeVersion = 7;
+        //错误效验、错误更正(有4个等级)
+        qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
 
-   return qrCodeEncoder.Encode(enCodeString, Encoding.GetEncoding("GB2312"));
-}
+        return qrCodeEncoder.Encode(enCodeString, Encoding.GetEncoding("GB2312"));
+    }
 
     #region 分享明细
     [CSMethod("getShareList")]
-    public object getShareList(int pagnum, int pagesize, string isregister, string isbuy,string start,string end,string tjr,string btjr)
+    public object getShareList(int pagnum, int pagesize, string isregister, string isbuy, string start, string end, string tjr, string btjr)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -2636,7 +2641,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 }
                 if (!string.IsNullOrEmpty(start))
                 {
-                    where += " and a.addtime>='" +Convert.ToDateTime(start).ToString("yyyy-MM-dd")+"'";
+                    where += " and a.addtime>='" + Convert.ToDateTime(start).ToString("yyyy-MM-dd") + "'";
                 }
                 if (!string.IsNullOrEmpty(end))
                 {
@@ -2644,7 +2649,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 }
                 if (!string.IsNullOrEmpty(tjr))
                 {
-                    where += " and (" + dbc.C_Like("b.UserName", tjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("b.UserXM", tjr, LikeStyle.LeftAndRightLike)+" )";
+                    where += " and (" + dbc.C_Like("b.UserName", tjr, LikeStyle.LeftAndRightLike) + " or " + dbc.C_Like("b.UserXM", tjr, LikeStyle.LeftAndRightLike) + " )";
                 }
 
                 if (!string.IsNullOrEmpty(btjr))
@@ -2861,5 +2866,51 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         return mmck;
     }
 
+    [CSMethod("IsBdBf")]
+    public object IsBdBf(string username)
+    {
+        //构造获取openid及access_token的url
+        WxPayData data = new WxPayData();
+        data.SetValue("loginmobile", username);
+        string url = "http://47.110.134.105:8011/BAOHUTONG_H5/findCustInfo.action?" + data.ToUrl();
 
+        //请求url以获取数据
+        string json = HttpService.Get(url);
+        ToJsonMy2 ToJsonMy2 = JsonConvert.DeserializeObject<ToJsonMy2>(json);
+        return ToJsonMy2;
+    }
+
+    
+}
+public class ToJsonMy2
+{
+    public bool success { get; set; }
+    public result result { get; set; }
+    public string errorCode { get; set; }
+    public string errorMsg { get; set; }
+
+}
+
+public class result
+{
+    public string contractNo { get; set; }
+    public string platformNo { get; set; }
+    public string loginMobile { get; set; }
+    public string realNameFlag { get; set; }
+    public string bindCardFlag { get; set; }
+    public string operatorStatus { get; set; }
+    public string customerName { get; set; }
+    public string certificateNo { get; set; }
+
+    public result(string contractNo, string platformNo, string loginMobile, string realNameFlag, string bindCardFlag, string operatorStatus, string customerName, string certificateNo)
+    {
+        this.contractNo = contractNo;
+        this.platformNo = platformNo;
+        this.loginMobile = loginMobile;
+        this.realNameFlag = realNameFlag;
+        this.bindCardFlag = bindCardFlag;
+        this.operatorStatus = operatorStatus;
+        this.customerName = customerName;
+        this.certificateNo = certificateNo;
+    }
 }

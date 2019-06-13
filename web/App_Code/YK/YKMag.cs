@@ -1038,53 +1038,51 @@ public class YKMag
     {
         using (DBConnection dbc = new DBConnection())
         {
-            string sqlw = " where 1=1 ";
+            string sqlw = "";
             List<string> wArr = new List<string>();
             if (!string.IsNullOrEmpty(userxm))
             {
-                sqlw += " and " + dbc.C_Like("c.UserXM", userxm, LikeStyle.LeftAndRightLike);
+                wArr.Add(dbc.C_Like("c.UserXM", userxm, LikeStyle.LeftAndRightLike));
             }
             if (!string.IsNullOrEmpty(dqmc))
             {
-                sqlw += " and " + dbc.C_Like("c.dq_mc", dqmc, LikeStyle.LeftAndRightLike);
+                wArr.Add(dbc.C_Like("c.dq_mc", dqmc, LikeStyle.LeftAndRightLike));
+            }
+            if (wArr.Count > 0)
+            {
+                sqlw += " where " + string.Join(" and ", wArr);
             }
             //专线
             var cmd = dbc.CreateCommand();
-            cmd.CommandText = @"SELECT a.*,ISNULL(b.YK_XH,0)YK_XH,(ISNULL(a.YK_SY,0)+ISNULL(b.YK_XH,0))YK_AMOUNT,c.DqBm,c.UserXM,c.UserName FROM(
-	                                SELECT UserID,ISNULL(SUM(oilmoney),0) YK_SY FROM tb_b_myoilcard where oilcardcode in(
-		                                select oilcardcode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-	                                )
-	                                GROUP BY UserID
-                                )a
-                                left join (
-	                                select UserID,ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
-		                                SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
-			                                select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-		                                )
-	                                )
-	                                GROUP BY UserID
-                                )b on a.UserID=b.userid
-                                inner join (
-                                    select t1.*,t2.dq_mc from tb_b_user t1
-                                    left join tb_b_dq t2 on t1.DqBm=t2.dq_bm 
-                                    where t1.ClientKind=1 
-                                ) c on a.UserID=c.UserID " + sqlw + @"
-                                order by c.DqBm";
+            cmd.CommandText = @"select c.UserID,c.UserXM,c.dq_mc,(YK_ZR - YK_XF) YK_SY from (
+	                                select a.inuserid,ISNULL(SUM(a.YK_ZR),0) YK_ZR,ISNULL(SUM(b.YK_XF),0) YK_XF from (
+		                                select inuserid,oiltransfercode,ISNULL(SUM(money),0) YK_ZR from tb_b_oil_transfer 
+		                                where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0 and transfertype=@transfertype
+		                                group by inuserid,oiltransfercode
+	                                )a
+	                                left join(
+		                                select userid,oiltransfercode,ISNULL(SUM(money),0) YK_XF from(
+			                                select t1.userid,t1.money,t2.oiltransfercode from tb_b_oil_order t1
+			                                left join tb_b_myoilcard t2 on t1.userid=t2.UserID and t1.cardNo=t2.oilcardcode
+			                                where t1.status=1 
+		                                )t
+		                                group by userid,oiltransfercode
+	                                )b on a.inuserid=b.userid and a.oiltransfercode=b.oiltransfercode
+	                                group by a.inuserid
+                                )t
+                                inner join(
+	                                select t1.*,t2.dq_mc from tb_b_user t1
+                                    left join tb_b_dq t2 on t1.DqBm=t2.dq_bm
+                                )c on t.inuserid=c.UserID " + sqlw + @"
+                                order by c.UserXM";
             cmd.Parameters.AddWithValue("@transfertype", transfertype);
             DataTable dt = dbc.ExecuteDataTable(cmd);
 
             //干线
-            cmd.Parameters.Clear();
-            cmd.CommandText = @"select SUM(oilmoney) from tb_b_myoilcard 
-                                where oilcardcode in(
-                                    select oilcardcode from tb_b_oil_transfer 
-                                    where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                                ) and UserID in (select UserID from tb_b_user where ClientKind=1)";
-            cmd.Parameters.AddWithValue("@transfertype", transfertype);
-            decimal AmountYk = dbc.ExecuteScalar(cmd) == DBNull.Value ? 0 : (decimal)dbc.ExecuteScalar(cmd);
+            string AmountYk = dt.Compute("sum(YK_SY)", "true").ToString();
 
 
-            return new { dt = dt, gxye = AmountYk};
+            return new { dt = dt, gxye = AmountYk };
         }
     }
 
@@ -1108,28 +1106,27 @@ public class YKMag
             {
                 string ti = nowTi.AddDays(i).ToString("yyyy-MM-dd");
                 //期初金额
-                string sql = @"select (ISNULL(a.YK_AMOUNT,0)-ISNULL(b.YK_XH,0)-ISNULL(c.YK_ZC,0))YK_QC
-                                from(
-                                    SELECT inuserid,ISNULL(SUM(money),0) YK_AMOUNT FROM tb_b_oil_transfer 
-                                    where status=0 and transfertype=@transfertype 
-                                    and convert(nvarchar(10),addtime,120)< " + dbc.ToSqlValue(ti) + @"
-                                    GROUP BY inuserid
-                                )a
-                                left join (
-                                    select UserID,ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
-                                        SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
-                                            select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                                        )
-                                    ) and convert(nvarchar(10),addtime,120)<" + dbc.ToSqlValue(ti) + @"
-                                    GROUP BY UserID
-                                )b on a.inuserid=b.userid
-                                left join(
-                                    SELECT outuserid,ISNULL(SUM(money),0) YK_ZC FROM tb_b_oil_transfer 
-                                    where status=0 and transfertype=@transfertype
-                                    and convert(nvarchar(10),addtime,120)< " + dbc.ToSqlValue(ti) + @"
-                                    GROUP BY outuserid
-                                )c on a.inuserid=c.outuserid
-                                where a.inuserid=@UserID";
+                string sql = @"select (YK_ZR - YK_XF) YK_QC from (
+	                                select a.inuserid,ISNULL(SUM(a.YK_ZR),0) YK_ZR,ISNULL(SUM(b.YK_XF),0) YK_XF from (
+		                                select inuserid,oiltransfercode,ISNULL(SUM(money),0) YK_ZR from tb_b_oil_transfer 
+		                                where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0 and transfertype=@transfertype and convert(nvarchar(10),addtime,120)< " + dbc.ToSqlValue(ti) + @"
+		                                group by inuserid,oiltransfercode
+	                                )a
+	                                left join(
+		                                select userid,oiltransfercode,ISNULL(SUM(money),0) YK_XF from(
+			                                select t1.userid,t1.money,t2.oiltransfercode from tb_b_oil_order t1
+			                                left join tb_b_myoilcard t2 on t1.userid=t2.UserID and t1.cardNo=t2.oilcardcode
+			                                where t1.status=1 and convert(nvarchar(10),t1.addtime,120)< " + dbc.ToSqlValue(ti) + @"
+		                                )t
+		                                group by userid,oiltransfercode
+	                                )b on a.inuserid=b.userid and a.oiltransfercode=b.oiltransfercode
+	                                group by a.inuserid
+                                )t
+                                inner join(
+	                                select t1.*,t2.dq_mc from tb_b_user t1
+                                    left join tb_b_dq t2 on t1.DqBm=t2.dq_bm
+                                )c on t.inuserid=c.UserID
+                                where t.inuserid=@UserID";
                 var cmd = dbc.CreateCommand();
                 cmd.CommandText = sql;
                 cmd.Parameters.AddWithValue("@transfertype", transfertype);
@@ -1139,7 +1136,7 @@ public class YKMag
                 //油卡划拨
                 sql = @"select YK_HB from(
                             select inuserid,ISNULL(SUM(money),0) YK_HB from tb_b_oil_transfer 
-	                        where status=0 and DateDiff(dd,addtime," + dbc.ToSqlValue(ti) + @")=0 and transfertype=@transfertype 
+	                        where status=0 and DateDiff(dd,addtime," + dbc.ToSqlValue(ti) + @")=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                             group by inuserid
                         )t
                         where inuserid=@UserID";
@@ -1149,17 +1146,17 @@ public class YKMag
                 cmd.Parameters.AddWithValue("@UserID", zxid);
                 decimal ykhb = dbc.ExecuteScalar(cmd) == null ? 0 : (decimal)dbc.ExecuteScalar(cmd);
 
-                sql = @"select YK_ZC from(
-                            select outuserid,ISNULL(SUM(money),0) YK_ZC from tb_b_oil_transfer 
-	                        where status=0 and DateDiff(dd,addtime," + dbc.ToSqlValue(ti) + @")=0 and transfertype=@transfertype 
-                            group by outuserid
-                        )t
-                        where outuserid=@UserID";
-                cmd.Parameters.Clear();
-                cmd.CommandText = sql;
-                cmd.Parameters.AddWithValue("@transfertype", transfertype);
-                cmd.Parameters.AddWithValue("@UserID", zxid);
-                decimal ykzc = dbc.ExecuteScalar(cmd) == null ? 0 : (decimal)dbc.ExecuteScalar(cmd);
+                //sql = @"select YK_ZC from(
+                //            select outuserid,ISNULL(SUM(money),0) YK_ZC from tb_b_oil_transfer 
+	               //         where status=0 and DateDiff(dd,addtime," + dbc.ToSqlValue(ti) + @")=0 and transfertype=@transfertype 
+                //            group by outuserid
+                //        )t
+                //        where outuserid=@UserID";
+                //cmd.Parameters.Clear();
+                //cmd.CommandText = sql;
+                //cmd.Parameters.AddWithValue("@transfertype", transfertype);
+                //cmd.Parameters.AddWithValue("@UserID", zxid);
+                //decimal ykzc = dbc.ExecuteScalar(cmd) == null ? 0 : (decimal)dbc.ExecuteScalar(cmd);
 
                 //油卡消耗
                 sql = @"select YK_XH from( 
@@ -1182,9 +1179,9 @@ public class YKMag
                 newDr["RQ"] = ti;
                 newDr["QS"] = i + 1;
                 newDr["YK_QC"] = ykqc;
-                newDr["YK_HB"] = ykhb - ykzc;
+                newDr["YK_HB"] = ykhb;
                 newDr["YK_XH"] = ykxh;
-                newDr["YK_SY"] = ykqc + ykhb - ykxh - ykzc;
+                newDr["YK_SY"] = ykqc + ykhb - ykxh;
                 dt.Rows.Add(newDr);
             }
             return dt;
@@ -1301,7 +1298,7 @@ public class YKMag
                                     c.UserName as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh,a.transfertype,a.status from tb_b_oil_transfer a 
                                     left join tb_b_user b on a.inuserid=b.userid 
                                     left join tb_b_user c on a.outuserid=c.UserID
-                                ) a where (outuserid=@outuserid or inuserid=@inuserid) and status=0 and convert(nvarchar(10),addtime,120)=@addtime and transfertype=@transfertype";
+                                ) a where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and inuserid=@inuserid and status=0 and convert(nvarchar(10),addtime,120)=@addtime and transfertype=@transfertype";
                 var cmd = dbc.CreateCommand();
                 cmd.CommandText = sql;
                 cmd.Parameters.AddWithValue("@outuserid", zxid);
@@ -1399,7 +1396,7 @@ public class YKMag
                                     c.UserName as zczh,a.inuserid, b.UserXM as zrxm,b.UserName as zrzh,a.transfertype,a.status from tb_b_oil_transfer a 
                                     left join tb_b_user b on a.inuserid=b.userid 
                                     left join tb_b_user c on a.outuserid=c.UserID
-                                ) a where (outuserid=@outuserid or inuserid=@inuserid) and status=0 and convert(nvarchar(10),addtime,120)=@addtime and transfertype=@transfertype";
+                                ) a where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and inuserid=@inuserid and status=0 and convert(nvarchar(10),addtime,120)=@addtime and transfertype=@transfertype";
                 var cmd = dbc.CreateCommand();
                 cmd.CommandText = sql;
                 cmd.Parameters.AddWithValue("@outuserid", zxid);
@@ -1453,7 +1450,8 @@ public class YKMag
                 string sql = @"select * from tb_b_oil_order 
                                 where status=1 and cardNo in(
                                     SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
-                                        select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+                                        select oiltransfercode from tb_b_oil_transfer 
+                                        where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
                                     )
                                 ) and convert(nvarchar(10),addtime,120)=@addtime and userid=@userid";
                 var cmd = dbc.CreateCommand();

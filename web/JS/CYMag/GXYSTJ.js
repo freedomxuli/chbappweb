@@ -55,6 +55,7 @@ function DataBind() {
 }
 
 function ShowLine(zxid, zxxm) {
+    alert(zxxm);
     var win = new lineWin({ zxid: zxid });
     win.show(null, function () {
         Ext.getCmp('zx').setValue(zxxm);
@@ -429,7 +430,7 @@ Ext.define('lineWin', {
                                     sortable: false,
                                     menuDisabled: true,
                                     width: 160,
-                                    text: '油卡划拨（包含转出）',
+                                    text: '油卡划拨',
                                     align: 'right',
                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                         var str = '<a href="javascript:void(0);" onclick="ykhb(\'' + record.data.ZXID + '\',\'' + record.data.RQ + '\')">' + value + '</a>';
@@ -559,7 +560,9 @@ Ext.define('myView', {
                             text: "油卡剩余金额",
                             flex: 1,
                             renderer: function (v, s, r) {
-                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + r.data.UserID + '\',\'' + r.data.UserXM + '\')">' + v + '</a>';
+                                var yhid = r.data.UserID == null ? '' : r.data.UserID;
+                                var zx = r.data.UserXM == null ? '' : r.data.UserXM;
+                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + yhid + '\',\'' + zx + '\')">' + v + '</a>';
                             }
                         }
                     ],
