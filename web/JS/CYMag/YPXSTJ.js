@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
 var ypxsStore = Ext.create('Ext.data.Store', {
-    fields: ['UserID', 'UserXM', 'YK_SY', 'UserName']
+    fields: ['UserID', 'UserXM', 'YK_SY', 'UserName', 'dq_mc']
 });
 
 var linestore = Ext.create('Ext.data.Store', {
@@ -541,6 +541,14 @@ Ext.define('myView', {
                         Ext.create('Ext.grid.RowNumberer'),
                         {
                             xtype: 'gridcolumn',
+                            dataIndex: 'dq_mc',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "归属地",
+                            width:90
+                        },
+                        {
+                            xtype: 'gridcolumn',
                             dataIndex: 'UserName',
                             sortable: false,
                             menuDisabled: true,
@@ -572,7 +580,7 @@ Ext.define('myView', {
                                     id: 'cx_userxm',
                                     width: 160,
                                     labelWidth: 60,
-                                    fieldLabel: '专线名称'
+                                    fieldLabel: '划拨账户'
                                 },
                                 {
                                     xtype: 'textfield',

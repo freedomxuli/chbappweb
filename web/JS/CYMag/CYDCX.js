@@ -58,7 +58,7 @@ function DataBind(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue());
 }
 
 
@@ -641,6 +641,29 @@ Ext.onReady(function () {
                                     width: 150
                                 },
                                 {
+                                    xtype: 'combobox',
+                                    id: 'cx_isinvoice',
+                                    width: 180,
+                                    fieldLabel: '是否开票',
+                                    editable: false,
+                                    labelWidth: 60,
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: [
+                                            { name: 'val' },
+                                            { name: 'txt' }
+                                        ],
+                                        data: [
+                                            { 'val': "", 'txt': '全部' },
+                                            { 'val': 0, 'txt': '未开' },
+                                            { 'val': 1, 'txt': '已开' }]
+
+                                    }),
+                                    queryMode: 'local',
+                                    displayField: 'txt',
+                                    valueField: 'val',
+                                    value: ''
+                                },
+                                {
                                     xtype: 'buttongroup',
                                     items: [
                                         {
@@ -664,7 +687,7 @@ Ext.onReady(function () {
                                             iconCls: 'view',
                                             handler: function () {
                                                 if (privilege("承运模块_承运单查询_导出")) {
-                                                    DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                    DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue());
                                                 }
                                             }
                                         }
