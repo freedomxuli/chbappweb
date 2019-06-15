@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
 var gxysStore = Ext.create('Ext.data.Store', {
-    fields: ['UserID', 'UserXM', 'YK_SY']
+    fields: ['UserID', 'UserXM', 'YK_SY', 'dq_mc']
 });
 
 var linestore = Ext.create('Ext.data.Store', {
@@ -55,7 +55,6 @@ function DataBind() {
 }
 
 function ShowLine(zxid, zxxm) {
-    alert(zxxm);
     var win = new lineWin({ zxid: zxid });
     win.show(null, function () {
         Ext.getCmp('zx').setValue(zxxm);
@@ -544,6 +543,14 @@ Ext.define('myView', {
                     columnLines: true,
                     columns: [
                         Ext.create('Ext.grid.RowNumberer'),
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'dq_mc',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "归属地",
+                            width: 90
+                        },
                         {
                             xtype: 'gridcolumn',
                             dataIndex: 'UserXM',
