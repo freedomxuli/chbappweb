@@ -23,14 +23,14 @@ using Newtonsoft.Json;
 public class CYMag
 {
     public CYMag()
-	{
-		//
-		// TODO: 在此处添加构造函数逻辑
-		//
-	}
+    {
+        //
+        // TODO: 在此处添加构造函数逻辑
+        //
+    }
     string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ZYServiceURL"].ToString();
     [CSMethod("GetCYDList")]
-    public object GetCYDList(int pagnum, int pagesize, string carriagecode, string UserXM, string beg, string end)
+    public object GetCYDList(int pagnum, int pagesize, string carriagecode, string UserXM, string beg, string end, string isinvoice)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -58,7 +58,10 @@ public class CYMag
                 {
                     where += " and a.carriagetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
-
+                if (!string.IsNullOrEmpty(isinvoice))
+                {
+                    where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
+                }
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
                             left join tb_b_user c on a.userid=c.UserID where a.status=0 and 1=1 
@@ -78,8 +81,8 @@ public class CYMag
         }
     }
 
-    [CSMethod("GetCYDListToFile",2)]
-    public byte[] GetCYDListToFile(string carriagecode, string UserXM, string beg, string end)
+    [CSMethod("GetCYDListToFile", 2)]
+    public byte[] GetCYDListToFile(string carriagecode, string UserXM, string beg, string end, string iskp)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -198,7 +201,10 @@ public class CYMag
                 {
                     where += " and a.carriagetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
-
+                if (!string.IsNullOrEmpty(iskp))
+                {
+                    where += " and " + dbc.C_EQ("a.isinvoice", iskp);
+                }
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
                             left join tb_b_user c on a.userid=c.UserID where a.status=0 and  1=1 
@@ -457,7 +463,7 @@ public class CYMag
                 {
                     if (dt.Rows[0]["carriagestatus"] != null && dt.Rows[0]["carriagestatus"].ToString() != "")
                     {
-                        if (carriagestatus == 10 && Convert.ToInt32(dt.Rows[0]["carriagestatus"].ToString())==10)
+                        if (carriagestatus == 10 && Convert.ToInt32(dt.Rows[0]["carriagestatus"].ToString()) == 10)
                         {
                             DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                             DataTableTracker odtt = new DataTableTracker(odt);
@@ -485,7 +491,7 @@ public class CYMag
                             request2.ContentType = "application/json;charset=UTF-8";
                             var byteData2 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
                             {
-                                userid= dt.Rows[0]["userid"]
+                                userid = dt.Rows[0]["userid"]
                             }));
                             var length2 = byteData2.Length;
                             request2.ContentLength = length2;
@@ -529,7 +535,7 @@ public class CYMag
                     {
                         throw new Exception("无法操作该订单！");
                     }
-                   
+
                 }
                 else
                 {
@@ -545,7 +551,7 @@ public class CYMag
     }
 
     [CSMethod("JJ")]
-    public object JJ(string carriageid, int carriagestatus,string thyj)
+    public object JJ(string carriageid, int carriagestatus, string thyj)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -617,7 +623,7 @@ public class CYMag
             }
         }
     }
-     
+
     [CSMethod("TH")]
     public object TH(string carriageid, int carriagestatus)
     {
@@ -757,7 +763,7 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 0) && ( Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                    if ((Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                     {
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);
@@ -914,7 +920,7 @@ public class CYMag
                 {
                     throw new Exception("承运单不存在！");
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -1020,7 +1026,8 @@ public class CYMag
                             throw new Exception("划拨对象不是有效用户，请核实!");
                         }
                     }
-                    else {
+                    else
+                    {
                         throw new Exception("对不起，专线用户不存在!");
                     }
                 }
@@ -1028,7 +1035,7 @@ public class CYMag
                 {
                     throw new Exception("承运单不存在！");
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -1038,7 +1045,7 @@ public class CYMag
         }
     }
 
-   
+
 
     [CSMethod("getInsure")]
     public object getInsure(string carriageid)
