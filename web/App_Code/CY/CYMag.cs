@@ -67,7 +67,7 @@ public class CYMag
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by a.carriagestatus asc,a.carriagetime desc", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by a.carriagetime desc", pagesize, ref cp, out ac);
 
                 return new { dt = dtPage, cp = cp, ac = ac };
             }
