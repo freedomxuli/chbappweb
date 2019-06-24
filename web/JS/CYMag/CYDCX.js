@@ -139,6 +139,17 @@ function XJDK(carriageid, carriagestatus) {
     }
 }
 
+function XJDK1(carriageid, carriagestatus) {
+    if (privilege("承运模块_承运单查询_打款")) {
+        Ext.MessageBox.confirm("提示", "是否现付打款？", function (obj) {
+            if (obj == "yes") {
+                var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 3 });
+                passwin.show();
+            }
+        });
+    }
+}
+
 function YSFDK(carriageid, carriagestatus) {
     if (privilege("承运模块_承运单查询_打款")) {
         Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
@@ -150,6 +161,19 @@ function YSFDK(carriageid, carriagestatus) {
 
     }
 }
+
+function YSFDK1(carriageid, carriagestatus) {
+    if (privilege("承运模块_承运单查询_打款")) {
+        Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
+            if (obj == "yes") {
+                var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 4 });
+                passwin.show();
+            }
+        });
+
+    }
+}
+
 function CKBD(carriageid) {
     CS('CZCLZ.CYMag.getInsure', function (retVal) {
         if (retVal) {
@@ -340,17 +364,21 @@ Ext.onReady(function () {
                                 }
                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
                                     str += " <a onclick='XJDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款</a>";
+                                } if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
+                                    str += " <a onclick='XJDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款确认</a>";
                                 } if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
                                     str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
-                                } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
-                                    str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
-                                }
+                                    if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
+                                        str += " <a onclick='YSFDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款确认</a>";
+                                    } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
+                                        str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                    }
 
-                                if (record.data.carriagestatus >= 30) {
-                                    str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
+                                    if (record.data.carriagestatus >= 30) {
+                                        str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
+                                    }
+                                    return str;
                                 }
-                                return str;
-                            }
                         },
                         {
                             xtype: 'gridcolumn',

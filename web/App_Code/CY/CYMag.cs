@@ -940,6 +940,106 @@ public class CYMag
         }
     }
 
+    [CSMethod("XJDK1")]
+    public object XJDK1(string carriageid, int carriagestatus)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string str = @"select a.*,b.UserName,b.caruser from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
+                DataTable dt = dbc.ExecuteDataTable(str);
+                if (dt.Rows.Count > 0)
+                {
+                    if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
+                    {
+                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        DataTable udt = dbc.ExecuteDataTable(sql);
+                        if (udt.Rows.Count > 0)
+                        {
+                            if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                            {
+                                decimal money = 0;
+                                if (dt.Rows[0]["carriagemoney"] != null && dt.Rows[0]["carriagemoney"].ToString() != "")
+                                {
+                                    if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
+                                    {
+                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"]) / 100;
+                                    }
+                                    else
+                                    {
+                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
+                                    }
+                                }
+
+                                DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                                DataTableTracker odtt = new DataTableTracker(odt);
+                                DataRow odr = odt.NewRow();
+                                odr["carriageid"] = carriageid;
+                                odr["ismoneypay"] = 1;
+                                odt.Rows.Add(odr);
+                                dbc.UpdateTable(odt, odtt);
+
+                                DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
+                                DataRow pfdr = pfdt.NewRow();
+                                pfdr["carriagepayid"] = Guid.NewGuid().ToString();
+                                pfdr["carriagepaytype"] = 1;
+                                pfdr["adduser"] = SystemUser.CurrentUser.UserID;
+                                pfdr["addtime"] = DateTime.Now;
+                                pfdr["carriageid"] = carriageid;
+                                pfdt.Rows.Add(pfdr);
+                                dbc.InsertTable(pfdt);
+
+                                dbc.CommitTransaction();
+
+                                if (dt.Rows.Count > 0)
+                                {
+                                    var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pay/tocaruser");
+                                    request1.Method = "POST";
+                                    request1.ContentType = "application/json;charset=UTF-8";
+                                    var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                                    {
+                                        carriageid = carriageid
+                                    }));
+                                    var length1 = byteData1.Length;
+                                    request1.ContentLength = length1;
+                                    var writer1 = request1.GetRequestStream();
+                                    writer1.Write(byteData1, 0, length1);
+                                    writer1.Close();
+                                }
+                                return true;
+                            }
+                            else
+                            {
+                                throw new Exception("没有可现金打款的承运单！");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("划拨对象不是有效用户，请核实!");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("对不起，专线用户不存在!");
+                    }
+                }
+                else
+                {
+                    throw new Exception("承运单不存在！");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
     [CSMethod("YSFDK")]
     public object YSFDK(string carriageid, int carriagestatus)
     {
@@ -1055,6 +1155,87 @@ public class CYMag
         }
     }
 
+
+    [CSMethod("YSFDK1")]
+    public object YSFDK1(string carriageid, int carriagestatus)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string str = @"select a.*,b.UserName,b.caruser from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                if (dt.Rows.Count > 0)
+                {
+                    if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
+                    {
+                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
+                        DataTable udt = dbc.ExecuteDataTable(sql);
+                        if (udt.Rows.Count > 0)
+                        {
+
+                            if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 50))
+                            {
+                                decimal money = 0;
+                                if (dt.Rows[0]["carriagemoneynew"] != null && dt.Rows[0]["carriagemoneynew"].ToString() != "")
+                                {
+                                    money = Convert.ToDecimal(dt.Rows[0]["carriagemoneynew"]);
+                                }
+
+
+
+                                DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                                DataTableTracker odtt = new DataTableTracker(odt);
+                                DataRow odr = odt.NewRow();
+                                odr["carriageid"] = carriageid;
+                                odr["ismoneynewpay"] = 1;
+                                odt.Rows.Add(odr);
+                                dbc.UpdateTable(odt, odtt);
+
+                                DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
+                                DataRow pfdr = pfdt.NewRow();
+                                pfdr["carriagepayid"] = Guid.NewGuid().ToString();
+                                pfdr["carriagepaytype"] = 2;
+                                pfdr["adduser"] = SystemUser.CurrentUser.UserID;
+                                pfdr["addtime"] = DateTime.Now;
+                                pfdr["carriageid"] = carriageid;
+                                pfdt.Rows.Add(pfdr);
+                                dbc.InsertTable(pfdt);
+
+                                dbc.CommitTransaction();
+                                return true;
+                            }
+                            else
+                            {
+                                throw new Exception("没有可验收付打款的承运单！");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("划拨对象不是有效用户，请核实!");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("对不起，专线用户不存在!");
+                    }
+                }
+                else
+                {
+                    throw new Exception("承运单不存在！");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
 
 
     [CSMethod("getInsure")]
