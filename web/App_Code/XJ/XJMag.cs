@@ -290,7 +290,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                                 left join tb_b_user c on a.CardUserID=c.UserID
                                 left join tb_b_return_points d on a.invalidId=d.invalidId and d.status=0
 
-                            where a.status=0 and a.addTimd>'2019/6/23'" + sqlW + " order by a.addTimd desc";
+                            where a.status=0 and a.addTimd>'2019/6/24'" + sqlW + " order by a.addTimd desc";
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();

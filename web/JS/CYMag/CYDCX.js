@@ -141,7 +141,7 @@ function XJDK(carriageid, carriagestatus) {
 
 function XJDK1(carriageid, carriagestatus) {
     if (privilege("承运模块_承运单查询_打款")) {
-        Ext.MessageBox.confirm("提示", "是否现付打款？", function (obj) {
+        Ext.MessageBox.confirm("提示", "是否现付确认？", function (obj) {
             if (obj == "yes") {
                 var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 3 });
                 passwin.show();
@@ -164,7 +164,7 @@ function YSFDK(carriageid, carriagestatus) {
 
 function YSFDK1(carriageid, carriagestatus) {
     if (privilege("承运模块_承运单查询_打款")) {
-        Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
+        Ext.MessageBox.confirm("提示", "是否验收付确认？", function (obj) {
             if (obj == "yes") {
                 var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 4 });
                 passwin.show();
@@ -298,10 +298,24 @@ Ext.define('PassWin', {
                                             }
                                         }, CS.onError, carriageid, carriagestatus);
                                     } else if (type == 1) {
-                                        CS('CZCLZ.CYMag.YSFDK', function (retVal) {
+                                        CS('CZCLZ.CYMag.YSFDK', function (ret) {
                                             if (ret) {
                                                 DataBind(1);
                                                 Ext.MessageBox.alert('提示', "打款成功！");
+                                            }
+                                        }, CS.onError, carriageid, carriagestatus);
+                                    } else if (type == 3) {
+                                        CS('CZCLZ.CYMag.XJDK1', function (ret) {
+                                            if (ret) {
+                                                DataBind(1);
+                                                Ext.MessageBox.alert('提示', "现付确认成功！");
+                                            }
+                                        }, CS.onError, carriageid, carriagestatus);
+                                    } else if (type == 4) {
+                                        CS('CZCLZ.CYMag.YSFDK1', function (ret) {
+                                            if (ret) {
+                                                DataBind(1);
+                                                Ext.MessageBox.alert('提示', "验收付确认成功！");
                                             }
                                         }, CS.onError, carriageid, carriagestatus);
                                     }
@@ -352,7 +366,7 @@ Ext.onReady(function () {
                             sortable: false,
                             menuDisabled: true,
                             text: "操作",
-                            width: 150,
+                            width: 250,
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str = "";
                                 if (record.data.carriagestatus == 10) {
@@ -364,21 +378,25 @@ Ext.onReady(function () {
                                 }
                                 if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
                                     str += " <a onclick='XJDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款</a>";
-                                } if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
-                                    str += " <a onclick='XJDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付打款确认</a>";
-                                } if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
-                                    str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
-                                    if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
-                                        str += " <a onclick='YSFDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款确认</a>";
-                                    } if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
-                                        str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
-                                    }
-
-                                    if (record.data.carriagestatus >= 30) {
-                                        str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
-                                    }
-                                    return str;
                                 }
+                                if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.ismoneypay == 0) {
+                                    str += " <a onclick='XJDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>现付确认</a>";
+                                }
+                                if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
+                                    str += " <a onclick='YSFDK(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付打款</a>";
+                                }
+                                if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
+                                    str += " <a onclick='YSFDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付确认</a>";
+                                } 
+                                if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
+                                    str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                }
+                                if (record.data.carriagestatus >= 30) {
+                                    str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
+                                }
+                                return str;
+                                
+                            }
                         },
                         {
                             xtype: 'gridcolumn',

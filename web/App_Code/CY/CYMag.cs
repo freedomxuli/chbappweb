@@ -923,7 +923,7 @@ public class CYMag
                     }
                     else
                     {
-                        throw new Exception("对不起，专线用户不存在!");
+                        throw new Exception("对不起，车主用户不存在!");
                     }
                 }
                 else
@@ -953,78 +953,52 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
+                    if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                     {
-                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
-                        DataTable udt = dbc.ExecuteDataTable(sql);
-                        if (udt.Rows.Count > 0)
+                               
+
+                        DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                        DataTableTracker odtt = new DataTableTracker(odt);
+                        DataRow odr = odt.NewRow();
+                        odr["carriageid"] = carriageid;
+                        odr["ismoneypay"] = 1;
+                        odt.Rows.Add(odr);
+                        dbc.UpdateTable(odt, odtt);
+
+                        DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
+                        DataRow pfdr = pfdt.NewRow();
+                        pfdr["carriagepayid"] = Guid.NewGuid().ToString();
+                        pfdr["carriagepaytype"] = 1;
+                        pfdr["adduser"] = SystemUser.CurrentUser.UserID;
+                        pfdr["addtime"] = DateTime.Now;
+                        pfdr["carriageid"] = carriageid;
+                        pfdt.Rows.Add(pfdr);
+                        dbc.InsertTable(pfdt);
+
+                        dbc.CommitTransaction();
+
+                        if (dt.Rows.Count > 0)
                         {
-                            if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
+                            var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pay/tocaruser");
+                            request1.Method = "POST";
+                            request1.ContentType = "application/json;charset=UTF-8";
+                            var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
                             {
-                                decimal money = 0;
-                                if (dt.Rows[0]["carriagemoney"] != null && dt.Rows[0]["carriagemoney"].ToString() != "")
-                                {
-                                    if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
-                                    {
-                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"]) / 100;
-                                    }
-                                    else
-                                    {
-                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
-                                    }
-                                }
-
-                                DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
-                                DataTableTracker odtt = new DataTableTracker(odt);
-                                DataRow odr = odt.NewRow();
-                                odr["carriageid"] = carriageid;
-                                odr["ismoneypay"] = 1;
-                                odt.Rows.Add(odr);
-                                dbc.UpdateTable(odt, odtt);
-
-                                DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
-                                DataRow pfdr = pfdt.NewRow();
-                                pfdr["carriagepayid"] = Guid.NewGuid().ToString();
-                                pfdr["carriagepaytype"] = 1;
-                                pfdr["adduser"] = SystemUser.CurrentUser.UserID;
-                                pfdr["addtime"] = DateTime.Now;
-                                pfdr["carriageid"] = carriageid;
-                                pfdt.Rows.Add(pfdr);
-                                dbc.InsertTable(pfdt);
-
-                                dbc.CommitTransaction();
-
-                                if (dt.Rows.Count > 0)
-                                {
-                                    var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/pay/tocaruser");
-                                    request1.Method = "POST";
-                                    request1.ContentType = "application/json;charset=UTF-8";
-                                    var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                                    {
-                                        carriageid = carriageid
-                                    }));
-                                    var length1 = byteData1.Length;
-                                    request1.ContentLength = length1;
-                                    var writer1 = request1.GetRequestStream();
-                                    writer1.Write(byteData1, 0, length1);
-                                    writer1.Close();
-                                }
-                                return true;
-                            }
-                            else
-                            {
-                                throw new Exception("没有可现金打款的承运单！");
-                            }
+                                carriageid = carriageid
+                            }));
+                            var length1 = byteData1.Length;
+                            request1.ContentLength = length1;
+                            var writer1 = request1.GetRequestStream();
+                            writer1.Write(byteData1, 0, length1);
+                            writer1.Close();
                         }
-                        else
-                        {
-                            throw new Exception("划拨对象不是有效用户，请核实!");
-                        }
+                        return true;
                     }
                     else
                     {
-                        throw new Exception("对不起，专线用户不存在!");
+                        throw new Exception("没有可现金打款的承运单！");
                     }
+                    
                 }
                 else
                 {
@@ -1138,7 +1112,7 @@ public class CYMag
                     }
                     else
                     {
-                        throw new Exception("对不起，专线用户不存在!");
+                        throw new Exception("对不起，车主用户不存在!");
                     }
                 }
                 else
@@ -1170,57 +1144,32 @@ public class CYMag
 
                 if (dt.Rows.Count > 0)
                 {
-                    if (dt.Rows[0]["caruser"] != null && dt.Rows[0]["caruser"].ToString() != "")
+                    if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 50))
                     {
-                        string sql = "select * from tb_b_user where (ClientKind=1 or ClientKind=2) and IsSHPass=1 and UserName=" + dbc.ToSqlValue(dt.Rows[0]["caruser"].ToString());
-                        DataTable udt = dbc.ExecuteDataTable(sql);
-                        if (udt.Rows.Count > 0)
-                        {
+                        DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                        DataTableTracker odtt = new DataTableTracker(odt);
+                        DataRow odr = odt.NewRow();
+                        odr["carriageid"] = carriageid;
+                        odr["ismoneynewpay"] = 1;
+                        odt.Rows.Add(odr);
+                        dbc.UpdateTable(odt, odtt);
 
-                            if ((Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 50))
-                            {
-                                decimal money = 0;
-                                if (dt.Rows[0]["carriagemoneynew"] != null && dt.Rows[0]["carriagemoneynew"].ToString() != "")
-                                {
-                                    money = Convert.ToDecimal(dt.Rows[0]["carriagemoneynew"]);
-                                }
+                        DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
+                        DataRow pfdr = pfdt.NewRow();
+                        pfdr["carriagepayid"] = Guid.NewGuid().ToString();
+                        pfdr["carriagepaytype"] = 2;
+                        pfdr["adduser"] = SystemUser.CurrentUser.UserID;
+                        pfdr["addtime"] = DateTime.Now;
+                        pfdr["carriageid"] = carriageid;
+                        pfdt.Rows.Add(pfdr);
+                        dbc.InsertTable(pfdt);
 
-
-
-                                DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
-                                DataTableTracker odtt = new DataTableTracker(odt);
-                                DataRow odr = odt.NewRow();
-                                odr["carriageid"] = carriageid;
-                                odr["ismoneynewpay"] = 1;
-                                odt.Rows.Add(odr);
-                                dbc.UpdateTable(odt, odtt);
-
-                                DataTable pfdt = dbc.GetEmptyDataTable("tb_b_carriage_pay");
-                                DataRow pfdr = pfdt.NewRow();
-                                pfdr["carriagepayid"] = Guid.NewGuid().ToString();
-                                pfdr["carriagepaytype"] = 2;
-                                pfdr["adduser"] = SystemUser.CurrentUser.UserID;
-                                pfdr["addtime"] = DateTime.Now;
-                                pfdr["carriageid"] = carriageid;
-                                pfdt.Rows.Add(pfdr);
-                                dbc.InsertTable(pfdt);
-
-                                dbc.CommitTransaction();
-                                return true;
-                            }
-                            else
-                            {
-                                throw new Exception("没有可验收付打款的承运单！");
-                            }
-                        }
-                        else
-                        {
-                            throw new Exception("划拨对象不是有效用户，请核实!");
-                        }
+                        dbc.CommitTransaction();
+                        return true;
                     }
                     else
                     {
-                        throw new Exception("对不起，专线用户不存在!");
+                        throw new Exception("没有可验收付打款的承运单！");
                     }
                 }
                 else
