@@ -62,7 +62,17 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
                 }
-                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
+                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser,
+                                case a.carriagestatus
+                                when 10 then 1
+                                when 50 then 2
+                                when 40 then 3
+                                when 30 then 4
+                                when 0 then 5
+                                when 11 then 6
+                                when 20 then 7
+                                when 21 then 8
+                                else 9 end as px 
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
                             left join tb_b_user c on a.userid=c.UserID where a.status=0 and 1=1 
                                  ";
@@ -70,7 +80,7 @@ public class CYMag
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by a.carriagestatus asc,a.carriagetime desc", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by px asc,a.carriagetime desc", pagesize, ref cp, out ac);
 
                 return new { dt = dtPage, cp = cp, ac = ac };
             }

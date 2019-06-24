@@ -257,7 +257,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 List<string> wArr = new List<string>();
                 if (!string.IsNullOrEmpty(jsr["cx_zxmc"]))
                 {
-                    wArr.Add(dbc.C_Like("c.UserName", jsr["cx_zxmc"], LikeStyle.LeftAndRightLike));
+                    wArr.Add(dbc.C_Like("c.UserXM", jsr["cx_zxmc"], LikeStyle.LeftAndRightLike));
                 }
                 if (!string.IsNullOrEmpty(jsr["cx_fhrzh"]))
                 {
@@ -279,7 +279,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 {
                     sqlW = " and " + string.Join(" and ", wArr);
                 }
-                string str = @"select a.*,b.UserName fhrzh,c.UserName zxmc,
+                string str = @"select a.*,b.UserName fhrzh,c.UserXM zxmc,
                                 case 
                                 when d.id IS NULL then 0
                                 else 1 end as shzt from(
