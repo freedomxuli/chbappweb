@@ -558,17 +558,29 @@ public class UserMag
 
                 if (!string.IsNullOrEmpty(UserXM.Trim()))
                 {
-                    where += " and " + dbc.C_Like("a.UserXM", UserXM.Trim(), LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("UserXM", UserXM.Trim(), LikeStyle.LeftAndRightLike);
                 }
-
-                string str = @"select a.UserID,a.UserName,a.UserXM,a.FromRoute,a.ToRoute,a.AddTime,case when b.num is null then 0 else 1 end opentype from tb_b_user a
+                if (!string.IsNullOrEmpty(opentype))
+                {
+                    if (opentype == "1")
+                    {
+                        where += " and opentype>0 ";
+                    }
+                    else if (opentype == "2")
+                    {
+                        where += " and opentype=0 ";
+                    }
+                }
+                string str = @"select * from (
+                                select a.UserID,a.UserName,a.UserXM,a.FromRoute,a.ToRoute,a.AddTime,case when b.num is null then 0 else 1 end opentype from tb_b_user a
                                 left join (select count(1) num,userid from tb_b_user_pc where status = 0 group by userid) b on a.UserID = b.userid
-                                where a.isdriver = 0 and a.ClientKind = 1";
+                                where a.isdriver = 0 and a.ClientKind = 1
+                            )t where 1=1 ";
                 str += where;
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by a.AddTime desc,a.UserName,a.UserXM", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by AddTime desc,UserName,UserXM", pagesize, ref cp, out ac);
 
                 return new { dt = dtPage, cp = cp, ac = ac };
             }
@@ -2610,7 +2622,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         //编码方式(注意：BYTE能支持中文，ALPHA_NUMERIC扫描出来的都是数字)
         qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.BYTE;
         qrCodeEncoder.QRCodeScale = 4;//大小(值越大生成的二维码图片像素越高)
-                                      //版本(注意：设置为0主要是防止编码的字符串太长时发生错误)
+        //版本(注意：设置为0主要是防止编码的字符串太长时发生错误)
         qrCodeEncoder.QRCodeVersion = 7;
         //错误效验、错误更正(有4个等级)
         qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
@@ -2844,7 +2856,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         }
 
     }
-    #endregion 
+    #endregion
 
     [CSMethod("JudgeUser")]
     public object JudgeUser()
@@ -2880,7 +2892,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         return ToJsonMy2;
     }
 
-    
+
 }
 public class ToJsonMy2
 {
