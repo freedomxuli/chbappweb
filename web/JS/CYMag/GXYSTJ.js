@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
 var gxysStore = Ext.create('Ext.data.Store', {
-    fields: ['UserID', 'UserXM', 'YK_SY', 'dq_mc']
+    fields: ['UserID', 'UserXM', 'YK_SY', 'dq_mc', 'UserName']
 });
 
 var linestore = Ext.create('Ext.data.Store', {
@@ -46,18 +46,20 @@ var ykxhStore = Ext.create('Ext.data.Store', {
 //-----------------------------------------------------------页面方法-----------------------------------------------------------------
 function DataBind() {
     var mc = Ext.getCmp('cx_userxm').getValue();
+    var nm = Ext.getCmp('cx_username').getValue();
     var dq = Ext.getCmp('cx_dqmc').getValue();
 
     CS('CZCLZ.YKMag.GetYkTj', function (retVal) {
         gxysStore.loadData(retVal.dt);
         Ext.getCmp('tj').setText("干线运输各个专线的总账剩余：" + retVal.gxye);
-    }, CS.onError, mc, dq, 0);
+    }, CS.onError, mc, dq, 0, nm);
 }
 
-function ShowLine(zxid, zxxm) {
+function ShowLine(zxid, zxxm, zxzh) {
     var win = new lineWin({ zxid: zxid });
     win.show(null, function () {
         Ext.getCmp('zx').setValue(zxxm);
+        Ext.getCmp('zh').setValue(zxzh);
         Ext.getCmp('ny').setValue(new Date());
         CS('CZCLZ.YKMag.GetLine', function (retVal) {
             linestore.loadData(retVal);
@@ -472,6 +474,14 @@ Ext.define('lineWin', {
                                             readOnly: true
                                         },
                                         {
+                                            xtype: 'textfield',
+                                            id: 'zh',
+                                            width: 160,
+                                            labelWidth: 60,
+                                            fieldLabel: '账号',
+                                            readOnly: true
+                                        },
+                                        {
                                             xtype: 'monthfield',
                                             fieldLabel: '日期',
                                             editable: false,
@@ -561,6 +571,14 @@ Ext.define('myView', {
                         },
                         {
                             xtype: 'gridcolumn',
+                            dataIndex: 'UserName',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "人员账号",
+                            flex: 1
+                        },
+                        {
+                            xtype: 'gridcolumn',
                             dataIndex: 'YK_SY',
                             sortable: false,
                             menuDisabled: true,
@@ -568,8 +586,9 @@ Ext.define('myView', {
                             flex: 1,
                             renderer: function (v, s, r) {
                                 var yhid = r.data.UserID == null ? '' : r.data.UserID;
+                                var zh = r.data.UserName == null ? '' : r.data.UserName;
                                 var zx = r.data.UserXM == null ? '' : r.data.UserXM;
-                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + yhid + '\',\'' + zx + '\')">' + v + '</a>';
+                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + yhid + '\',\'' + zx + '\',\'' + zh + '\')">' + v + '</a>';
                             }
                         }
                     ],
@@ -587,6 +606,13 @@ Ext.define('myView', {
                                     width: 160,
                                     labelWidth: 60,
                                     fieldLabel: '专线名称'
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    id: 'cx_username',
+                                    width: 160,
+                                    labelWidth: 60,
+                                    fieldLabel: '人员账号'
                                 },
                                 {
                                     xtype: 'textfield',

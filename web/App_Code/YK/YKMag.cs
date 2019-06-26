@@ -1034,19 +1034,23 @@ public class YKMag
 
     #region 干线运输/油品销售 统计(不考虑二级划拨)
     [CSMethod("GetYkTj")]
-    public object GetYkTj(string userxm, string dqmc, int transfertype)
+    public object GetYkTj(string userxm, string dqmc, int transfertype, string username)
     {
         using (DBConnection dbc = new DBConnection())
         {
             string sqlw = "";
             List<string> wArr = new List<string>();
-            if (!string.IsNullOrEmpty(userxm))
+            if (!string.IsNullOrEmpty(userxm.Trim()))
             {
-                wArr.Add(dbc.C_Like("c.UserXM", userxm, LikeStyle.LeftAndRightLike));
+                wArr.Add(dbc.C_Like("c.UserXM", userxm.Trim(), LikeStyle.LeftAndRightLike));
             }
-            if (!string.IsNullOrEmpty(dqmc))
+            if (!string.IsNullOrEmpty(dqmc.Trim()))
             {
-                wArr.Add(dbc.C_Like("c.dq_mc", dqmc, LikeStyle.LeftAndRightLike));
+                wArr.Add(dbc.C_Like("c.dq_mc", dqmc.Trim(), LikeStyle.LeftAndRightLike));
+            }
+            if (!string.IsNullOrEmpty(username.Trim()))
+            {
+                wArr.Add(dbc.C_Like("c.UserName", username.Trim(), LikeStyle.LeftAndRightLike));
             }
             if (wArr.Count > 0)
             {
@@ -1054,7 +1058,7 @@ public class YKMag
             }
             //专线
             var cmd = dbc.CreateCommand();
-            cmd.CommandText = @"select c.UserID,c.UserXM,c.dq_mc,(YK_ZR - YK_XF) YK_SY from (
+            cmd.CommandText = @"select c.UserID,c.UserXM,c.UserName,c.dq_mc,(YK_ZR - YK_XF) YK_SY from (
 	                                select a.inuserid,ISNULL(SUM(a.YK_ZR),0) YK_ZR,ISNULL(SUM(b.YK_XF),0) YK_XF from (
 		                                select inuserid,oiltransfercode,ISNULL(SUM(money),0) YK_ZR from tb_b_oil_transfer 
 		                                where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0 and transfertype=@transfertype

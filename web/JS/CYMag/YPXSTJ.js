@@ -3,7 +3,7 @@
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
 var ypxsStore = Ext.create('Ext.data.Store', {
-    fields: ['UserID', 'UserXM', 'YK_SY', 'UserName', 'dq_mc']
+    fields: ['UserID', 'UserXM', 'YK_SY', 'UserName', 'dq_mc', 'UserName']
 });
 
 var linestore = Ext.create('Ext.data.Store', {
@@ -46,18 +46,20 @@ var ykxhStore = Ext.create('Ext.data.Store', {
 //-----------------------------------------------------------页面方法-----------------------------------------------------------------
 function DataBind() {
     var mc = Ext.getCmp('cx_userxm').getValue();
+    var nm = Ext.getCmp('cx_username').getValue();
     var dq = Ext.getCmp('cx_dqmc').getValue();
 
     CS('CZCLZ.YKMag.GetYkTj', function (retVal) {
         ypxsStore.loadData(retVal.dt);
         Ext.getCmp('tj').setText("油品销售各个账户的总账剩余：" + retVal.gxye);
-    }, CS.onError, mc, dq, 1);
+    }, CS.onError, mc, dq, 1, nm);
 }
 
-function ShowLine(zxid, zxxm) {
+function ShowLine(zxid, zxxm, zxzh) {
     var win = new lineWin({ zxid: zxid });
     win.show(null, function () {
         Ext.getCmp('zx').setValue(zxxm);
+        Ext.getCmp('zh').setValue(zxzh);
         Ext.getCmp('ny').setValue(new Date());
         CS('CZCLZ.YKMag.GetLine', function (retVal) {
             linestore.loadData(retVal);
@@ -472,6 +474,14 @@ Ext.define('lineWin', {
                                             readOnly: true
                                         },
                                         {
+                                            xtype: 'textfield',
+                                            id: 'zh',
+                                            width: 160,
+                                            labelWidth: 60,
+                                            fieldLabel: '账号',
+                                            readOnly: true
+                                        },
+                                        {
                                             xtype: 'monthfield',
                                             fieldLabel: '日期',
                                             editable: false,
@@ -545,7 +555,7 @@ Ext.define('myView', {
                             sortable: false,
                             menuDisabled: true,
                             text: "归属地",
-                            width:90
+                            width: 90
                         },
                         {
                             xtype: 'gridcolumn',
@@ -557,13 +567,24 @@ Ext.define('myView', {
                         },
                         {
                             xtype: 'gridcolumn',
+                            dataIndex: 'UserXM',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "账户名称",
+                            flex: 1
+                        },
+                        {
+                            xtype: 'gridcolumn',
                             dataIndex: 'YK_SY',
                             sortable: false,
                             menuDisabled: true,
                             text: "油卡剩余金额",
                             flex: 1,
                             renderer: function (v, s, r) {
-                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + r.data.UserID + '\',\'' + r.data.UserXM + '\')">' + v + '</a>';
+                                var yhid = r.data.UserID == null ? '' : r.data.UserID;
+                                var zh = r.data.UserName == null ? '' : r.data.UserName;
+                                var zx = r.data.UserXM == null ? '' : r.data.UserXM;
+                                return '<a href="javascript:void(0);" onclick="ShowLine(\'' + yhid + '\',\'' + zx + '\',\'' + zh + '\')">' + v + '</a>';
                             }
                         }
                     ],
@@ -581,6 +602,13 @@ Ext.define('myView', {
                                     width: 160,
                                     labelWidth: 60,
                                     fieldLabel: '划拨账户'
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    id: 'cx_username',
+                                    width: 160,
+                                    labelWidth: 60,
+                                    fieldLabel: '人员账号'
                                 },
                                 {
                                     xtype: 'textfield',
