@@ -1353,13 +1353,26 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 cells[0, 7].PutValue("在售运费券");
                 cells[0, 7].SetStyle(style2);
                 cells.SetColumnWidth(7, 20);
+
                 cells[0, 8].PutValue("注册时间");
                 cells[0, 8].SetStyle(style2);
                 cells.SetColumnWidth(8, 20);
+
                 cells[0, 9].PutValue("地址");
                 cells[0, 9].SetStyle(style2);
                 cells.SetColumnWidth(9, 20);
 
+                cells[0, 10].PutValue("模式类型");
+                cells[0, 10].SetStyle(style2);
+                cells.SetColumnWidth(10, 20);
+
+                cells[0, 11].PutValue("模式系数");
+                cells[0, 11].SetStyle(style2);
+                cells.SetColumnWidth(11, 20);
+
+                cells[0, 12].PutValue("承运最大限额");
+                cells[0, 12].SetStyle(style2);
+                cells.SetColumnWidth(12, 20);
                 string where = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
@@ -1412,6 +1425,29 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     cells[i + 1, 8].SetStyle(style4);
                     cells[i + 1, 9].PutValue(dt.Rows[i]["Address"]);
                     cells[i + 1, 9].SetStyle(style4);
+                    if (dt.Rows[i]["modetype"] != DBNull.Value)
+                    {
+                        if (Convert.ToInt32(dt.Rows[i]["modetype"]) == 1)
+                        {
+                            cells[i + 1, 10].PutValue("模式一");
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["modetype"]) == 2)
+                        {
+                            cells[i + 1, 10].PutValue("模式二");
+                        }
+                    }
+                    cells[i + 1, 10].SetStyle(style4);
+
+                    if (dt.Rows[i]["modecoefficient"] != DBNull.Value)
+                    {
+                        cells[i + 1, 11].PutValue(Convert.ToDecimal(dt.Rows[i]["modecoefficient"]));
+                    }
+                    cells[i + 1, 11].SetStyle(style4);
+                    if (dt.Rows[i]["carriagemaxmoney"] != DBNull.Value)
+                    {
+                        cells[i + 1, 12].PutValue(Convert.ToDecimal(dt.Rows[i]["carriagemaxmoney"]));
+                    }
+                    cells[i + 1, 12].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -2046,6 +2082,31 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     dr["DqBm"] = jsr["DqBm"].ToString();
                     dr["IDCard"] = jsr["IDCard"].ToString();
                     dr["caruser"] = jsr["caruser"].ToString();
+                    if (!string.IsNullOrEmpty(jsr["modetype"].ToString()))
+                    {
+                        dr["modetype"] = Convert.ToInt32(jsr["modetype"].ToString());
+                    }
+                    else
+                    {
+                        dr["modetype"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["modecoefficient"].ToString()))
+                    {
+                        dr["modecoefficient"] = Convert.ToDecimal(jsr["modecoefficient"].ToString());
+                    }
+                    else
+                    {
+                        dr["modecoefficient"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["carriagemaxmoney"].ToString()))
+                    {
+                        dr["carriagemaxmoney"] = Convert.ToDecimal(jsr["carriagemaxmoney"].ToString());
+                    }
+                    else
+                    {
+                        dr["carriagemaxmoney"] = DBNull.Value;
+                    }
+
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2087,6 +2148,31 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     dr["DqBm"] = jsr["DqBm"].ToString();
                     dr["IDCard"] = jsr["IDCard"].ToString();
                     dr["caruser"] = jsr["caruser"].ToString();
+
+                    if (!string.IsNullOrEmpty(jsr["modetype"].ToString()))
+                    {
+                        dr["modetype"] = Convert.ToInt32(jsr["modetype"].ToString());
+                    }
+                    else
+                    {
+                        dr["modetype"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["modecoefficient"].ToString()))
+                    {
+                        dr["modecoefficient"] = Convert.ToDecimal(jsr["modecoefficient"].ToString());
+                    }
+                    else
+                    {
+                        dr["modecoefficient"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["carriagemaxmoney"].ToString()))
+                    {
+                        dr["carriagemaxmoney"] = Convert.ToDecimal(jsr["carriagemaxmoney"].ToString());
+                    }
+                    else
+                    {
+                        dr["carriagemaxmoney"] = DBNull.Value;
+                    }
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);
 

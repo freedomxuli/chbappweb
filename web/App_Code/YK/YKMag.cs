@@ -448,6 +448,10 @@ public class YKMag
                         {
                             invoice = "已开";
                         }
+                        else if (Convert.ToInt32(dt.Rows[i]["isinvoice"].ToString()) == 2)
+                        {
+                            invoice = "已收票";
+                        }
                     }
                     cells[i + 1, 9].PutValue(invoice);
                     cells[i + 1, 9].SetStyle(style4);

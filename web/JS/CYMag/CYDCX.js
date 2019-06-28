@@ -63,7 +63,7 @@ function DataBind(nPage) {
 
 
 function QR(carriageid, carriagestatus, userid) {
-    
+
     CS('CZCLZ.CYMag.QR', function (retVal) {
         if (retVal) {
             $.ajax({
@@ -98,7 +98,7 @@ function QR(carriageid, carriagestatus, userid) {
             });
         }
     }, CS.onError, carriageid, carriagestatus);
-    
+
 
 }
 
@@ -387,7 +387,7 @@ Ext.onReady(function () {
                                 }
                                 if ((record.data.carriagestatus >= 50) && record.data.ismoneynewpay == 0) {
                                     str += " <a onclick='YSFDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付确认</a>";
-                                } 
+                                }
                                 if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
                                     str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
                                 }
@@ -395,7 +395,7 @@ Ext.onReady(function () {
                                     str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
                                 }
                                 return str;
-                                
+
                             }
                         },
                         {
@@ -424,8 +424,10 @@ Ext.onReady(function () {
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 if (value == 1) {
                                     return "已开";
-                                } else {
+                                } else if (value == 0) {
                                     return "未开";
+                                } else if (value == 2) {
+                                    return "已收票";
                                 }
                             }
                         },
@@ -701,7 +703,8 @@ Ext.onReady(function () {
                                         data: [
                                             { 'val': "", 'txt': '全部' },
                                             { 'val': 0, 'txt': '未开' },
-                                            { 'val': 1, 'txt': '已开' }]
+                                            { 'val': 1, 'txt': '已开' },
+                                            { 'val': 2, 'txt': '已收票' }]
 
                                     }),
                                     queryMode: 'local',

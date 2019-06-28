@@ -85,7 +85,7 @@ Ext.onReady(function () {
                         sortable: false,
                         menuDisabled: true,
                         text: "加油卡号",
-                        width:200
+                        width: 200
                     },
                     {
                         xtype: 'gridcolumn',
@@ -109,7 +109,7 @@ Ext.onReady(function () {
                         sortable: false,
                         menuDisabled: true,
                         text: "单价（元/L）",
-                        align:'right',
+                        align: 'right',
                         width: 100
                     },
                     {
@@ -176,8 +176,10 @@ Ext.onReady(function () {
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                             if (value == 1) {
                                 return "已开";
-                            } else {
+                            } else if (value == 0) {
                                 return "未开";
+                            } else if (value == 2) {
+                                return "已收票";
                             }
                         }
                     },
@@ -382,7 +384,7 @@ Ext.onReady(function () {
                                         {
                                             xtype: 'button',
                                             text: '开票',
-                                            id:'kaipiao',
+                                            id: 'kaipiao',
                                             handler: function () {
                                                 if (privilege("加油模块_油卡订单查询_开票")) {
                                                     var grid = Ext.getCmp('ykGrid');

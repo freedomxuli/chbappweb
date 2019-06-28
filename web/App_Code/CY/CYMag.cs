@@ -392,6 +392,10 @@ public class CYMag
                         {
                             isinvoice = "已开";
                         }
+                        else if (Convert.ToInt32(dt.Rows[i]["isinvoice"]) == 2)
+                        {
+                            isinvoice = "已收票";
+                        }
                     }
                     else
                     {

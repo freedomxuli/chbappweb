@@ -39,7 +39,10 @@ var store = createSFW4Store({
         { name: 'searchAddress' },
         { name: 'ewmbs' },
         { name: 'IDCard' },
-        { name: 'caruser' }
+        { name: 'caruser' },
+        { name: 'modetype' },
+        { name: 'modecoefficient' },
+        { name: 'carriagemaxmoney' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -171,6 +174,15 @@ function EditUser(id) {
     var r = store.findRecord("UserID", id).data;
     var win = new addWin();
     win.show(null, function () {
+        if (r.ClientKind == 1) {
+            Ext.getCmp('modetype').show();
+            Ext.getCmp('modecoefficient').show();
+            Ext.getCmp('carriagemaxmoney').show();
+        } else {
+            Ext.getCmp('modetype').hide();
+            Ext.getCmp('modecoefficient').hide();
+            Ext.getCmp('carriagemaxmoney').hide();
+        }
         CS('CZCLZ.YHGLClass.GetDQS', function (retVal) {
             if (retVal) {
                 sdqstore.loadData(retVal);
@@ -786,8 +798,8 @@ Ext.define('phWin', {
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 475,
-    width: 400,
+    height: 550,
+    width: 450,
     layout: {
         type: 'fit'
     },
@@ -808,7 +820,7 @@ Ext.define('addWin', {
                         fieldLabel: 'ID',
                         id: 'UserID',
                         name: 'UserID',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         hidden: true,
                         colspan: 2
                     },
@@ -817,7 +829,7 @@ Ext.define('addWin', {
                         fieldLabel: '用户名',
                         id: 'UserName',
                         name: 'UserName',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         allowBlank: false,
                         anchor: '100%'
                     },
@@ -826,7 +838,7 @@ Ext.define('addWin', {
                         fieldLabel: '密码',
                         id: 'Password',
                         name: 'Password',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         allowBlank: false,
                         anchor: '100%'
                     },
@@ -835,7 +847,7 @@ Ext.define('addWin', {
                         fieldLabel: '真实姓名',
                         id: 'UserXM',
                         name: 'UserXM',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         allowBlank: false,
                         anchor: '100%'
                     },
@@ -844,7 +856,7 @@ Ext.define('addWin', {
                         fieldLabel: '电话',
                         id: 'UserTel',
                         name: 'UserTel',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         anchor: '100%'
                     },
                     {
@@ -855,7 +867,7 @@ Ext.define('addWin', {
                         fieldLabel: '所属地(省)',
                         allowBlank: false,
                         editable: false,
-                        labelWidth: 70,
+                        labelWidth: 80,
                         store: sdqstore,
                         queryMode: 'local',
                         displayField: 'dq_mc',
@@ -878,7 +890,7 @@ Ext.define('addWin', {
                         fieldLabel: '所属地(市)',
                         allowBlank: false,
                         editable: false,
-                        labelWidth: 70,
+                        labelWidth: 80,
                         store: dqstore,
                         queryMode: 'local',
                         displayField: 'dq_mc',
@@ -890,7 +902,7 @@ Ext.define('addWin', {
                         fieldLabel: '线路起点',
                         id: 'FromRoute',
                         name: 'FromRoute',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         anchor: '100%'
                     },
                     {
@@ -898,7 +910,7 @@ Ext.define('addWin', {
                         fieldLabel: '线路终点',
                         id: 'ToRoute',
                         name: 'ToRoute',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         anchor: '100%'
                     },
                     {
@@ -909,7 +921,7 @@ Ext.define('addWin', {
                         fieldLabel: '角色',
                         allowBlank: false,
                         editable: false,
-                        labelWidth: 70,
+                        labelWidth: 80,
                         store: roleStore1,
                         queryMode: 'local',
                         displayField: 'ClientName',
@@ -921,14 +933,14 @@ Ext.define('addWin', {
                         fieldLabel: '身份证号',
                         id: 'IDCard',
                         name: 'IDCard',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         anchor: '100%'
                     },
                     {
                         xtype: 'textareafield',
                         id: 'Address',
                         name: 'Address',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         fieldLabel: '地址',
                         anchor: '100%'
                     },
@@ -936,7 +948,7 @@ Ext.define('addWin', {
                         xtype: 'textareafield',
                         id: 'searchAddress',
                         name: 'searchAddress',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         fieldLabel: '搜索地址',
                         anchor: '100%'
                     },
@@ -945,8 +957,50 @@ Ext.define('addWin', {
                         fieldLabel: '车主账号',
                         id: 'caruser',
                         name: 'caruser',
-                        labelWidth: 70,
+                        labelWidth: 80,
                         anchor: '100%'
+                    },
+                    {
+                        xtype: 'combobox',
+                        id: 'modetype',
+                        name: 'modetype',
+                        anchor: '100%',
+                        fieldLabel: '干线运输模式',
+                        editable: false,
+                        labelWidth: 80,
+                        queryMode: 'local',
+                        displayField: 'TEXT',
+                        valueField: 'VALUE',
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['VALUE', 'TEXT'],
+                            data: [
+                                { 'VALUE': 1, 'TEXT': '模式一' }, { 'VALUE': 2, 'TEXT': '模式二' }
+                            ]
+                        }),
+                        value: 1
+                    },
+                    {
+                        xtype: 'numberfield',
+                        id: 'modecoefficient',
+                        name: 'modecoefficient',
+                        fieldLabel: '模式系数',
+                        labelWidth: 80,
+                        anchor: '100%',
+                        minValue: 0.01,
+                        maxValue: 0.99,
+                        decimalPrecision: 2,
+                        value: 0.94
+                    },
+                    {
+                        xtype: 'numberfield',
+                        id: 'carriagemaxmoney',
+                        name: 'carriagemaxmoney',
+                        fieldLabel: '承运最大限额',
+                        labelWidth: 80,
+                        anchor: '100%',
+                        minValue: 0,
+                        decimalPrecision: 2,
+                        value: 0
                     }
                 ],
                 buttonAlign: 'center',
@@ -1322,6 +1376,40 @@ Ext.onReady(function () {
                         menuDisabled: true,
                         width: 140,
                         text: "专线用户在售运费券"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "模式类型",
+                        dataIndex: 'modetype',
+                        width: 100,
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            var str = "";
+                            if (value==1) {
+                                str = "模式一";
+                            }else if (value==2) {
+                                str = "模式二";
+                            }
+                            return str;
+                        }
+
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'modecoefficient',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 90,
+                        text: "模式系数"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'carriagemaxmoney',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 90,
+                        text: "承运最大限额"
                     },
                     {
                         text: '操作',
