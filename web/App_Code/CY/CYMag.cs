@@ -432,11 +432,11 @@ public class CYMag
     }
 
     /// <summary>
-    /// 开票
+    /// 开票\收票
     /// </summary>
     /// <param name="jsr"></param>
     [CSMethod("Cykp")]
-    public void Cykp(JSReader jsr)
+    public void Cykp(JSReader jsr,int zt)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -450,7 +450,7 @@ public class CYMag
 
                     DataRow dr = dt.NewRow();
                     dr["carriageid"] = id;
-                    dr["isinvoice"] = 1;
+                    dr["isinvoice"] = zt;
                     dt.Rows.Add(dr);
                 }
                 dbc.UpdateTable(dt, dtt);

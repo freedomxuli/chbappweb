@@ -424,7 +424,7 @@ Ext.onReady(function () {
                             dataIndex: 'isinvoice',
                             sortable: false,
                             menuDisabled: true,
-                            text: "是否开票",
+                            text: "票据状态",
                             width: 100,
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 if (value == 1) {
@@ -780,7 +780,46 @@ Ext.onReady(function () {
                                                             icon: Ext.MessageBox.INFO
                                                         });
                                                         DataBind();
-                                                    }, CS.onError, arr);
+                                                    }, CS.onError, arr, 1);
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'buttongroup',
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            text: '收票',
+                                            id: 'shoupiao',
+                                            handler: function () {
+                                                if (privilege("承运模块_承运单查询_收票")) {
+                                                    var grid = Ext.getCmp('cyGrid');
+                                                    var gx = grid.getSelectionModel().getSelection();
+                                                    if (gx.length == 0) {
+                                                        Ext.Msg.show({
+                                                            title: '提示',
+                                                            msg: "请勾选需要收票的承运单。",
+                                                            buttons: Ext.MessageBox.OK,
+                                                            icon: Ext.MessageBox.INFO
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    var arr = [];
+                                                    for (var i = 0; i < gx.length; i++) {
+                                                        arr.push(gx[i].data);
+                                                    }
+                                                    CS('CZCLZ.CYMag.Cykp', function (retVal) {
+                                                        Ext.Msg.show({
+                                                            title: '提示',
+                                                            msg: "收票成功。",
+                                                            buttons: Ext.MessageBox.OK,
+                                                            icon: Ext.MessageBox.INFO
+                                                        });
+                                                        DataBind();
+                                                    }, CS.onError, arr, 2);
                                                 }
                                             }
                                         }
