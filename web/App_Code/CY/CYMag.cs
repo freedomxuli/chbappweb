@@ -564,6 +564,70 @@ public class CYMag
         }
     }
 
+    [CSMethod("QRTH")]
+    public object QRTH(string carriageid, int carriagestatus)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string str = "select * from tb_b_carriage where status=0 and carriageid=" + dbc.ToSqlValue(carriageid);
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                if (dt.Rows.Count > 0)
+                {
+                    if (dt.Rows[0]["carriagestatus"] != null && dt.Rows[0]["carriagestatus"].ToString() != "")
+                    {
+                        if (carriagestatus == 10 && Convert.ToInt32(dt.Rows[0]["carriagestatus"].ToString()) == 20)
+                        {
+                            DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
+                            DataTableTracker odtt = new DataTableTracker(odt);
+                            DataRow odr = odt.NewRow();
+                            odr["carriageid"] = carriageid;
+                            odr["carriagestatus"] = 10;
+                            odt.Rows.Add(odr);
+                            dbc.UpdateTable(odt, odtt);
+
+                            DataTable ofdt = dbc.GetEmptyDataTable("tb_b_carriage_flow");
+                            DataRow ofdr = ofdt.NewRow();
+                            ofdr["carriageflowid"] = Guid.NewGuid().ToString();
+                            ofdr["carriageid"] = carriageid;
+                            ofdr["carriagestatus"] = 10;
+                            ofdr["status"] = 0;
+                            ofdr["adduser"] = SystemUser.CurrentUser.UserID;
+                            ofdr["addtime"] = DateTime.Now;
+                            ofdt.Rows.Add(ofdr);
+                            dbc.InsertTable(ofdt);
+
+                            dbc.CommitTransaction();
+
+                            return true;
+                        }
+                        else
+                        {
+                            throw new Exception("无法操作该订单！");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("无法操作该订单！");
+                    }
+
+                }
+                else
+                {
+                    throw new Exception("该订单不存在！");
+                }
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
     [CSMethod("JJ")]
     public object JJ(string carriageid, int carriagestatus, string thyj)
     {
@@ -856,11 +920,6 @@ public class CYMag
                                     {
                                         money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
                                     }
-                                }
-
-                                if (dt.Rows[0]["modecoefficient"] != null && dt.Rows[0]["modecoefficient"].ToString() != "")
-                                {
-                                    money = money * Convert.ToDecimal(dt.Rows[0]["modecoefficient"].ToString());
                                 }
 
                                 string _url = ServiceURL + "huabozijin";

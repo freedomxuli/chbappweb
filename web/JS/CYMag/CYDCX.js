@@ -85,16 +85,32 @@ function QR(carriageid, carriagestatus, userid) {
                             DataBind(1);
                         }
                         else {
-                            Ext.MessageBox.alert('提示', data.details);
+                            CS('CZCLZ.CYMag.QRTH', function (ret) {
+                                if (ret) {
+                                    Ext.MessageBox.alert('提示', data.details);
+                                    DataBind(1);
+                                }
+                            }, CS.onError, carriageid, carriagestatus);
                         }
                     }
                     catch (e) {
-                        Ext.MessageBox.alert('提示', data.details);
+                        CS('CZCLZ.CYMag.QRTH', function (ret) {
+                            if (ret) {
+                                Ext.MessageBox.alert('提示', data.details);
+                                DataBind(1);
+                            }
+                        }, CS.onError, carriageid, carriagestatus);
                     }
                 },
                 error: function (j, t, e) {
-                    console.log(j);
-                    console.log("发生未知错误，错误:" + t, e);
+                    CS('CZCLZ.CYMag.QRTH', function (ret) {
+                        if (ret) {
+                            console.log(j);
+                            console.log("发生未知错误，错误:" + t, e);
+                            DataBind(1);
+                        }
+                    }, CS.onError, carriageid, carriagestatus);
+
                 }
             });
         }
