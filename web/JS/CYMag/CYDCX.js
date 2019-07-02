@@ -40,7 +40,8 @@ var store = createSFW4Store({
         { name: 'zx' },
         { name: 'isinvoice' },
         { name: 'modetype' },
-        { name: 'modecoefficient' }
+        { name: 'modecoefficient' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -202,6 +203,19 @@ function CKBD(carriageid) {
     }, CS.onError, carriageid);
 }
 
+
+function QRDD(carriageid, carriagestatus) {
+    if (privilege("承运模块_承运单查询_确认到达")) {
+        Ext.MessageBox.confirm("提示", "是否确认到达确认？", function (obj) {
+            if (obj == "yes") {
+                CS('CZCLZ.CYMag.QRDD', function (retVal) {
+                    DataBind(1);
+                }, CS.onError, carriageid, carriagestatus);
+            }
+        });
+
+    }
+}
 
 //************************************页面方法***************************************
 
@@ -409,8 +423,19 @@ Ext.onReady(function () {
                                         str += " <a onclick='YSFDK1(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>验收付确认</a>";
                                     }
                                 }
-                                if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
-                                    str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+
+                                if ((record.data.carriagestatus == 30 || record.data.carriagestatus == 40 || record.data.carriagestatus == 50) && record.data.isarrive == 0) {
+                                    str += " <a onclick='QRDD(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>确认到达</a>";
+                                }
+                                
+                                if (record.data.modetype == 1) {
+                                    if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
+                                        str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                    }
+                                } else if (record.data.modetype == 2) {
+                                    if (record.data.carriagestatus == 50 && record.data.ismoneypay == 1) {
+                                        str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                    }
                                 }
                                 if (record.data.carriagestatus >= 30) {
                                     str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
