@@ -751,13 +751,11 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                string str = "select a.*,c.modetype,c.modecoefficient from tb_b_carriage a left join tb_b_user c on a.userid=c.UserID where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
+                string str = "select * from tb_b_carriage where status=0 and carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50 && Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 1 && Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1
-                        && Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 1 && Convert.ToInt32(dt.Rows[0]["modetype"]) == 1) || (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50
-                        && Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1 && Convert.ToInt32(dt.Rows[0]["modetype"]) == 2))
+                    if (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50 && Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 1 && Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1)
                     {
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);
@@ -1293,70 +1291,6 @@ public class CYMag
                     throw new Exception("承运单不存在！");
                 }
 
-            }
-            catch (Exception ex)
-            {
-                dbc.RoolbackTransaction();
-                throw ex;
-            }
-        }
-    }
-
-    [CSMethod("QRDD")]
-    public object QRDD(string carriageid, int carriagestatus)
-    {
-        using (DBConnection dbc = new DBConnection())
-        {
-            dbc.BeginTransaction();
-            try
-            {
-                string str = "select * from tb_b_carriage where status=0 and carriageid=" + dbc.ToSqlValue(carriageid);
-                DataTable dt = dbc.ExecuteDataTable(str);
-
-                if (dt.Rows.Count > 0)
-                {
-                    if (dt.Rows[0]["carriagestatus"] != null && dt.Rows[0]["carriagestatus"].ToString() != "")
-                    {
-                        if ((Convert.ToInt32(dt.Rows[0]["isarrive"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) >= 30))
-                        {
-                            DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
-                            DataTableTracker odtt = new DataTableTracker(odt);
-                            DataRow odr = odt.NewRow();
-                            odr["carriageid"] = carriageid;
-                            odr["isarrive"] = 1;
-                            odt.Rows.Add(odr);
-                            dbc.UpdateTable(odt, odtt);
-
-                            //DataTable ofdt = dbc.GetEmptyDataTable("tb_b_carriage_flow");
-                            //DataRow ofdr = ofdt.NewRow();
-                            //ofdr["carriageflowid"] = Guid.NewGuid().ToString();
-                            //ofdr["carriageid"] = carriageid;
-                            //ofdr["carriagestatus"] = 20;
-                            //ofdr["status"] = 0;
-                            //ofdr["adduser"] = SystemUser.CurrentUser.UserID;
-                            //ofdr["addtime"] = DateTime.Now;
-                            //ofdt.Rows.Add(ofdr);
-                            //dbc.InsertTable(ofdt);
-
-                            dbc.CommitTransaction();
-
-                            return true;
-                        }
-                        else
-                        {
-                            throw new Exception("无法操作该订单！");
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("无法操作该订单！");
-                    }
-
-                }
-                else
-                {
-                    throw new Exception("该订单不存在！");
-                }
             }
             catch (Exception ex)
             {
