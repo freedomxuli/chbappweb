@@ -498,7 +498,7 @@ Ext.define('lineWin', {
                                             handler: function () {
                                                 CS('CZCLZ.YKMag.GetLine', function (retVal) {
                                                     linestore.loadData(retVal);
-                                                }, CS.onError, zxid, Ext.getCmp('ny').getValue(), 0);
+                                                }, CS.onError, zxid, Ext.getCmp('ny').getValue(), 1);
                                             }
                                         },
                                         {
