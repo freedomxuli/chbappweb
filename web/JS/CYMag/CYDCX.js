@@ -40,7 +40,8 @@ var store = createSFW4Store({
         { name: 'zx' },
         { name: 'isinvoice' },
         { name: 'modetype' },
-        { name: 'modecoefficient' }
+        { name: 'modecoefficient' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);

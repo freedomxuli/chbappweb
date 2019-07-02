@@ -1167,19 +1167,15 @@ public class YKMag
                 //decimal ykzc = dbc.ExecuteScalar(cmd) == null ? 0 : (decimal)dbc.ExecuteScalar(cmd);
 
                 //油卡消耗
-                sql = @"select YK_XH from( 
-                            select UserID,ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
-                                SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
-                                    select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
-                                )
-                            ) and DateDiff(dd,addtime," + dbc.ToSqlValue(ti) + @")=0
-                            GROUP BY UserID
-                        )t
-                        where UserID=@UserID";
+                sql = @"select ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
+                            SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
+                                select oiltransfercode from tb_b_oil_transfer where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and inuserid=@inuserid
+                            )
+                    ) and DateDiff(dd,addtime," + dbc.ToSqlValue(ti) + @")=0";
                 cmd.Parameters.Clear();
                 cmd.CommandText = sql;
                 cmd.Parameters.AddWithValue("@transfertype", transfertype);
-                cmd.Parameters.AddWithValue("@UserID", zxid);
+                cmd.Parameters.AddWithValue("@inuserid", zxid);
                 decimal ykxh = dbc.ExecuteScalar(cmd) == null ? 0 : (decimal)dbc.ExecuteScalar(cmd);
 
                 DataRow newDr = dt.NewRow();
@@ -1459,16 +1455,16 @@ public class YKMag
                                 where status=1 and cardNo in(
                                     SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
                                         select oiltransfercode from tb_b_oil_transfer 
-                                        where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9'
+                                        where status=0 and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and inuserid=@inuserid
                                     )
-                                ) and convert(nvarchar(10),addtime,120)=@addtime and userid=@userid";
+                                ) and convert(nvarchar(10),addtime,120)=@addtime";
                 var cmd = dbc.CreateCommand();
                 cmd.CommandText = sql;
-                cmd.Parameters.AddWithValue("@userid", zxid);
+                cmd.Parameters.AddWithValue("@inuserid", zxid);
                 cmd.Parameters.AddWithValue("@addtime", rq);
                 cmd.Parameters.AddWithValue("@transfertype", transfertype);
 
-                DataTable dt = dbc.ExecuteDataTable(cmd);
+                 DataTable dt = dbc.ExecuteDataTable(cmd);
                 return dt;
 
 

@@ -81,7 +81,7 @@ function ykxh(zxid, rq) {
     var win = new ykxhWin({ zxid: zxid, rq: rq });
     win.show(null, function () {
         CS('CZCLZ.YKMag.GetYkxhLine', function (retVal) {
-            ykhbStore.loadData(retVal);
+            ykxhStore.loadData(retVal);
         }, CS.onError, zxid, rq, 1);
     });
 }
