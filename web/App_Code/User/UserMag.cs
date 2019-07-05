@@ -574,7 +574,7 @@ public class UserMag
                 string str = @"select * from (
                                 select a.UserID,a.UserName,a.UserXM,a.FromRoute,a.ToRoute,a.AddTime,case when b.num is null then 0 else 1 end opentype from tb_b_user a
                                 left join (select count(1) num,userid from tb_b_user_pc where status = 0 group by userid) b on a.UserID = b.userid
-                                where a.isdriver = 0 and a.ClientKind = 1
+                                where a.isdriver = 0 and (a.ClientKind = 1 or a.ClientKind = 2)
                             )t where 1=1 ";
                 str += where;
 

@@ -1,4 +1,7 @@
-﻿var pageSize = 15;
+﻿/*
+专线、三方客户端授权
+*/
+var pageSize = 15;
 
 //************************************数据源*****************************************
 var store = createSFW4Store({
@@ -349,7 +352,7 @@ Ext.onReady(function () {
                                 sortable: false,
                                 menuDisabled: true,
                                 width: 360,
-                                text: "专线名称"
+                                text: "账户名称"
                             },
                             {
                                 xtype: 'gridcolumn',
@@ -378,7 +381,7 @@ Ext.onReady(function () {
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
                                     if (record.data.opentype == 0) {
-                                        str = "<a onclick='OpenClientPC(\"" + value + "\");'>开通专线PC</a>";
+                                        str = "<a onclick='OpenClientPC(\"" + value + "\");'>开通PC</a>";
                                     } else {
                                         str = "<a onclick='CloseClientPC(\"" + value + "\");'>关闭专线PC</a> <a onclick='SelectModule(\"" + value + "\");'>选择模块</a>";
                                     }
@@ -399,7 +402,7 @@ Ext.onReady(function () {
                                             id: 'cx_xm',
                                             width: 200,
                                             labelWidth: 70,
-                                            fieldLabel: '专线名称'
+                                            fieldLabel: '账户名称'
                                         },
                                         {
                                             xtype: 'combobox',

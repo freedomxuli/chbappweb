@@ -1,4 +1,7 @@
-﻿var MenuStore = Ext.create('Ext.data.TreeStore', {
+﻿/*
+专线、三方客户端模块管理
+*/
+var MenuStore = Ext.create('Ext.data.TreeStore', {
     fields: [
         'ML_ID', 'ML_MC', 'ML_LB', 'ML_PX', 'ML_URL', 'MODULE_ID', 'MENU_ID'
     ]
