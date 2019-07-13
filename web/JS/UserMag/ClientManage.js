@@ -42,7 +42,8 @@ var store = createSFW4Store({
         { name: 'caruser' },
         { name: 'modetype' },
         { name: 'modecoefficient' },
-        { name: 'carriagemaxmoney' }
+        { name: 'carriagemaxmoney' },
+        { name: 'mirrornumber' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -178,10 +179,12 @@ function EditUser(id) {
             Ext.getCmp('modetype').show();
             Ext.getCmp('modecoefficient').show();
             Ext.getCmp('carriagemaxmoney').show();
+            Ext.getCmp('mirrornumber').show();
         } else {
             Ext.getCmp('modetype').hide();
             Ext.getCmp('modecoefficient').hide();
             Ext.getCmp('carriagemaxmoney').hide();
+            Ext.getCmp('mirrornumber').hide();
         }
         CS('CZCLZ.YHGLClass.GetDQS', function (retVal) {
             if (retVal) {
@@ -389,7 +392,7 @@ function IsBdBf(username) {
 Ext.define('YGLSJList', {
     extend: 'Ext.window.Window',
 
-    height: 450,
+    height: 500,
     width: 650,
     layout: {
         type: 'fit'
@@ -1001,6 +1004,14 @@ Ext.define('addWin', {
                         minValue: 0,
                         decimalPrecision: 2,
                         value: 0
+                    },
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: '设备号',
+                        id: 'mirrornumber',
+                        name: 'mirrornumber',
+                        labelWidth: 80,
+                        anchor: '100%'
                     }
                 ],
                 buttonAlign: 'center',

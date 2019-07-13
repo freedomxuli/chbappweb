@@ -2106,7 +2106,14 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["carriagemaxmoney"] = DBNull.Value;
                     }
-
+                    if (!string.IsNullOrEmpty(jsr["mirrornumber"].ToString()))
+                    {
+                        dr["mirrornumber"] = jsr["mirrornumber"].ToString();
+                    }
+                    else
+                    {
+                        dr["mirrornumber"] = DBNull.Value;
+                    }
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2172,6 +2179,14 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     else
                     {
                         dr["carriagemaxmoney"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["mirrornumber"].ToString()))
+                    {
+                        dr["mirrornumber"] = jsr["mirrornumber"].ToString();
+                    }
+                    else
+                    {
+                        dr["mirrornumber"] = DBNull.Value;
                     }
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);
