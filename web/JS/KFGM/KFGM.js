@@ -292,7 +292,7 @@ Ext.define('addWin', {
                         listeners: {
                             afterrender: function () {
                                 Ext.get(this.el).select('input').on('keyup', function (evt, t, option) {
-                                    Ext.getCmp("discountmemo").setValue((parseFloat(Ext.getCmp("discount").getValue()) * 10) + "折");
+                                    Ext.getCmp("discountmemo").setValue(Number(Ext.getCmp("discount").getValue() * 10).toFixed(1) + "折");
                                     return false;
                                 });
                             }
