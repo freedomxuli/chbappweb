@@ -288,7 +288,15 @@ Ext.define('addWin', {
                         minValue: 0,
                         maxValue: 1,
                         allowBlank: false,
-                        anchor: '100%'
+                        anchor: '100%',
+                        listeners: {
+                            afterrender: function () {
+                                Ext.get(this.el).select('input').on('keyup', function (evt, t, option) {
+                                    Ext.getCmp("discountmemo").setValue((parseFloat(Ext.getCmp("discount").getValue()) * 10) + "折");
+                                    return false;
+                                });
+                            }
+                        }
                     },
                     {
                         xtype: "label",
