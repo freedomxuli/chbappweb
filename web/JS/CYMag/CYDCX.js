@@ -41,7 +41,8 @@ var store = createSFW4Store({
         { name: 'isinvoice' },
         { name: 'modetype' },
         { name: 'modecoefficient' },
-        { name: 'caruser' }
+        { name: 'caruser' },
+        { name: 'carriagegetmode' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -64,12 +65,16 @@ function DataBind(nPage) {
 }
 
 
-function QR(carriageid, carriagestatus, userid) {
+function QR(carriageid, carriagestatus, userid, model) {
 
     CS('CZCLZ.CYMag.QR', function (retVal) {
         if (retVal) {
+            var newUrl = "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure";
+            if (model == 1) {
+                newUrl = "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure115"
+            }
             $.ajax({
-                url: "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure",
+                url: newUrl,
                 type: 'post',
                 dataType: 'json',
                 headers: { 'Content-Type': 'application/json' },
@@ -147,7 +152,7 @@ function YKDK(carriageid, carriagestatus) {
 }
 
 function XJDK(carriageid, carriagestatus) {
-    if (privilege("承运模块_承运单查询_打款")) {
+    if (privilege("承运模块_专线承运单查询_打款")) {
         Ext.MessageBox.confirm("提示", "是否现付打款？", function (obj) {
             if (obj == "yes") {
                 var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 0 });
@@ -158,7 +163,7 @@ function XJDK(carriageid, carriagestatus) {
 }
 
 function XJDK1(carriageid, carriagestatus) {
-    if (privilege("承运模块_承运单查询_打款")) {
+    if (privilege("承运模块_专线承运单查询_打款")) {
         Ext.MessageBox.confirm("提示", "是否现付确认？", function (obj) {
             if (obj == "yes") {
                 var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 3 });
@@ -169,7 +174,7 @@ function XJDK1(carriageid, carriagestatus) {
 }
 
 function YSFDK(carriageid, carriagestatus) {
-    if (privilege("承运模块_承运单查询_打款")) {
+    if (privilege("承运模块_专线承运单查询_打款")) {
         Ext.MessageBox.confirm("提示", "是否验收付打款？", function (obj) {
             if (obj == "yes") {
                 var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 1 });
@@ -181,7 +186,7 @@ function YSFDK(carriageid, carriagestatus) {
 }
 
 function YSFDK1(carriageid, carriagestatus) {
-    if (privilege("承运模块_承运单查询_打款")) {
+    if (privilege("承运模块_专线承运单查询_打款")) {
         Ext.MessageBox.confirm("提示", "是否验收付确认？", function (obj) {
             if (obj == "yes") {
                 var passwin = new PassWin({ carriageid: carriageid, carriagestatus: carriagestatus, type: 4 });
@@ -204,7 +209,7 @@ function CKBD(carriageid) {
 }
 
 function QRDD(carriageid, carriagestatus) {
-    if (privilege("承运模块_承运单查询_确认到达")) {
+    if (privilege("承运模块_专线承运单查询_确认到达")) {
         Ext.MessageBox.confirm("提示", "是否确认到达确认？", function (obj) {
             if (obj == "yes") {
                 CS('CZCLZ.CYMag.QRDD', function (retVal) {
@@ -399,7 +404,7 @@ Ext.onReady(function () {
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str = "";
                                 if (record.data.carriagestatus == 10) {
-                                    str += " <a onclick='QR(\"" + value + "\",\"" + record.data.carriagestatus + "\",\"" + record.data.userid + "\");'>确认</a>";
+                                    str += " <a onclick='QR(\"" + value + "\",\"" + record.data.carriagestatus + "\",\"" + record.data.userid + "\",\"" + record.data.carriagegetmode + "\");'>确认</a>";
                                 } else if (record.data.carriagestatus == 11)
                                     str += " <a onclick='TH(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>退回</a> ";
                                 if (record.data.modetype == 1) {
@@ -764,7 +769,7 @@ Ext.onReady(function () {
                                             iconCls: 'search',
                                             text: '查询',
                                             handler: function () {
-                                                if (privilege("承运模块_承运单查询_查看")) {
+                                                if (privilege("承运模块_专线承运单查询_查看")) {
                                                     DataBind(1);
                                                 }
                                             }
@@ -779,7 +784,7 @@ Ext.onReady(function () {
                                             text: '导出',
                                             iconCls: 'view',
                                             handler: function () {
-                                                if (privilege("承运模块_承运单查询_导出")) {
+                                                if (privilege("承运模块_专线承运单查询_导出")) {
                                                     DownloadFile("CZCLZ.CYMag.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue());
                                                 }
                                             }
@@ -794,7 +799,7 @@ Ext.onReady(function () {
                                             text: '开票',
                                             id: 'kaipiao',
                                             handler: function () {
-                                                if (privilege("承运模块_承运单查询_开票")) {
+                                                if (privilege("承运模块_专线承运单查询_开票")) {
                                                     var grid = Ext.getCmp('cyGrid');
                                                     var gx = grid.getSelectionModel().getSelection();
                                                     if (gx.length == 0) {
@@ -833,7 +838,7 @@ Ext.onReady(function () {
                                             text: '收票',
                                             id: 'shoupiao',
                                             handler: function () {
-                                                if (privilege("承运模块_承运单查询_收票")) {
+                                                if (privilege("承运模块_专线承运单查询_收票")) {
                                                     var grid = Ext.getCmp('cyGrid');
                                                     var gx = grid.getSelectionModel().getSelection();
                                                     if (gx.length == 0) {
@@ -880,7 +885,7 @@ Ext.onReady(function () {
     });
 
     new CYDView();
-    if (!privilegeBo("承运模块_承运单查询_开票")) {
+    if (!privilegeBo("承运模块_专线承运单查询_开票")) {
         Ext.getCmp('kaipiao').disable(true);
     }
 

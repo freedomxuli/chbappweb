@@ -17,12 +17,12 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
 /// <summary>
-/// YKMag 的摘要说明
+/// CYMagSf 的摘要说明
 /// </summary>
-[CSClass("CYMag")]
-public class CYMag
+[CSClass("CYMagSf")]
+public class CYMagSf
 {
-    public CYMag()
+    public CYMagSf()
     {
         //
         // TODO: 在此处添加构造函数逻辑
@@ -72,10 +72,10 @@ public class CYMag
                                 when 11 then 6
                                 when 20 then 7
                                 when 21 then 8
-                                else 9 end as px,c.modetype,c.modecoefficient,c.carriagegetmode 
+                                else 9 end as px,c.modetype,c.modecoefficient
                               from tb_b_carriage a 
-                            left join tb_b_user b on a.driverid=b.UserID 
-                            inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=1
+                            left join tb_b_user b on a.driverid=b.UserID
+                            inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=2
                             where a.status=0 and 1=1 
                                  ";
                 str += where;
@@ -218,8 +218,10 @@ public class CYMag
                     where += " and " + dbc.C_EQ("a.isinvoice", iskp);
                 }
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
-                              from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
-                            left join tb_b_user c on a.userid=c.UserID where a.status=0 and  1=1 
+                              from tb_b_carriage a 
+                            left join tb_b_user b on a.driverid=b.UserID
+                            inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=2
+                            where a.status=0 and  1=1 
                                  ";
                 str += where;
 
