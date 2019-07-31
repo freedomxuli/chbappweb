@@ -11,6 +11,10 @@ using SmartFramework4v2.Web.Common.JSON;
 using SmartFramework4v2.Data;
 using Aspose.Cells;
 using System.IO;
+using System.Web.Script.Serialization;
+using System.Net;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 /// <summary>
 /// XJMag 的摘要说明
@@ -343,6 +347,125 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 dbc.RoolbackTransaction();
                 throw ex;
             }
+        }
+    }
+    #endregion
+
+    #region 退款审核界面
+    [CSMethod("GetTkshList")]
+    public object GetTkshList(int pagnum, int pagesize, JSReader jsr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                List<string> wArr = new List<string>();
+                string cx_beg = jsr["cx_beg"].ToString();
+                if (!string.IsNullOrEmpty(cx_beg))
+                {
+                    wArr.Add("a.addtime >= " + dbc.ToSqlValue(Convert.ToDateTime(cx_beg)));
+                }
+                string cx_endjsr = jsr["cx_end"].ToString();
+                if (!string.IsNullOrEmpty(cx_endjsr))
+                {
+                    wArr.Add("a.addtime < " + dbc.ToSqlValue(Convert.ToDateTime(cx_endjsr).AddDays(1)));
+                }
+                if (!string.IsNullOrEmpty(jsr["cx_fhrzh"]))
+                {
+                    wArr.Add(dbc.C_Like("b.UserName", jsr["cx_fhrzh"], LikeStyle.LeftAndRightLike));
+                }
+                if (!string.IsNullOrEmpty(jsr["cx_zxmc"]))
+                {
+                    wArr.Add(dbc.C_Like("c.UserXM", jsr["cx_zxmc"], LikeStyle.LeftAndRightLike));
+                }
+                if (!string.IsNullOrEmpty(jsr["cx_istk"]))
+                {
+                    wArr.Add(dbc.C_EQ("a.status", Convert.ToInt32(jsr["cx_istk"].ToString())));
+                }
+                string sqlW = "";
+                if (wArr.Count > 0)
+                {
+                    sqlW = " and " + string.Join(" and ", wArr);
+                }
+
+                string str = @"select a.*,b.UserName fhrmc,c.UserXM zxmc from tb_b_mycard a 
+                                left join tb_b_user b on a.UserID=b.UserID
+                                left join tb_b_user c on a.CardUserID=c.UserID
+                                where a.status in(2,3) and a.OrderCode is not null ";
+                str += sqlW;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.status asc,a.addtime desc", pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("VerifyPassWorld")]
+    public bool VerifyPassWorld(string mycardId, string password)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ZYServiceURL"].ToString();
+
+            string sqlStr = @"select a.UserID YH_ID, a.UserName YH_DLM,a.UserXM YH_XM,a.Password,b.roleId,b.companyId from tb_b_user a 
+                            left join tb_b_user_role b on a.UserID = b.userId 
+                            where a.UserID=@UserID and a.Password=@Password ";
+            SqlCommand cmd = new SqlCommand(sqlStr);
+            cmd.Parameters.AddWithValue("@UserID", SystemUser.CurrentUser.UserID);
+            cmd.Parameters.AddWithValue("@Password", password);
+            var dtUser = dbc.ExecuteDataTable(cmd);
+            if (dtUser.Rows.Count > 0)
+            {
+                //string _url = ServiceURL + "huabozijin";
+                //string jsonParam = new JavaScriptSerializer().Serialize(new
+                //{
+                //    mycardId = mycardId,
+                //    userid = SystemUser.CurrentUser.UserID,
+                //    userxm = SystemUser.CurrentUser.UserName
+                //});
+                //var request = (HttpWebRequest)WebRequest.Create(_url);
+                //request.Method = "POST";
+                //request.ContentType = "application/json;charset=UTF-8";
+                //var byteData = Encoding.UTF8.GetBytes(jsonParam);
+                //var length = byteData.Length;
+                //request.ContentLength = length;
+                //var writer = request.GetRequestStream();
+                //writer.Write(byteData, 0, length);
+                //writer.Close();
+                //var response = (HttpWebResponse)request.GetResponse();
+                //var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+                //JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
+                //try
+                //{
+                //    if (Convert.ToBoolean(jo["success"].ToString()))
+                //    {
+                sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(mycardId);
+                dbc.ExecuteNonQuery(sqlStr);
+                return true;
+                //    }
+                //    else
+                //    {
+                //        throw new Exception("退款失败");
+                //    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    throw new Exception(jo["details"].ToString());
+                //}
+
+            }
+            return false;
         }
     }
     #endregion

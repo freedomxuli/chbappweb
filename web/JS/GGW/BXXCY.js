@@ -70,7 +70,6 @@ Ext.define('phWin', {
                         var screen = "安卓(720*1280)";
                         
                         Ext.getCmp('sbBdform').upload('CZCLZ.GGWMag.UploadPic', function (retVal) {
-                            alert(retVal);
                             console.log(retVal);
                             var height = document.getElementById("uploadproductpic1").style.height;
                             var html = "";
@@ -130,10 +129,15 @@ Ext.define('knjtjbxxcx', {
                     buttonAlign: 'center',
                     buttons: [
                         {
+                            text: '上传',
+                            handler: function () {
+                                tp();
+                            }
+                        },
+                        {
                             text: '保存',
                             handler: function () {
                                 if (fjlist.length < 0) {
-                                    console.log(fjlist);
                                     Ext.Msg.show({
                                         title: '提示',
                                         msg: '请上传图片！',
@@ -164,12 +168,6 @@ Ext.define('knjtjbxxcx', {
                                         icon: Ext.MessageBox.INFO
                                     });
                                 }
-                            }
-                        },
-                        {
-                            text: '上传',
-                            handler: function () {
-                                tp();
                             }
                         }
                     ],
