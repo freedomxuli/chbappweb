@@ -2114,6 +2114,44 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["mirrornumber"] = DBNull.Value;
                     }
+                    if (!string.IsNullOrEmpty(jsr["carriagegetmode"].ToString()))
+                    {
+                        dr["carriagegetmode"] = jsr["carriagegetmode"].ToString();
+                        if (jsr["carriagegetmode"].ToString() == "0" && jsr["modetype"].ToString() == "1")
+                        {
+                            if (!string.IsNullOrEmpty(jsr["carriageoilrate"].ToString()))
+                            {
+                                dr["carriageoilrate"] = jsr["carriageoilrate"].ToString();
+                            }
+                            else
+                            {
+                                dr["carriageoilrate"] = DBNull.Value;
+                            }
+
+                            if (!string.IsNullOrEmpty(jsr["carriagemoneyrate"].ToString()))
+                            {
+                                dr["carriagemoneyrate"] = jsr["carriagemoneyrate"].ToString();
+                            }
+                            else
+                            {
+                                dr["carriagemoneyrate"] = DBNull.Value;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        dr["carriagegetmode"] = DBNull.Value;
+                    }
+
+                    if (!string.IsNullOrEmpty(jsr["carriagechbid"].ToString()))
+                    {
+                        dr["carriagechbid"] = jsr["carriagechbid"].ToString();
+                    }
+                    else
+                    {
+                        dr["carriagechbid"] = DBNull.Value;
+                    }
+                    
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2188,6 +2226,45 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["mirrornumber"] = DBNull.Value;
                     }
+
+                    if (!string.IsNullOrEmpty(jsr["carriagegetmode"].ToString()))
+                    {
+                        dr["carriagegetmode"] = jsr["carriagegetmode"].ToString();
+                        if (jsr["carriagegetmode"].ToString() == "0" && jsr["modetype"].ToString() == "1")
+                        {
+                            if (!string.IsNullOrEmpty(jsr["carriageoilrate"].ToString()))
+                            {
+                                dr["carriageoilrate"] = jsr["carriageoilrate"].ToString();
+                            }
+                            else
+                            {
+                                dr["carriageoilrate"] = DBNull.Value;
+                            }
+
+                            if (!string.IsNullOrEmpty(jsr["carriagemoneyrate"].ToString()))
+                            {
+                                dr["carriagemoneyrate"] = jsr["carriagemoneyrate"].ToString();
+                            }
+                            else
+                            {
+                                dr["carriagemoneyrate"] = DBNull.Value;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        dr["carriagegetmode"] = DBNull.Value;
+                    }
+
+                    if (!string.IsNullOrEmpty(jsr["carriagechbid"].ToString()))
+                    {
+                        dr["carriagechbid"] = jsr["carriagechbid"].ToString();
+                    }
+                    else
+                    {
+                        dr["carriagechbid"] = DBNull.Value;
+                    }
+
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);
 
@@ -2666,6 +2743,17 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         using (DBConnection dbc = new DBConnection())
         {
             string str = "select dq_mc,dq_bm from tb_b_dq where dq_sj=" + dbc.ToSqlValue(dqbm) + " and status=0 order by dq_bm";
+            DataTable dt = dbc.ExecuteDataTable(str);
+            return dt;
+        }
+    }
+
+    [CSMethod("GetKP")]
+    public DataTable GetKP()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            string str = "select id,name from tb_b_carriagechb order by name";
             DataTable dt = dbc.ExecuteDataTable(str);
             return dt;
         }

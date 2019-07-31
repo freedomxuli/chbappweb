@@ -32,7 +32,7 @@ public class DriverMag
                 int cp = pagnum;
                 int ac = 0;
 
-                string str = @"select  b.userid,b.UserName,b.linkedunit,b.carnumber,b.drivermemo,b.mirrornumber  from tb_b_zx_driver a left join tb_b_user b on a.driverid=b.userid
+                string str = @"select  b.id,b.driverid,b.driverxm,b.linkedunit,b.carnumber,b.drivermemo,b.mirrornumber  from tb_b_zx_driver a left join tb_b_car b on a.driverid=b.id
                     where a.userid=@userid order by a.addtime desc";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@userid", userid);
@@ -87,9 +87,9 @@ public class DriverMag
                 {
                     where += " and " + db.C_Like("carnumber", cph, SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
                 }
-                string str = @"select userid,UserName,linkedunit,carnumber,drivermemo,mirrornumber from
-                tb_b_user where isdriver=1 and clientkind=1  and userid not in (select driverid from tb_b_zx_driver where userid=@userid) " + where + @"
-                              order by UserName";
+                string str = @"select id,driverxm,drivername,linkedunit,carnumber,drivermemo,mirrornumber from
+                tb_b_car where status=0  and id not in (select driverid from tb_b_zx_driver where userid=@userid) " + where + @"
+                              order by drivername";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.Add("@userid", userid);
                 DataTable dt = db.GetPagedDataTable(cmd, pagesize, ref cp, out ac);

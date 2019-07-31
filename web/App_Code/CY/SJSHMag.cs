@@ -516,10 +516,10 @@ public class SJSHMag
     [CSMethod("SHSJCG")]
     public object SHSJCG(string userId)
     {
-        string _url = ServiceURL + "tbbdriverapply.pass";
+        string _url = ServiceURL + "tbbdriverapply.passcar";
             string jsonParam = new JavaScriptSerializer().Serialize(new
             {
-                tradeCode = "tbbdriverapply.pass",
+                tradeCode = "tbbdriverapply.passcar",
                 id = userId
             });
             var request = (HttpWebRequest)WebRequest.Create(_url);

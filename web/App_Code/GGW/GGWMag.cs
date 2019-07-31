@@ -103,7 +103,7 @@ public class GGWMag
         string _url = ServiceURL + "tbbadvert.update";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
-            zxd = zxd,  // 1-专线，0-三方
+            zxd = zxd,  // 1-专线，0-三方，2-司机
             screen = screen, //分辨率
             status = 0,  // 默认状态0
             fileList = list
