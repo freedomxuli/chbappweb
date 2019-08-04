@@ -1115,26 +1115,23 @@ public class YKMag
                 string ti = nowTi.AddDays(i).ToString("yyyy-MM-dd");
                 //期初金额
                 string sql = @"select (YK_ZR - YK_XF) YK_QC from (
-	                                select a.inuserid,ISNULL(SUM(a.YK_ZR),0) YK_ZR,ISNULL(SUM(b.YK_XF),0) YK_XF from (
-		                                select inuserid,oiltransfercode,ISNULL(SUM(money),0) YK_ZR from tb_b_oil_transfer 
-		                                where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0 and transfertype=@transfertype and convert(nvarchar(10),addtime,120)< " + dbc.ToSqlValue(ti) + @"
-		                                group by inuserid,oiltransfercode
-	                                )a
-	                                left join(
-		                                select userid,oiltransfercode,ISNULL(SUM(money),0) YK_XF from(
-			                                select t1.userid,t1.money,t2.oiltransfercode from tb_b_oil_order t1
-			                                left join tb_b_myoilcard t2 on t1.userid=t2.UserID and t1.cardNo=t2.oilcardcode
-			                                where t1.status=1 and convert(nvarchar(10),t1.addtime,120)< " + dbc.ToSqlValue(ti) + @"
-		                                )t
-		                                group by userid,oiltransfercode
-	                                )b on a.inuserid=b.userid and a.oiltransfercode=b.oiltransfercode
-	                                group by a.inuserid
+                                    select inuserid,ISNULL(SUM(money),0) YK_ZR,
+                                    (select ISNULL(SUM(money),0) YK_XH from tb_b_oil_order where status=1 and cardNo in(
+			                                SELECT oilcardcode FROM tb_b_myoilcard where oiltransfercode in(
+				                                select oiltransfercode from tb_b_oil_transfer where status=0 
+				                                and transfertype=@transfertype and outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and inuserid=@UserID
+			                                )
+		                                ) and convert(nvarchar(10),addtime,120)< " + dbc.ToSqlValue(ti) + @"
+	                                ) YK_XF 
+                                    from tb_b_oil_transfer 
+                                    where outuserid='6E72B59D-BEC6-4835-A66F-8BC70BD82FE9' and status=0 and transfertype=@transfertype 
+                                    and convert(nvarchar(10),addtime,120)< " + dbc.ToSqlValue(ti) + @" and inuserid=@UserID
+                                    group by inuserid
                                 )t
                                 inner join(
-	                                select t1.*,t2.dq_mc from tb_b_user t1
+                                    select t1.*,t2.dq_mc from tb_b_user t1
                                     left join tb_b_dq t2 on t1.DqBm=t2.dq_bm
-                                )c on t.inuserid=c.UserID
-                                where t.inuserid=@UserID";
+                                )c on t.inuserid=c.UserID";
                 var cmd = dbc.CreateCommand();
                 cmd.CommandText = sql;
                 cmd.Parameters.AddWithValue("@transfertype", transfertype);
