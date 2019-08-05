@@ -2151,6 +2151,14 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["carriagechbid"] = DBNull.Value;
                     }
+                    if (!string.IsNullOrEmpty(jsr["isidentification"].ToString()))
+                    {
+                        dr["isidentification"] = jsr["isidentification"].ToString();
+                    }
+                    else
+                    {
+                        dr["isidentification"] = DBNull.Value;
+                    }
                     
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
@@ -2263,6 +2271,15 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     else
                     {
                         dr["carriagechbid"] = DBNull.Value;
+                    }
+
+                    if (!string.IsNullOrEmpty(jsr["isidentification"].ToString()))
+                    {
+                        dr["isidentification"] = jsr["isidentification"].ToString();
+                    }
+                    else
+                    {
+                        dr["isidentification"] = DBNull.Value;
                     }
 
                     dt.Rows.Add(dr);

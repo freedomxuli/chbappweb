@@ -47,7 +47,8 @@ var store = createSFW4Store({
         { name: 'carriagegetmode' },
         { name: 'carriagechbid' },
         { name: 'carriageoilrate' },
-        { name: 'carriagemoneyrate' }
+        { name: 'carriagemoneyrate' },
+        { name: 'isidentification' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -220,6 +221,10 @@ function EditUser(id) {
                             Ext.getCmp("roleId").allowBlank = true;
                             Ext.getCmp("roleId").hide();
                             Ext.getCmp("UserXM").allowBlank = true;
+                            Ext.getCmp("isidentification").allowBlank = true;
+                            Ext.getCmp("isidentification").hide();
+                            Ext.getCmp("carriagechbid").allowBlank = true;
+                            Ext.getCmp("carriagechbid").hide();
                             if (!r.carriagegetmode) {
                                 Ext.getCmp("carriagegetmode").setValue(1);
                                 Ext.getCmp("carriageoilrate").hide();
@@ -249,6 +254,10 @@ function EditUser(id) {
                             Ext.getCmp("roleId").hide();
                             Ext.getCmp("IDCard").allowBlank = true;
                             Ext.getCmp("IDCard").hide();
+                            Ext.getCmp("isidentification").allowBlank = false;
+                            Ext.getCmp("isidentification").show();
+                            Ext.getCmp("carriagechbid").allowBlank = false;
+                            Ext.getCmp("carriagechbid").show();
                             if (!r.carriagegetmode) { Ext.getCmp("carriagegetmode").setValue(0); }
                             if (Ext.getCmp("carriagegetmode").getValue() == "0" && Ext.getCmp("modetype").getValue() == "1") {
                                 Ext.getCmp("carriageoilrate").show();
@@ -864,7 +873,7 @@ function EditUser(id) {
     Ext.define('addWin', {
         extend: 'Ext.window.Window',
 
-        height: 680,
+        height: 500,
         width: 450,
         layout: {
             type: 'fit'
@@ -880,6 +889,7 @@ function EditUser(id) {
                     xtype: 'form',
                     id: 'addform',
                     bodyPadding: 10,
+                    bodyStyle: 'overflow-x:hidden;overflow-y:auto',
                     items: [
                         {
                             xtype: 'textfield',
@@ -1183,6 +1193,25 @@ function EditUser(id) {
                              displayField: 'name',
                              valueField: 'id',
                              value: ''
+                         },
+                         {
+                             xtype: 'combobox',
+                             id: 'isidentification',
+                             name: 'isidentification',
+                             anchor: '100%',
+                             fieldLabel: '查货宝认证',
+                             allowBlank: false,
+                             editable: false,
+                             labelWidth: 80,
+                             store: Ext.create('Ext.data.Store', {
+                                 fields: ['VALUE', 'TEXT'],
+                                 data: [
+                                     { 'VALUE': 0, 'TEXT': '否' }, { 'VALUE': 1, 'TEXT': '是' }
+                                 ]
+                             }),
+                             queryMode: 'local',
+                             displayField: 'TEXT',
+                             valueField: 'VALUE'
                          }
                     ],
                     buttonAlign: 'center',
