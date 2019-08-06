@@ -220,6 +220,7 @@ function QRDD(carriageid, carriagestatus) {
 
     }
 }
+
 //************************************页面方法***************************************
 
 //************************************弹出界面***************************************
@@ -442,6 +443,10 @@ Ext.onReady(function () {
                                 }
                                 if (record.data.carriagestatus >= 30) {
                                     str += " <a onclick='CKBD(\"" + value + "\");'>查看保单</a> ";
+                                }
+                                if (record.data.carriagestatus >= 30 && record.data.carriagestatus < 90) {
+                                    var href = "http://47.110.134.105:8010/location?carriageid=" + value;
+                                    str += " <a href=" + href + " target='_blank'>查看轨迹</a> ";
                                 }
                                 return str;
 
