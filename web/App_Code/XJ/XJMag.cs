@@ -411,7 +411,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
     }
 
     [CSMethod("VerifyPassWorld")]
-    public bool VerifyPassWorld(string mycardId, string password)
+    public bool VerifyPassWorld(string id, string password)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -429,7 +429,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 string _url = ServiceURL + "baofooReturn";
                 string jsonParam = new JavaScriptSerializer().Serialize(new
                 {
-                    mycardId = mycardId,
+                    mycardid = id,
                     userid = SystemUser.CurrentUser.UserID,
                     userxm = SystemUser.CurrentUser.UserName
                 });
@@ -437,7 +437,6 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 request.Method = "POST";
                 request.ContentType = "application/json;charset=UTF-8";
                 var byteData = Encoding.UTF8.GetBytes(jsonParam);
-
                 var length = byteData.Length;
                 request.ContentLength = length;
                 var writer = request.GetRequestStream();
@@ -453,7 +452,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 {
                     if (Convert.ToBoolean(jo["success"].ToString()))
                     {
-                        sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(mycardId);
+                        sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(id);
                         dbc.ExecuteNonQuery(sqlStr);
                         return true;
                     }
