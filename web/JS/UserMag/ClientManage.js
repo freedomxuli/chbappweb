@@ -176,6 +176,7 @@ var kpstore = Ext.create('Ext.data.Store', {
 //************************************页面方法***************************************
 function getUser(nPage) {
     CS('CZCLZ.YHGLClass.GetClientList', function (retVal) {
+        console.log(retVal);
         store.setData({
             data: retVal.dt,
             pageSize: pageSize,
@@ -223,8 +224,8 @@ function EditUser(id) {
                         Ext.getCmp("UserXM").allowBlank = true;
                         Ext.getCmp("isidentification").allowBlank = true;
                         Ext.getCmp("isidentification").hide();
-                        Ext.getCmp("carriagechbid").allowBlank = true;
-                        Ext.getCmp("carriagechbid").hide();
+                        Ext.getCmp("carriagechbid").allowBlank = false;
+                        Ext.getCmp("carriagechbid").show();
                         if (!r.carriagegetmode) {
                             Ext.getCmp("carriagegetmode").setValue(1);
                             Ext.getCmp("carriageoilrate").hide();
@@ -234,7 +235,7 @@ function EditUser(id) {
                             Ext.getCmp("carriageoilrate").allowBlank = true;
                             Ext.getCmp("carriagemoneyrate").allowBlank = true;
                         }
-                        Ext.getCmp("carriagegetmode").disable();
+                        Ext.getCmp("carriagegetmode").setReadOnly(true);
                         CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
                             if (ret1) {
                                 Ext.getCmp("IDCard").allowBlank = false;
@@ -1060,8 +1061,20 @@ Ext.define('addWin', {
                                 if (record[0].data.VALUE == 1) {
                                     Ext.getCmp("modetype").hide();
                                     Ext.getCmp("modetype").setValue();
+
+                                    Ext.getCmp("carriageoilrate").hide()
+                                    Ext.getCmp("carriagemoneyrate").hide();
+                                    Ext.getCmp("carriageoilrate").setValue();
+                                    Ext.getCmp("carriagemoneyrate").setValue();
+                                    Ext.getCmp("carriageoilrate").allowBlank = true;
+                                    Ext.getCmp("carriagemoneyrate").allowBlank = true;
                                 } else if (record[0].data.VALUE == 0) {
                                     Ext.getCmp("modetype").show();
+
+                                    Ext.getCmp("carriageoilrate").show();
+                                    Ext.getCmp("carriagemoneyrate").show();
+                                    Ext.getCmp("carriageoilrate").allowBlank = false;
+                                    Ext.getCmp("carriagemoneyrate").allowBlank = false;
                                 }
                             }
                         }
@@ -1084,7 +1097,7 @@ Ext.define('addWin', {
                                 { 'VALUE': 1, 'TEXT': '模式一' }, { 'VALUE': 2, 'TEXT': '模式二' }
                             ]
                         }),
-                        value: 1,
+                        value: 2,
                         listeners: {
                             select: function (combo, record, opts) {
                                 if (Ext.getCmp("modetype").getValue() == 1 && record[0].data.VALUE == 1) {
@@ -1625,7 +1638,7 @@ Ext.onReady(function () {
                     {
                         text: '操作',
                         dataIndex: 'UserID',
-                        width: 450,
+                        width: 550,
                         sortable: false,
                         menuDisabled: true,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
@@ -1633,7 +1646,7 @@ Ext.onReady(function () {
                             if (record.data.ClientKind == 1) {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
                             } else if (record.data.ClientKind == 2) {
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a>";
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
                             }
                             return str;
                         }

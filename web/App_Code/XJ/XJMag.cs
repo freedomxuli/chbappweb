@@ -415,7 +415,7 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
     {
         using (DBConnection dbc = new DBConnection())
         {
-            string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ZYServiceURL"].ToString();
+            string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
 
             string sqlStr = @"select a.UserID YH_ID, a.UserName YH_DLM,a.UserXM YH_XM,a.Password,b.roleId,b.companyId from tb_b_user a 
                             left join tb_b_user_role b on a.UserID = b.userId 
@@ -426,43 +426,46 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
             var dtUser = dbc.ExecuteDataTable(cmd);
             if (dtUser.Rows.Count > 0)
             {
-                //string _url = ServiceURL + "huabozijin";
-                //string jsonParam = new JavaScriptSerializer().Serialize(new
-                //{
-                //    mycardId = mycardId,
-                //    userid = SystemUser.CurrentUser.UserID,
-                //    userxm = SystemUser.CurrentUser.UserName
-                //});
-                //var request = (HttpWebRequest)WebRequest.Create(_url);
-                //request.Method = "POST";
-                //request.ContentType = "application/json;charset=UTF-8";
-                //var byteData = Encoding.UTF8.GetBytes(jsonParam);
-                //var length = byteData.Length;
-                //request.ContentLength = length;
-                //var writer = request.GetRequestStream();
-                //writer.Write(byteData, 0, length);
-                //writer.Close();
-                //var response = (HttpWebResponse)request.GetResponse();
-                //var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+                string _url = ServiceURL + "baofooReturn";
+                string jsonParam = new JavaScriptSerializer().Serialize(new
+                {
+                    mycardId = mycardId,
+                    userid = SystemUser.CurrentUser.UserID,
+                    userxm = SystemUser.CurrentUser.UserName
+                });
+                var request = (HttpWebRequest)WebRequest.Create(_url);
+                request.Method = "POST";
+                request.ContentType = "application/json;charset=UTF-8";
+                var byteData = Encoding.UTF8.GetBytes(jsonParam);
 
-                //JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
-                //try
-                //{
-                //    if (Convert.ToBoolean(jo["success"].ToString()))
-                //    {
-                sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(mycardId);
-                dbc.ExecuteNonQuery(sqlStr);
-                return true;
-                //    }
-                //    else
-                //    {
-                //        throw new Exception("退款失败");
-                //    }
-                //}
-                //catch (Exception ex)
-                //{
-                //    throw new Exception(jo["details"].ToString());
-                //}
+                var length = byteData.Length;
+                request.ContentLength = length;
+                var writer = request.GetRequestStream();
+                writer.Write(byteData, 0, length);
+                writer.Close();
+                var response = (HttpWebResponse)request.GetResponse();
+                var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+
+
+                JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
+                try
+                {
+                    if (Convert.ToBoolean(jo["success"].ToString()))
+                    {
+                        sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(mycardId);
+                        dbc.ExecuteNonQuery(sqlStr);
+                        return true;
+                    }
+                    else
+                    {
+                        throw new Exception("退款失败");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(jo["details"].ToString());
+                }
 
             }
             return false;

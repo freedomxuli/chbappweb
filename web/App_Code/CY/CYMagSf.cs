@@ -62,7 +62,7 @@ public class CYMagSf
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
                 }
-                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser,
+                string str = @"select a.*,b.UserName as sjzh,b.UserTel as sjdh,c.UserXM as zx,d.driverxm as sjxm,d.carnumber as sjcarnumber,d.caruser,
                                 case a.carriagestatus
                                 when 10 then 1
                                 when 50 then 2
@@ -76,6 +76,7 @@ public class CYMagSf
                               from tb_b_carriage a 
                             left join tb_b_user b on a.driverid=b.UserID
                             inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=2
+                            left join  tb_b_car d on a.carid=d.id
                             where a.status=0 and 1=1 
                                  ";
                 str += where;

@@ -432,11 +432,17 @@ Ext.onReady(function () {
                                     str += " <a onclick='QRDD(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>确认到达</a>";
                                 }
 
-                                if (record.data.modetype == 1) {
-                                    if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
-                                        str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                if (record.data.carriagegetmode == 0) {
+                                    if (record.data.modetype == 1) {
+                                        if (record.data.carriagestatus == 50 && record.data.isoilpay == 1 && record.data.ismoneypay == 1 && record.data.ismoneynewpay == 1) {
+                                            str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                        }
+                                    } else if (record.data.modetype == 2) {
+                                        if (record.data.carriagestatus == 50 && record.data.ismoneypay == 1) {
+                                            str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
+                                        }
                                     }
-                                } else if (record.data.modetype == 2) {
+                                } else if (record.data.carriagegetmode == 1) {
                                     if (record.data.carriagestatus == 50 && record.data.ismoneypay == 1) {
                                         str += " <a onclick='WC(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>完成</a>";
                                     }
@@ -531,7 +537,7 @@ Ext.onReady(function () {
                             dataIndex: 'carriagepoints',
                             sortable: false,
                             menuDisabled: true,
-                            text: "支付券额",
+                            text: "支付券额/运费",
                             width: 100
                         },
                         {

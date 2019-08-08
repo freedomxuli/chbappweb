@@ -62,7 +62,7 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
                 }
-                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser,
+                string str = @"select a.*,b.UserName as sjzh,b.UserTel as sjdh,c.UserXM as zx,d.driverxm as sjxm,d.carnumber as sjcarnumber,d.caruser,
                                 case a.carriagestatus
                                 when 10 then 1
                                 when 50 then 2
@@ -76,6 +76,7 @@ public class CYMag
                               from tb_b_carriage a 
                             left join tb_b_user b on a.driverid=b.UserID 
                             inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=1
+                            left join  tb_b_car d on a.carid=d.id
                             where a.status=0 and 1=1 
                                  ";
                 str += where;
@@ -141,7 +142,7 @@ public class CYMag
                 cells[0, 3].PutValue("目的地");
                 cells[0, 3].SetStyle(style2);
                 cells.SetColumnWidth(3, 20);
-                cells[0, 4].PutValue("支付券额");
+                cells[0, 4].PutValue("支付券额/运费");
                 cells[0, 4].SetStyle(style2);
                 cells.SetColumnWidth(4, 20);
                 cells[0, 5].PutValue("下游司机");
@@ -963,8 +964,10 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                string str = @"select a.*,b.UserName,b.caruser,c.modetype,c.modecoefficient from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                string str = @"select a.*,b.UserName,d.caruser,c.modetype,c.modecoefficient from tb_b_carriage a 
+                left join tb_b_user b on a.driverid=b.UserID 
                 left join tb_b_user c on a.userid=c.UserID 
+                left join  tb_b_car d on a.carid=d.id
                 where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
