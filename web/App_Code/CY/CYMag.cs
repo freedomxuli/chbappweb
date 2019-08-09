@@ -983,14 +983,14 @@ public class CYMag
                                 decimal money = 0;
                                 if (dt.Rows[0]["carriagemoney"] != null && dt.Rows[0]["carriagemoney"].ToString() != "")
                                 {
-                                    if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
-                                    {
-                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"]) / 100;
-                                    }
-                                    else
-                                    {
+                                    //if (dt.Rows[0]["insurancemoney"] != null && dt.Rows[0]["insurancemoney"].ToString() != "")
+                                    //{
+                                    //    money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]) - Convert.ToDecimal(dt.Rows[0]["insurancemoney"]) / 100;
+                                    //}
+                                    //else
+                                    //{
                                         money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
-                                    }
+                                    //}
                                 }
 
                                 string _url = ServiceURL + "huabozijin";
