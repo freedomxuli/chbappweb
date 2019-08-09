@@ -966,8 +966,10 @@ public class CYMagSf
             dbc.BeginTransaction();
             try
             {
-                string str = @"select a.*,b.UserName,b.caruser,c.modetype,c.modecoefficient from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                string str = @"select a.*,b.UserName,d.caruser,c.modetype,c.modecoefficient from tb_b_carriage a 
+                left join tb_b_user b on a.driverid=b.UserID 
                 left join tb_b_user c on a.userid=c.UserID 
+                left join  tb_b_car d on a.carid=d.id
                 where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)

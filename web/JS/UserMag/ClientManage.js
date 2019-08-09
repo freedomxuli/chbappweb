@@ -67,7 +67,8 @@ var yglsjstore = createSFW4Store({
         { name: 'linkedunit' },
         { name: 'carnumber' },
         { name: 'drivermemo' },
-        { name: 'mirrornumber' }
+        { name: 'mirrornumber' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getYGLSJList(nPage);
@@ -199,8 +200,14 @@ function EditUser(id) {
     var r = store.findRecord("UserID", id).data;
     var win = new addWin();
     win.show(null, function () {
-        if (r.ClientKind == 1 || r.ClientKind == 2) {
-            Ext.getCmp('modetype').show();
+        if (r.ClientKind == 1) {
+            //Ext.getCmp('modetype').show();
+            Ext.getCmp('modecoefficient').show();
+            Ext.getCmp('carriagemaxmoney').show();
+            Ext.getCmp('mirrornumber').show();
+        } else if (r.ClientKind == 2) {
+            Ext.getCmp('modetype').hide();
+            Ext.getCmp('modetype').setValue(2);
             Ext.getCmp('modecoefficient').show();
             Ext.getCmp('carriagemaxmoney').show();
             Ext.getCmp('mirrornumber').show();
@@ -484,7 +491,7 @@ Ext.define('YGLSJList', {
                                              dataIndex: 'drivername',
                                              sortable: false,
                                              menuDisabled: true,
-                                             flex: 1,
+                                             width: 100,
                                              text: '司机账号'
                                          },
                                         {
@@ -492,7 +499,7 @@ Ext.define('YGLSJList', {
                                             dataIndex: 'driverxm',
                                             sortable: false,
                                             menuDisabled: true,
-                                            flex: 1,
+                                            width: 100,
                                             text: '司机姓名'
                                         },
                                         {
@@ -521,11 +528,19 @@ Ext.define('YGLSJList', {
                                         },
                                         {
                                             xtype: 'gridcolumn',
-                                            dataIndex: 'Mirrornumber',
+                                            dataIndex: 'mirrornumber',
                                             sortable: false,
                                             menuDisabled: true,
                                             width: 100,
                                             text: '后视镜设备编号'
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'caruser',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '车主账号'
                                         },
                                         {
                                             xtype: 'gridcolumn',
@@ -1236,6 +1251,7 @@ Ext.define('addWin', {
                             var form = Ext.getCmp('addform');
                             if (form.form.isValid()) {
                                 var values = form.form.getValues(false);
+                                
                                 var me = this;
                                 CS('CZCLZ.YHGLClass.SaveClient', function (retVal) {
                                     if (retVal) {

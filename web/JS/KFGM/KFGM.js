@@ -292,7 +292,12 @@ Ext.define('addWin', {
                         listeners: {
                             afterrender: function () {
                                 Ext.get(this.el).select('input').on('keyup', function (evt, t, option) {
-                                    Ext.getCmp("discountmemo").setValue(Number(Ext.getCmp("discount").getValue() * 10).toFixed(1) + "折");
+                                    var zk = Number(Ext.getCmp("discount").getValue() * 100).toFixed(0) + "";
+                                    var lastNum = zk.substr(zk.length - 1, 1);
+                                    if (lastNum == '0') {
+                                        zk = zk.substr(0, zk.length - 1);
+                                    }
+                                    Ext.getCmp("discountmemo").setValue(zk + "折");
                                     return false;
                                 });
                             }
@@ -312,13 +317,13 @@ Ext.define('addWin', {
                          //decimalPrecision: 2,    // 精确的位数
                          allowNegative: false,
                          minValue: 72,
-                         maxValue: 360,
+                         maxValue: 720,
                          allowBlank: false,
                          anchor: '100%'
                      },
                     {
                         xtype: "label",
-                        text: "*有效期限必须为介于72-360小时！",
+                        text: "*有效期限必须为介于72-720小时！",
                         style: "color:red;padding-left:100px;"
                     },
                     {

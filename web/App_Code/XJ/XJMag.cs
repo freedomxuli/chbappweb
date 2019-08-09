@@ -452,8 +452,8 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                 {
                     if (Convert.ToBoolean(jo["success"].ToString()))
                     {
-                        sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(id);
-                        dbc.ExecuteNonQuery(sqlStr);
+                        //sqlStr = "update tb_b_mycard set status=3 where mycardId=" + dbc.ToSqlValue(id);
+                        //dbc.ExecuteNonQuery(sqlStr);
                         return true;
                     }
                     else
