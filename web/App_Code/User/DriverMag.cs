@@ -32,7 +32,7 @@ public class DriverMag
                 int cp = pagnum;
                 int ac = 0;
 
-                string str = @"select  b.id,b.driverid,b.driverxm,b.linkedunit,b.carnumber,b.drivermemo,b.mirrornumber,b.caruser  from tb_b_zx_driver a 
+                string str = @"select  b.id,b.driverid,b.driverxm,b.linkedunit,b.carnumber,b.drivermemo,b.mirrornumber,b.caruser,b.drivername  from tb_b_zx_driver a 
 left join tb_b_car b on a.driverid=b.id
                     where a.userid=@userid order by a.addtime desc";
                 SqlCommand cmd = new SqlCommand(str);
