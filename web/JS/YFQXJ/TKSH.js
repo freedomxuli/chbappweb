@@ -15,7 +15,10 @@ var cardStore = createSFW4Store({
         { name: 'mycardId' },
         { name: 'status' },
         { name: 'OrderCode' },
-        { name: 'mycardId' }
+        { name: 'mycardId' },
+        { name: 'tktime' },
+        { name: 'tkmoney' },
+        { name: 'qlx' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getList(nPage);
@@ -192,7 +195,32 @@ Ext.define('iView', {
                                 return "已退款";
                             }
                         }
-                    }
+                    },
+                    {
+                        xtype: 'datecolumn',
+                        dataIndex: 'tktime',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 90,
+                        text: '退款时间',
+                        format: 'Y-m-d'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'tkmoney',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 150,
+                        text: '退款金额'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'qlx',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 150,
+                        text: '券类型'
+                    },
                 ],
                 viewConfig: {
 

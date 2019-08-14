@@ -391,9 +391,16 @@ group by SaleUserID) b  on a.UserID=b.SaleUserID
                     sqlW = " and " + string.Join(" and ", wArr);
                 }
 
-                string str = @"select a.*,b.UserName fhrmc,c.UserXM zxmc from tb_b_mycard a 
+                string str = @"select a.*,b.UserName fhrmc,c.UserXM zxmc
+                                ,d.addtime tktime,e.Money tkmoney,
+                                case
+                                when d.salerecordlx=0 then '耗材券'
+                                else '自发布券' end as qlx
+                                from tb_b_mycard a 
                                 left join tb_b_user b on a.UserID=b.UserID
                                 left join tb_b_user c on a.CardUserID=c.UserID
+                                left join tb_b_refund d on a.mycardid=d.mycardid
+                                left join tb_b_order e on a.OrderCode=e.OrderCode
                                 where a.status in(2,3) and a.OrderCode is not null ";
                 str += sqlW;
 
