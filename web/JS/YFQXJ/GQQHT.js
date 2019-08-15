@@ -39,26 +39,35 @@ function getList(nPage) {
 }
 
 function sh(id, zxid, ps) {
-    CS('CZCLZ.XJMag.GqqSh', function (retVal) {
-        if (retVal) {
-            Ext.Msg.show({
-                title: '提示',
-                msg: '审核成功!',
-                buttons: Ext.MessageBox.OK,
-                icon: Ext.MessageBox.INFO,
-                fn: function () {
-                    getList(1);
-                }
-            });
-        } else {
-            Ext.Msg.show({
-                title: '提示',
-                msg: '该券已经回退审核过!',
-                buttons: Ext.MessageBox.OK,
-                icon: Ext.MessageBox.INFO,
-            });
-        }
-    }, CS.onError, id, zxid, ps);
+    if (privilege("运费券下架_过期券回退_审核")) {
+        Ext.MessageBox.confirm('提示', '是否审核？', function (obj) {
+            if (obj == "yes") {
+                CS('CZCLZ.XJMag.GqqSh', function (retVal) {
+                    if (retVal) {
+                        Ext.Msg.show({
+                            title: '提示',
+                            msg: '审核成功!',
+                            buttons: Ext.MessageBox.OK,
+                            icon: Ext.MessageBox.INFO,
+                            fn: function () {
+                                getList(1);
+                            }
+                        });
+                    } else {
+                        Ext.Msg.show({
+                            title: '提示',
+                            msg: '该券已经回退审核过!',
+                            buttons: Ext.MessageBox.OK,
+                            icon: Ext.MessageBox.INFO,
+                        });
+                    }
+                }, CS.onError, id, zxid, ps);
+            }
+            else {
+                return;
+            }
+        });
+    }
 }
 //-----------------------------------------------------------界    面-----------------------------------------------------------------
 Ext.define('iView', {

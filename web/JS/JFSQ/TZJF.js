@@ -279,6 +279,15 @@ Ext.onReady(function () {
                                                     getList(1);
                                                 }
                                             }
+                                        },
+					{
+                                            xtype: 'button',
+                                            text: '导出',
+                                            handler: function () {
+						if (privilege("申请运费券_调整申请额度_导出")) {
+                                               DownloadFile("CZCLZ.JFSQMag.GetTZListToFile", "调整申请额度.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
+						}
+                                            }
                                         }
                                     ]
                                 }

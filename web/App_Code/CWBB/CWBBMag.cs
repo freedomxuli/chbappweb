@@ -1853,14 +1853,14 @@ public class CWBBMag
 		                    left join 
 		                    (select sum(c.Money) as gqje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
-		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate() and b.status=9    
+		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime<getDate() and b.status=9
 		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) d on a.rq=d.rq
 		                    left join
 		                    (select sum(c.Money) as wsyje,CONVERT(varchar(100), c.AddTime, 23) as rq from tb_b_mycard b left join tb_b_order c on b.OrderCode=c.OrderCode
 		                    left join tb_b_salerecord d on b.SaleRecordID=d.SaleRecordID 
 		                    where c.SaleUserID=@UserID and c.status=0  and c.ZhiFuZT=1 " + sjwhere + @" and b.PointsEndTime>=getDate() and b.status=0
-		                    and d.status=0 and d.SaleRecordLX!=0 and and d.SaleRecordVerifyType=1 d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
+		                    and d.status=0 and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
 		                    group by CONVERT(varchar(100), c.AddTime, 23)) e on a.rq=e.rq order by rq desc
 		                    ";
                 SqlCommand cmd = new SqlCommand(str);
