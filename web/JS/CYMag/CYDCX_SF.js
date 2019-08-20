@@ -58,7 +58,7 @@ function DataBind(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue(), Ext.getCmp("cx_carriagestatus").getValue());
 }
 
 //操作-确认
@@ -757,6 +757,36 @@ Ext.define('CYDView', {
                                 value: ''
                             },
                             {
+                                xtype: 'combobox',
+                                id: 'cx_carriagestatus',
+                                width: 250,
+                                fieldLabel: '订单状态',
+                                editable: false,
+                                labelWidth: 60,
+                                store: Ext.create('Ext.data.Store', {
+                                    fields: [
+                                        { name: 'val' },
+                                        { name: 'txt' }
+                                    ],
+                                    data: [
+                                        { 'val': "", 'txt': '全部' },
+                                        { 'val': 0, 'txt': '已申请待后台审核' },
+                                        { 'val': 10, 'txt': '司机确认待后台审核' },
+                                        { 'val': 11, 'txt': '司机拒绝待后台审核' },
+                                        { 'val': 20, 'txt': '后台已审核待专线付款' },
+                                        { 'val': 21, 'txt': '后台拒绝申请' },
+                                        { 'val': 30, 'txt': '专线支付券额运输开始' },
+                                        { 'val': 40, 'txt': '司机确认到货待专线确认' },
+                                        { 'val': 50, 'txt': '专线确认到货待后台结款' },
+                                        { 'val': 90, 'txt': '后台确认结款，承运完成' }]
+
+                                }),
+                                queryMode: 'local',
+                                displayField: 'txt',
+                                valueField: 'val',
+                                value: ''
+                            },
+                            {
                                 xtype: 'buttongroup',
                                 items: [
                                     {
@@ -780,7 +810,7 @@ Ext.define('CYDView', {
                                         iconCls: 'view',
                                         handler: function () {
                                             if (privilege("承运模块_三方承运单查询_导出")) {
-                                                DownloadFile("CZCLZ.CYMagSf.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue());
+                                                DownloadFile("CZCLZ.CYMagSf.GetCYDListToFile", "承运单.xls", Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue(), Ext.getCmp("cx_carriagestatus").getValue());
                                             }
                                         }
                                     }

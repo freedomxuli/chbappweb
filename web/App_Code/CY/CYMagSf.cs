@@ -30,7 +30,7 @@ public class CYMagSf
     }
     string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ZYServiceURL"].ToString();
     [CSMethod("GetCYDList")]
-    public object GetCYDList(int pagnum, int pagesize, string carriagecode, string UserXM, string beg, string end, string isinvoice)
+    public object GetCYDList(int pagnum, int pagesize, string carriagecode, string UserXM, string beg, string end, string isinvoice, string carriagestatus)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -62,12 +62,16 @@ public class CYMagSf
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
                 }
+                if (!string.IsNullOrEmpty(carriagestatus))
+                {
+                    where += " and " + dbc.C_EQ("a.carriagestatus", carriagestatus); ;
+                }
                 string str = @"select a.*,b.UserName as sjzh,b.UserTel as sjdh,c.UserXM as zx,d.driverxm as sjxm,d.carnumber as sjcarnumber,d.caruser,
                                 case a.carriagestatus
                                 when 10 then 1
-                                when 50 then 2
-                                when 40 then 3
-                                when 30 then 4
+                                when 30 then 2
+                                when 50 then 3
+                                when 40 then 4
                                 when 0 then 5
                                 when 11 then 6
                                 when 20 then 7
@@ -95,7 +99,7 @@ public class CYMagSf
     }
 
     [CSMethod("GetCYDListToFile", 2)]
-    public byte[] GetCYDListToFile(string carriagecode, string UserXM, string beg, string end, string iskp)
+    public byte[] GetCYDListToFile(string carriagecode, string UserXM, string beg, string end, string iskp, string status)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -217,6 +221,10 @@ public class CYMagSf
                 if (!string.IsNullOrEmpty(iskp))
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", iskp);
+                }
+                if (!string.IsNullOrEmpty(status))
+                {
+                    where += " and " + dbc.C_EQ("a.carriagestatus", status); ;
                 }
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
                               from tb_b_carriage a 
