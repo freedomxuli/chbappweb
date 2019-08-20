@@ -42,7 +42,8 @@ var store = createSFW4Store({
         { name: 'modetype' },
         { name: 'modecoefficient' },
         { name: 'caruser' },
-        { name: 'carriagegetmode' }
+        { name: 'carriagegetmode' },
+        { name: 'kp' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -467,7 +468,9 @@ Ext.onReady(function () {
                             width: 80,
                             renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str = "";
-                                if (record.data.carriagestatus == 10) {
+                                if (record.data.carriagestatus == 0) {
+                                    str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a>";
+                                }else if (record.data.carriagestatus == 10) {
                                     str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a>";
                                 } else if (record.data.carriagestatus == 11)
                                     str += " <a onclick='JJ(\"" + value + "\",\"" + record.data.carriagestatus + "\");'>拒绝</a> ";
@@ -707,6 +710,14 @@ Ext.onReady(function () {
                             sortable: false,
                             menuDisabled: true,
                             text: "车主账号",
+                            width: 100
+                        },
+                        {
+                            xtype: 'gridcolumn',
+                            dataIndex: 'kp',
+                            sortable: false,
+                            menuDisabled: true,
+                            text: "开票抬头",
                             width: 100
                         }
                     ],

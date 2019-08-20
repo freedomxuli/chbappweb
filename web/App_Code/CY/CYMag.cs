@@ -62,7 +62,7 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
                 }
-                string str = @"select a.*,b.UserName as sjzh,b.UserTel as sjdh,c.UserXM as zx,d.driverxm as sjxm,d.carnumber as sjcarnumber,d.caruser,
+                string str = @"select a.*,b.UserName as sjzh,b.UserTel as sjdh,c.UserXM as zx,d.driverxm as sjxm,d.carnumber as sjcarnumber,d.caruser,e.name as kp,
                                 case a.carriagestatus
                                 when 10 then 1
                                 when 50 then 2
@@ -77,6 +77,7 @@ public class CYMag
                             left join tb_b_user b on a.driverid=b.UserID 
                             inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=1
                             left join  tb_b_car d on a.carid=d.id
+                            left join tb_b_carriagechb e on c.carriagechbid=e.id
                             where a.status=0 and 1=1 
                                  ";
                 str += where;
@@ -192,6 +193,9 @@ public class CYMag
                 cells[0, 18].PutValue("承运单号");
                 cells[0, 18].SetStyle(style2);
                 cells.SetColumnWidth(18, 20);
+                cells[0, 19].PutValue("开票抬头");
+                cells[0, 19].SetStyle(style2);
+                cells.SetColumnWidth(19, 20);
 
 
 
@@ -218,9 +222,11 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", iskp);
                 }
-                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser
+                string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser,e.name as kp
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
-                            left join tb_b_user c on a.userid=c.UserID where a.status=0 and  1=1 
+                            left join tb_b_user c on a.userid=c.UserID 
+                            left join tb_b_carriagechb e on c.carriagechbid=e.id
+                            where a.status=0 and  1=1 
                                  ";
                 str += where;
 
@@ -419,6 +425,12 @@ public class CYMag
 
                     }
                     cells[i + 1, 18].SetStyle(style4);
+                    if (dt.Rows[i]["kp"] != null && dt.Rows[i]["kp"].ToString() != "")
+                    {
+                        cells[i + 1, 19].PutValue(dt.Rows[i]["kp"]);
+
+                    }
+                    cells[i + 1, 19].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -703,7 +715,7 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                if (carriagestatus == 10 || carriagestatus == 11)
+                if (carriagestatus == 0 || carriagestatus == 10 || carriagestatus == 11)
                 {
                     DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                     DataTableTracker odtt = new DataTableTracker(odt);
