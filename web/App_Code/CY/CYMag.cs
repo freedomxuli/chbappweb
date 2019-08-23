@@ -30,7 +30,7 @@ public class CYMag
     }
     string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ZYServiceURL"].ToString();
     [CSMethod("GetCYDList")]
-    public object GetCYDList(int pagnum, int pagesize, string carriagecode, string UserXM, string beg, string end, string isinvoice, string carriagestatus)
+    public object GetCYDList(int pagnum, int pagesize, string carriagecode, string UserXM, string beg, string end, string isinvoice, string carriagestatus, string ismoneypay)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -66,6 +66,10 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.carriagestatus", carriagestatus); ;
                 }
+                if (!string.IsNullOrEmpty(ismoneypay))
+                {
+                    where += " and " + dbc.C_EQ("a.ismoneypay", ismoneypay); ;
+                }
                 string str = @"select a.*,b.UserName as sjzh,b.UserTel as sjdh,c.UserXM as zx,d.driverxm as sjxm,d.carnumber as sjcarnumber,d.caruser,e.name as kp,
                                 case a.carriagestatus
                                 when 10 then 1
@@ -100,7 +104,7 @@ public class CYMag
     }
 
     [CSMethod("GetCYDListToFile", 2)]
-    public byte[] GetCYDListToFile(string carriagecode, string UserXM, string beg, string end, string iskp, string status)
+    public byte[] GetCYDListToFile(string carriagecode, string UserXM, string beg, string end, string iskp, string status, string moneypay)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -229,6 +233,10 @@ public class CYMag
                 if (!string.IsNullOrEmpty(status))
                 {
                     where += " and " + dbc.C_EQ("a.carriagestatus", status); ;
+                }
+                if (!string.IsNullOrEmpty(moneypay))
+                {
+                    where += " and " + dbc.C_EQ("a.ismoneypay", moneypay); ;
                 }
                 string str = @"select a.*,b.UserName as sjzh,b.carnumber as sjcarnumber,b.UserXM as sjxm,b.UserTel as sjdh,c.UserXM as zx,b.caruser,e.name as kp
                               from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID
