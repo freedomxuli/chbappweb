@@ -876,45 +876,45 @@ public class CYMag
                 }
                 dbc.CommitTransaction();
 
-                var request = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/arrive/todriver");
-                request.Method = "POST";
-                request.ContentType = "application/json;charset=UTF-8";
-                var byteData = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                {
-                    carriageid = carriageid
-                }));
-                var length = byteData.Length;
-                request.ContentLength = length;
-                var writer = request.GetRequestStream();
-                writer.Write(byteData, 0, length);
-                writer.Close();
+                //var request = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/arrive/todriver");
+                //request.Method = "POST";
+                //request.ContentType = "application/json;charset=UTF-8";
+                //var byteData = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                //{
+                //    carriageid = carriageid
+                //}));
+                //var length = byteData.Length;
+                //request.ContentLength = length;
+                //var writer = request.GetRequestStream();
+                //writer.Write(byteData, 0, length);
+                //writer.Close();
 
 
-                var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/finish/tocaruser");
-                request1.Method = "POST";
-                request1.ContentType = "application/json;charset=UTF-8";
-                var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                {
-                    carriageid = carriageid
-                }));
-                var length1 = byteData1.Length;
-                request1.ContentLength = length1;
-                var writer1 = request1.GetRequestStream();
-                writer1.Write(byteData1, 0, length1);
-                writer1.Close();
+                //var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/finish/tocaruser");
+                //request1.Method = "POST";
+                //request1.ContentType = "application/json;charset=UTF-8";
+                //var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                //{
+                //    carriageid = carriageid
+                //}));
+                //var length1 = byteData1.Length;
+                //request1.ContentLength = length1;
+                //var writer1 = request1.GetRequestStream();
+                //writer1.Write(byteData1, 0, length1);
+                //writer1.Close();
 
-                var request3 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/finish/tocaruser");
-                request3.Method = "POST";
-                request3.ContentType = "application/json;charset=UTF-8";
-                var byteData3 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
-                {
-                    carriageid = carriageid
-                }));
-                var length3 = byteData3.Length;
-                request3.ContentLength = length3;
-                var writer3 = request3.GetRequestStream();
-                writer3.Write(byteData3, 0, length3);
-                writer3.Close();
+                //var request3 = (HttpWebRequest)WebRequest.Create(ServiceURL + "sendSms/finish/tocaruser");
+                //request3.Method = "POST";
+                //request3.ContentType = "application/json;charset=UTF-8";
+                //var byteData3 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                //{
+                //    carriageid = carriageid
+                //}));
+                //var length3 = byteData3.Length;
+                //request3.ContentLength = length3;
+                //var writer3 = request3.GetRequestStream();
+                //writer3.Write(byteData3, 0, length3);
+                //writer3.Close();
 
                 return true;
             }
@@ -1204,8 +1204,10 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                string str = @"select a.*,b.UserName,b.caruser,c.modetype,c.modecoefficient from tb_b_carriage a left join tb_b_user b on a.driverid=b.UserID 
+                string str = @"select a.*,b.UserName,d.caruser,c.modetype,c.modecoefficient from tb_b_carriage a 
+                left join tb_b_user b on a.driverid=b.UserID 
                 left join tb_b_user c on a.userid=c.UserID 
+                left join  tb_b_car d on a.carid=d.id
                 where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
 

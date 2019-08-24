@@ -17,7 +17,8 @@ var store = createSFW4Store({
         { name: 'UserName' },
         { name: 'carnumber' },
         { name: 'linkedunit' },
-        { name: 'drivermemo' }
+        { name: 'drivermemo' },
+        { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -115,8 +116,8 @@ Ext.define('addWin', {
                     {
                         xtype: 'textfield',
                         fieldLabel: '车主账号',
-                        id: 'UserName',
-                        name: 'UserName',
+                        id: 'caruser',
+                        name: 'caruser',
                         labelWidth: 80,
                         allowBlank: false,
                         anchor: '100%'
@@ -224,7 +225,7 @@ Ext.onReady(function () {
                     },
                     {
                         xtype: 'gridcolumn',
-                        dataIndex: 'UserName',
+                        dataIndex: 'caruser',
                         sortable: false,
                         menuDisabled: true,
                         flex: 1,

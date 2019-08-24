@@ -39,7 +39,7 @@ public class CarMag
                 string where = "";
                 if (!string.IsNullOrEmpty(cz.Trim()))
                 {
-                    where += " and " + dbc.C_Like("b.UserName", cz.Trim(), LikeStyle.LeftAndRightLike); 
+                    where += " and " + dbc.C_Like("a.caruser", cz.Trim(), LikeStyle.LeftAndRightLike); 
                 }
 
                 if (!string.IsNullOrEmpty(sj.Trim()))
@@ -85,7 +85,7 @@ public class CarMag
       [CSMethod("SaveCar")]
       public bool SaveCar(JSReader jsr)
       {
-          if (jsr["UserName"].IsNull || jsr["UserName"].IsEmpty)
+          if (jsr["caruser"].IsNull || jsr["caruser"].IsEmpty)
           {
               throw new Exception("车主不能为空");
           }
@@ -97,7 +97,7 @@ public class CarMag
               {
                   if (jsr["id"].ToString() != "")
                   {
-                      var userName = jsr["UserName"].ToString();
+                      var userName = jsr["caruser"].ToString();
                       var cz = "";
                       DataTable czdt = dbc.ExecuteDataTable("select * from tb_b_user where userName=" + dbc.ToSqlValue(userName));
                       if (czdt.Rows.Count > 0)
@@ -140,6 +140,7 @@ public class CarMag
                       if (!string.IsNullOrEmpty(cz))
                       {
                           dr["userid"] = cz;
+                          dr["caruser"] = userName;
                       }
                       dr["driverxm"] = jsr["driverxm"].ToString();
                       dr["drivername"] = jsr["drivername"].ToString();
