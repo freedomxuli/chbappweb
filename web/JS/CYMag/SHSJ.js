@@ -105,6 +105,7 @@ function ck(id) {
         Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
         Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
         Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
+        Ext.getCmp("caruser").setValue(r.param.caruser);
         if (r.paramphoto0.fileList) {
             if (r.paramphoto0.fileList.length > 0) {
                 var isDefault = false;
@@ -182,6 +183,7 @@ function sh(id) {
         Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
         Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
         Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
+        Ext.getCmp("caruser").setValue(r.param.caruser);
         if (r.paramphoto0.fileList) {
             if (r.paramphoto0.fileList.length > 0) {
                 var isDefault = false;
@@ -359,6 +361,14 @@ Ext.define('addWin', {
                          name: 'mirrornumber',
                          labelWidth: 100,
                          fieldLabel: '后视镜设备编号',
+                         anchor: '100%'
+                     },
+                     {
+                         xtype: 'textfield',
+                         id: 'caruser',
+                         name: 'caruser',
+                         labelWidth: 100,
+                         fieldLabel: '车主账号',
                          anchor: '100%'
                      },
                       {
@@ -608,7 +618,10 @@ Ext.onReady(function () {
                                 sortable: false,
                                 menuDisabled: true,
                                 text: "车主账号",
-                                width: 100
+                                width: 100,
+                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                    return record.data.param.caruser;
+                                }
                             },
                             {
                                 xtype: 'gridcolumn',
