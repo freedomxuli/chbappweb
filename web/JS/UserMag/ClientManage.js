@@ -241,6 +241,8 @@ function EditUser(id) {
                             Ext.getCmp("carriagemoneyrate").setValue();
                             Ext.getCmp("carriageoilrate").allowBlank = true;
                             Ext.getCmp("carriagemoneyrate").allowBlank = true;
+
+                            Ext.getCmp('modecoefficient').decimalPrecision = 3;
                         }
                         Ext.getCmp("carriagegetmode").setReadOnly(true);
                         CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
@@ -266,12 +268,15 @@ function EditUser(id) {
                         Ext.getCmp("isidentification").show();
                         Ext.getCmp("carriagechbid").allowBlank = false;
                         Ext.getCmp("carriagechbid").show();
-                        if (!r.carriagegetmode) { Ext.getCmp("carriagegetmode").setValue(0); }
+                        if (!r.carriagegetmode) {
+                            Ext.getCmp("carriagegetmode").setValue(0);
+                        }
                         if (Ext.getCmp("carriagegetmode").getValue() == "0" && Ext.getCmp("modetype").getValue() == "1") {
                             Ext.getCmp("carriageoilrate").show();
                             Ext.getCmp("carriagemoneyrate").show();
                             Ext.getCmp("carriageoilrate").allowBlank = false;
                             Ext.getCmp("carriagemoneyrate").allowBlank = false;
+                            Ext.getCmp('modecoefficient').decimalPrecision = 2;
                         } else {
                             Ext.getCmp("carriageoilrate").hide();
                             Ext.getCmp("carriagemoneyrate").hide();
@@ -279,6 +284,7 @@ function EditUser(id) {
                             Ext.getCmp("carriagemoneyrate").setValue();
                             Ext.getCmp("carriageoilrate").allowBlank = true;
                             Ext.getCmp("carriagemoneyrate").allowBlank = true;
+                            Ext.getCmp('modecoefficient').decimalPrecision = 3;
                         }
 
                         CS('CZCLZ.YHGLClass.JudgeUser', function (ret1) {
@@ -486,14 +492,14 @@ Ext.define('YGLSJList', {
                                     border: 1,
                                     store: yglsjstore,
                                     columns: [
-                                         {
-                                             xtype: 'gridcolumn',
-                                             dataIndex: 'drivername',
-                                             sortable: false,
-                                             menuDisabled: true,
-                                             width: 100,
-                                             text: '司机账号'
-                                         },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'drivername',
+                                            sortable: false,
+                                            menuDisabled: true,
+                                            width: 100,
+                                            text: '司机账号'
+                                        },
                                         {
                                             xtype: 'gridcolumn',
                                             dataIndex: 'driverxm',
@@ -1083,6 +1089,9 @@ Ext.define('addWin', {
                                     Ext.getCmp("carriagemoneyrate").setValue();
                                     Ext.getCmp("carriageoilrate").allowBlank = true;
                                     Ext.getCmp("carriagemoneyrate").allowBlank = true;
+
+                                    Ext.getCmp('modecoefficient').decimalPrecision = 3;
+
                                 } else if (record[0].data.VALUE == 0) {
                                     Ext.getCmp("modetype").show();
 
@@ -1090,6 +1099,9 @@ Ext.define('addWin', {
                                     Ext.getCmp("carriagemoneyrate").show();
                                     Ext.getCmp("carriageoilrate").allowBlank = false;
                                     Ext.getCmp("carriagemoneyrate").allowBlank = false;
+
+                                    Ext.getCmp('modecoefficient').decimalPrecision = 2;
+
                                 }
                             }
                         }
@@ -1185,7 +1197,6 @@ Ext.define('addWin', {
                         anchor: '100%',
                         minValue: 0.01,
                         maxValue: 0.99,
-                        decimalPrecision: 2,
                         value: 0.94
                     },
                     {
@@ -1207,40 +1218,40 @@ Ext.define('addWin', {
                         labelWidth: 80,
                         anchor: '100%'
                     },
-                     {
-                         xtype: 'combobox',
-                         id: 'carriagechbid',
-                         name: 'carriagechbid',
-                         anchor: '100%',
-                         fieldLabel: '开票抬头',
-                         allowBlank: false,
-                         editable: false,
-                         labelWidth: 80,
-                         store: kpstore,
-                         queryMode: 'local',
-                         displayField: 'name',
-                         valueField: 'id',
-                         value: ''
-                     },
-                     {
-                         xtype: 'combobox',
-                         id: 'isidentification',
-                         name: 'isidentification',
-                         anchor: '100%',
-                         fieldLabel: '查货宝认证',
-                         allowBlank: false,
-                         editable: false,
-                         labelWidth: 80,
-                         store: Ext.create('Ext.data.Store', {
-                             fields: ['VALUE', 'TEXT'],
-                             data: [
-                                 { 'VALUE': 0, 'TEXT': '否' }, { 'VALUE': 1, 'TEXT': '是' }
-                             ]
-                         }),
-                         queryMode: 'local',
-                         displayField: 'TEXT',
-                         valueField: 'VALUE'
-                     }
+                    {
+                        xtype: 'combobox',
+                        id: 'carriagechbid',
+                        name: 'carriagechbid',
+                        anchor: '100%',
+                        fieldLabel: '开票抬头',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 80,
+                        store: kpstore,
+                        queryMode: 'local',
+                        displayField: 'name',
+                        valueField: 'id',
+                        value: ''
+                    },
+                    {
+                        xtype: 'combobox',
+                        id: 'isidentification',
+                        name: 'isidentification',
+                        anchor: '100%',
+                        fieldLabel: '查货宝认证',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 80,
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['VALUE', 'TEXT'],
+                            data: [
+                                { 'VALUE': 0, 'TEXT': '否' }, { 'VALUE': 1, 'TEXT': '是' }
+                            ]
+                        }),
+                        queryMode: 'local',
+                        displayField: 'TEXT',
+                        valueField: 'VALUE'
+                    }
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -1251,7 +1262,7 @@ Ext.define('addWin', {
                             var form = Ext.getCmp('addform');
                             if (form.form.isValid()) {
                                 var values = form.form.getValues(false);
-                                
+
                                 var me = this;
                                 CS('CZCLZ.YHGLClass.SaveClient', function (retVal) {
                                     if (retVal) {
