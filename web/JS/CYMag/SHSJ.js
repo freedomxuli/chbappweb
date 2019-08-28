@@ -75,12 +75,12 @@ function getUser(nPage) {
             var result = retVal.evalJSON();
             var temp = [];
             for (var i = 0; i < result.list.length; i++) {
-                if (result.list[i].UserXM != "" && result.list[i].UserXM != null) {
-                    if (result.list[i].caruser == null) {
-                        result.list[i].caruser = '';
+                //if (result.list[i].param.userxm != "" && result.list[i].param.userxm != null) {
+                    if (result.list[i].param.caruser == null) {
+                        result.list[i].param.caruser = '';
                     }
                     temp.push(result.list[i]);
-                }
+                //}
 
             }
             store.setData({
@@ -97,13 +97,14 @@ function getUser(nPage) {
 function ck(id) {
     if (privilege("承运模块_司机审核_查看")) {
         var r = store.findRecord("id", id).data;
+        console.log(r);
         var win = new addWin({ id: id });
         win.show(null, function () { })
         Ext.getCmp("UserTel").setValue(r.UserTel);
         Ext.getCmp("UserXM").setValue(r.param.userxm);
         Ext.getCmp("carnumber").setValue(r.param.carnumber);
         Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
-        Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
+        Ext.getCmp("mirrornumber").setValue(r.param.mirrornumber);
         Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
         Ext.getCmp("caruser").setValue(r.param.caruser);
         if (r.paramphoto0.fileList) {
@@ -181,7 +182,7 @@ function sh(id) {
         Ext.getCmp("UserXM").setValue(r.param.userxm);
         Ext.getCmp("carnumber").setValue(r.param.carnumber);
         Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
-        Ext.getCmp("mirrornumber").setValue(r.mirrornumber);
+        Ext.getCmp("mirrornumber").setValue(r.param.mirrornumber);
         Ext.getCmp("drivermemo").setValue(r.param.drivermemo);
         Ext.getCmp("caruser").setValue(r.param.caruser);
         if (r.paramphoto0.fileList) {
@@ -579,7 +580,7 @@ Ext.onReady(function () {
                                  flex: 1,
                                  text: "后视镜设备编号",
                                  renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                     return record.data.mirrornumber;
+                                     return record.data.param.mirrornumber;
                                  }
                              },
                              {
