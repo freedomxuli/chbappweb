@@ -345,6 +345,28 @@ function AddPhoto(v) {
     var win = new phWin({ UserID: v });
     win.show();
 }
+function AddPhoto1(v) {
+    var picItem = [];
+    CS('CZCLZ.YHGLClass.GetProductImages1', function (retVal) {
+
+        var result = retVal.evalJSON();
+        //for (var i = 0; i < result.length; i++) {
+        var isDefault = false;
+        //    //if (result[i].ISDEFAULT == 1)
+        //    //    isDefault = true;
+        if (result.data.length > 0) {
+            Ext.getCmp('uploadproductpic1').add(new SelectImg({
+                isSelected: isDefault,
+                src: result.data[0].photoUrl,
+                fileid: result.data[0].fjId
+            }));
+        }
+        //}
+    }, CS.onError, v);
+
+    var win = new phWin1({ UserID: v });
+    win.show();
+}
 
 function LookLists(id) {
     var win = new OrderList();
@@ -797,6 +819,20 @@ Ext.define('SelectImg', {
                     }
                 }
             });
+
+            Ext.fly(me.el).on('click', function () {
+                var oldSelectImg = Ext.getCmp('uploadproductpic1').query('image[isSelected=true]');
+                if (oldSelectImg.length < 0 || oldSelectImg[0] != me) {
+                    me.removeCls('clsUnselected');
+                    me.addCls('clsSelected');
+                    me.isSelected = true;
+                    if (oldSelectImg.length > 0) {
+                        oldSelectImg[0].removeCls('clsSelected');
+                        oldSelectImg[0].addCls('clsUnselected');
+                        oldSelectImg[0].isSelected = false;
+                    }
+                }
+            });
         });
 
     },
@@ -879,6 +915,91 @@ Ext.define('phWin', {
                                     CS('CZCLZ.YHGLClass.DelProductImageByPicID', function (retVal) {
                                         if (retVal) {
                                             Ext.getCmp('uploadproductpic').remove(selPics[0]);
+                                        }
+                                    }, CS.onError, selPics[0].fileid);
+                                }
+                            }
+                        });
+                    }
+                }
+            ]
+        }];
+        me.callParent(arguments);
+    }
+});
+
+Ext.define('phWin1', {
+    extend: 'Ext.window.Window',
+    height: 275,
+    width: 653,
+    modal: true,
+    layout: 'border',
+    initComponent: function () {
+        var me = this;
+        var UserID = me.UserID;
+
+
+        me.items = [{
+            xtype: 'UploaderPanel',
+            id: 'uploadproductpic1',
+            region: 'center',
+            autoScroll: true,
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [{
+                    xtype: 'filefield',
+                    fieldLabel: '上传图片',
+                    width: 300,
+                    buttonText: '浏览'
+                }, {
+                    xtype: 'button',
+                    text: '上传',
+                    iconCls: 'upload',
+                    handler: function () {
+                        Ext.getCmp('uploadproductpic1').upload('CZCLZ.YHGLClass.UploadPicForProduct1', function (retVal) {
+                            var isDefault = false;
+                            if (retVal.isdefault == 1)
+                                isDefault = true;
+                            Ext.getCmp('uploadproductpic1').add(new SelectImg({
+                                isSelected: isDefault,
+                                src: retVal.fileurl,
+                                fileid: retVal.fileid
+                            }));
+                        }, CS.onError, UserID);
+                    }
+                }]
+            }],
+            buttonAlign: 'center',
+            buttons: [
+                //{
+                //    text: '设为默认',
+                //    handler: function () {
+                //        Ext.MessageBox.confirm('确认', '是否设置该图片为默认图片？', function (btn) {
+                //            if (btn == 'yes') {
+                //                var selPics = Ext.getCmp('uploadproductpic').query('image[isSelected=true]');
+                //                if (selPics.length > 0) {
+                //                    CS('CZCLZ.YHGLClass.SetDefaultPicForProduct', function (retVal) {
+                //                        if (retVal)
+                //                            Ext.Msg.alert('提示', '设置成功！');
+                //                        else
+                //                            Ext.Msg.alert('提示', '设置失败！');
+                //                    }, CS.onError, selPics[0].fileid, UserID);
+                //                }
+                //            }
+                //        });
+                //    }
+                //},
+                {
+                    text: '删除',
+                    handler: function () {
+                        Ext.MessageBox.confirm('确认', '是否删除该图片？', function (btn) {
+                            if (btn == 'yes') {
+                                var selPics = Ext.getCmp('uploadproductpic1').query('image[isSelected=true]');
+                                if (selPics.length > 0) {
+                                    CS('CZCLZ.YHGLClass.DelProductImageByPicID', function (retVal) {
+                                        if (retVal) {
+                                            Ext.getCmp('uploadproductpic1').remove(selPics[0]);
                                         }
                                     }, CS.onError, selPics[0].fileid);
                                 }
@@ -1671,7 +1792,7 @@ Ext.onReady(function () {
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                             var str;
                             if (record.data.ClientKind == 1) {
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>  <a onclick='AddPhoto1(\"" + value + "\");'>添加认证照片</a>";
                             } else if (record.data.ClientKind == 2) {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
                             }

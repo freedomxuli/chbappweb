@@ -3097,7 +3097,89 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         ToJsonMy2 ToJsonMy2 = JsonConvert.DeserializeObject<ToJsonMy2>(json);
         return ToJsonMy2;
     }
+    #region 
+    [CSMethod("GetProductImages1")]
+    public object GetProductImages1(string pid)
+    {
 
+        string _url = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString() + "tbbuserphoto.selectUserphoto";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            tradeCode = "tbbuserphoto.selectUserphoto",
+            userid = pid,
+            userphotogltype = 99
+        });
+        var request1 = (HttpWebRequest)WebRequest.Create(_url);
+        request1.Method = "POST";
+        request1.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request1.ContentLength = length;
+        var writer = request1.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request1.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+        return responseString;
+
+    }
+
+    [CSMethod("UploadPicForProduct1", 1)]
+    public object UploadPicForProduct1(FileData[] fds, string UserID)
+    {
+        string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
+        WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL + "uploadMultipleFiles");
+        MsMultiPartFormData form = new MsMultiPartFormData();
+        form.AddFormField("devilField", "中国人");
+        form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
+        form.PrepareFormData();
+        request.ContentType = "multipart/form-data; boundary=" + form.Boundary;
+        request.Method = "POST";
+        Stream stream = request.GetRequestStream();
+        foreach (var b in form.GetFormData())
+        {
+            stream.WriteByte(b);
+        }
+        stream.Close();
+        string responseContent = "";
+        using (HttpWebResponse res = (HttpWebResponse)request.GetResponse())
+        {
+            using (Stream resStream = res.GetResponseStream())
+            {
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = resStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    responseContent += Encoding.UTF8.GetString(buffer, 0, read);
+                }
+            }
+            res.Close();
+        }
+        JavaScriptSerializer js = new JavaScriptSerializer();
+        List<FJ> list = js.Deserialize<List<FJ>>(responseContent);
+        string _url = ServiceURL + "tbbuserphoto.update";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            userid = UserID,
+            userphotogltype = 99,
+            fileList = list
+        });
+        var request1 = (HttpWebRequest)WebRequest.Create(_url);
+        request1.Method = "POST";
+        request1.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request1.ContentLength = length;
+        var writer = request1.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request1.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+        return new { fileurl = list[0].fileFullUrl, isdefault = 0, fileid = list[0].fjId };
+
+    }
+    #endregion 
 
 }
 public class ToJsonMy2
