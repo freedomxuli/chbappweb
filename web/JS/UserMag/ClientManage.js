@@ -921,7 +921,7 @@ Ext.define('phWin', {
                                         if (retVal) {
                                             Ext.getCmp('uploadproductpic').remove(selPics[0]);
                                         }
-                                    }, CS.onError, selPics[0].fileid);
+                                    }, CS.onError, selPics[0].fileid, UserID,0);
                                 }
                             }
                         });
@@ -1006,7 +1006,7 @@ Ext.define('phWin1', {
                                         if (retVal) {
                                             Ext.getCmp('uploadproductpic1').remove(selPics[0]);
                                         }
-                                    }, CS.onError, selPics[0].fileid);
+                                    }, CS.onError, selPics[0].fileid, UserID,99);
                                 }
                             }
                         });

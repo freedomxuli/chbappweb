@@ -134,18 +134,27 @@ public class UserMag
 
 
     [CSMethod("DelProductImageByPicID")]
-    public bool DelProductImageByPicID(string fj_id)
+    public bool DelProductImageByPicID(string fj_id, string userid, int userphotogltype)
     {
-        string sqlStr = "update tb_b_FJ set STATUS = 1,UPDATETIME = getdate(),XGYH_ID = @XGYH_ID where fj_id = @fj_id ";
         using (DBConnection dbc = new DBConnection())
         {
             try
             {
                 dbc.BeginTransaction();
+                string sqlStr = "update tb_b_FJ set STATUS = 1,UPDATETIME = getdate(),XGYH_ID = @XGYH_ID where fj_id = @fj_id ";
                 SqlCommand cmd = new SqlCommand(sqlStr);
                 cmd.Parameters.AddWithValue("@XGYH_ID", DBNull.Value);
                 cmd.Parameters.AddWithValue("@fj_id", fj_id);
                 dbc.ExecuteNonQuery(cmd);
+
+                sqlStr = @"update tb_b_userphoto set Status = 1,updatetime = getdate(),updateuser = @XGYH_ID where FJ_ID = @fj_id and UserId=@UserId and userphotogltype=@userphotogltype";
+                cmd = new SqlCommand(sqlStr);
+                cmd.Parameters.AddWithValue("@XGYH_ID", DBNull.Value);
+                cmd.Parameters.AddWithValue("@fj_id", fj_id);
+                cmd.Parameters.AddWithValue("@UserId", userid);
+                cmd.Parameters.AddWithValue("@userphotogltype", userphotogltype);
+                dbc.ExecuteNonQuery(cmd);
+
                 dbc.CommitTransaction();
                 return true;
             }
