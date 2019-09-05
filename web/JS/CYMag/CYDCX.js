@@ -375,6 +375,8 @@ Ext.define('PassWin', {
 
 //************************************主界面*****************************************
 Ext.onReady(function () {
+    Ext.util.CSS.createStyleSheet('.x-grid-record-yellow table{background: #F3FEC2;}');//单独创建css样式
+    //var cssObj = Ext.util.CSS.getRule(".ts", true);
     Ext.define('CYDView', {
         extend: 'Ext.container.Viewport',
 
@@ -394,6 +396,15 @@ Ext.onReady(function () {
                     selModel: Ext.create('Ext.selection.CheckboxModel', {
                         checkOnly: true
                     }),
+
+                    viewConfig: {
+                        getRowClass: function (record, rowIndex, rowParams, store) {
+                            console.log(record);
+                            if (record.data.carriagegetmode == 0) {
+                                return "x-grid-record-yellow";
+                            }
+                        }
+                    },
                     columns: [
                         Ext.create('Ext.grid.RowNumberer'),//专线名称，司机手机、车牌、是否保险、保费、是否油卡付款、是否现金付款
                         {
@@ -721,9 +732,6 @@ Ext.onReady(function () {
                             width: 100
                         }
                     ],
-                    viewConfig: {
-
-                    },
                     dockedItems: [
                         {
                             xtype: 'toolbar',
@@ -965,5 +973,6 @@ Ext.onReady(function () {
     }
 
     DataBind();
+
 })
 //************************************主界面*****************************************

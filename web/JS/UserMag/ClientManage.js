@@ -217,6 +217,11 @@ function EditUser(id) {
             Ext.getCmp('carriagemaxmoney').hide();
             Ext.getCmp('mirrornumber').hide();
         }
+        if (r.carriagegetmode == 1) {
+            Ext.getCmp('modecoefficient').decimalPrecision = 3;
+        } else if (r.carriagegetmode == 0) {
+            Ext.getCmp('modecoefficient').decimalPrecision = 2;
+        }
         CS('CZCLZ.YHGLClass.GetDQS', function (retVal) {
             if (retVal) {
                 sdqstore.loadData(retVal);
