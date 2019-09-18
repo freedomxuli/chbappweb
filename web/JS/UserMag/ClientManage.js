@@ -48,7 +48,8 @@ var store = createSFW4Store({
         { name: 'carriagechbid' },
         { name: 'carriageoilrate' },
         { name: 'carriagemoneyrate' },
-        { name: 'isidentification' }
+        { name: 'isidentification' },
+        { name: 'IsSHPass' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -177,7 +178,6 @@ var kpstore = Ext.create('Ext.data.Store', {
 //************************************页面方法***************************************
 function getUser(nPage) {
     CS('CZCLZ.YHGLClass.GetClientList', function (retVal) {
-        console.log(retVal);
         store.setData({
             data: retVal.dt,
             pageSize: pageSize,
@@ -198,7 +198,7 @@ function GetKP() {
 function EditUser(id) {
     GetKP();
     var r = store.findRecord("UserID", id).data;
-    var win = new addWin();
+    var win = new addWin({ oldv: r });
     win.show(null, function () {
         if (r.ClientKind == 1) {
             //Ext.getCmp('modetype').show();
@@ -277,12 +277,17 @@ function EditUser(id) {
                             Ext.getCmp("carriagegetmode").setValue(0);
                         }
                         if (Ext.getCmp("carriagegetmode").getValue() == "0" && Ext.getCmp("modetype").getValue() == "1") {
+                            Ext.getCmp("modetype").show();
+
                             Ext.getCmp("carriageoilrate").show();
                             Ext.getCmp("carriagemoneyrate").show();
                             Ext.getCmp("carriageoilrate").allowBlank = false;
                             Ext.getCmp("carriagemoneyrate").allowBlank = false;
                             Ext.getCmp('modecoefficient').decimalPrecision = 2;
                         } else {
+                            Ext.getCmp("modetype").hide();
+                            Ext.getCmp("modetype").setValue();
+
                             Ext.getCmp("carriageoilrate").hide();
                             Ext.getCmp("carriagemoneyrate").hide();
                             Ext.getCmp("carriageoilrate").setValue();
@@ -329,7 +334,6 @@ function EditUser(id) {
 function AddPhoto(v) {
     var picItem = [];
     CS('CZCLZ.YHGLClass.GetProductImages', function (retVal) {
-        console.log(retVal);
 
         var result = retVal.evalJSON();
         //for (var i = 0; i < result.length; i++) {
@@ -337,7 +341,6 @@ function AddPhoto(v) {
         //    //if (result[i].ISDEFAULT == 1)
         //    //    isDefault = true;
         if (result.data.length > 0) {
-            console.log(result.data[0].photoUrl);
             Ext.getCmp('uploadproductpic').add(new SelectImg({
                 isSelected: isDefault,
                 src: result.data[0].photoUrl,
@@ -482,6 +485,16 @@ function IsBdBf(username) {
             });
         }
     }, CS.onError, username);
+}
+
+function shpass(id, isshpass) {
+    Ext.MessageBox.confirm('确认', isshpass == 0 ? '确认下架？' : '确认重新上架？', function (btn) {
+        if (btn == 'yes') {
+            CS('CZCLZ.YHGLClass.Shpass', function (retVal) {
+                getUser(store.currentPage);
+            }, CS.onError, id, isshpass);
+        }
+    });
 }
 //************************************页面方法***************************************
 
@@ -921,7 +934,7 @@ Ext.define('phWin', {
                                         if (retVal) {
                                             Ext.getCmp('uploadproductpic').remove(selPics[0]);
                                         }
-                                    }, CS.onError, selPics[0].fileid, UserID,0);
+                                    }, CS.onError, selPics[0].fileid, UserID, 0);
                                 }
                             }
                         });
@@ -1006,7 +1019,7 @@ Ext.define('phWin1', {
                                         if (retVal) {
                                             Ext.getCmp('uploadproductpic1').remove(selPics[0]);
                                         }
-                                    }, CS.onError, selPics[0].fileid, UserID,99);
+                                    }, CS.onError, selPics[0].fileid, UserID, 99);
                                 }
                             }
                         });
@@ -1032,6 +1045,7 @@ Ext.define('addWin', {
 
     initComponent: function () {
         var me = this;
+        var oldv = me.oldv;
         me.items = [
             {
                 xtype: 'form',
@@ -1388,14 +1402,27 @@ Ext.define('addWin', {
                             var form = Ext.getCmp('addform');
                             if (form.form.isValid()) {
                                 var values = form.form.getValues(false);
+                                var nr = "";
+                                if (values.carriagegetmode == 1) {
+                                    values.modetype = 1;
+                                }
+                                for (var key in values) {
+                                    if (oldv.hasOwnProperty(key)) {
 
+                                        if (values[key] != oldv[key]) {
+                                            if (!(oldv[key] == null && values[key] == "")) {
+                                                nr += key + "：" + oldv[key] + " 改为 " + values[key] + ",";
+                                            }
+                                        }
+                                    }
+                                }
                                 var me = this;
                                 CS('CZCLZ.YHGLClass.SaveClient', function (retVal) {
                                     if (retVal) {
                                         me.up('window').close();
                                         getUser(1);
                                     }
-                                }, CS.onError, values);
+                                }, CS.onError, values, nr.substr(0, nr.length - 1));
 
                             }
                         }
@@ -1791,7 +1818,7 @@ Ext.onReady(function () {
                     {
                         text: '操作',
                         dataIndex: 'UserID',
-                        width: 550,
+                        width: 620,
                         sortable: false,
                         menuDisabled: true,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
@@ -1800,6 +1827,11 @@ Ext.onReady(function () {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>  <a onclick='AddPhoto1(\"" + value + "\");'>添加认证照片</a>";
                             } else if (record.data.ClientKind == 2) {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
+                            }
+                            if (record.data.IsSHPass == 1) {
+                                str += " <a onclick='shpass(\"" + value + "\",\"0\");'>下架</a>";
+                            } else if (record.data.IsSHPass == 0) {
+                                str += " <a onclick='shpass(\"" + value + "\",\"1\");'>重新上架</a>";
                             }
                             return str;
                         }

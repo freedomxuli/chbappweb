@@ -2044,7 +2044,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("SaveClient")]
-    public bool SaveClient(JSReader jsr)
+    public bool SaveClient(JSReader jsr, string nr)
     {
         if (jsr["UserName"].IsNull || jsr["UserName"].IsEmpty)
         {
@@ -2146,9 +2146,15 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                                 dr["carriagemoneyrate"] = DBNull.Value;
                             }
                         }
+                        else
+                        {
+                            dr["carriageoilrate"] = DBNull.Value; ;
+                            dr["carriagemoneyrate"] = DBNull.Value; ;
+                        }
                     }
                     else
                     {
+                        dr["carriageoilrate"] = DBNull.Value;
                         dr["carriagegetmode"] = DBNull.Value;
                     }
 
@@ -2168,7 +2174,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["isidentification"] = DBNull.Value;
                     }
-                    
+
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2267,9 +2273,15 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                                 dr["carriagemoneyrate"] = DBNull.Value;
                             }
                         }
+                        else
+                        {
+                            dr["carriageoilrate"] = DBNull.Value;
+                            dr["carriagemoneyrate"] = DBNull.Value;
+                        }
                     }
                     else
                     {
+                        dr["carriageoilrate"] = DBNull.Value;
                         dr["carriagegetmode"] = DBNull.Value;
                     }
 
@@ -2309,6 +2321,8 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     rdr["companyId"] = companyId;
                     rdt.Rows.Add(rdr);
                     dbc.InsertTable(rdt);
+
+                    recordlog(dbc, YHID, DateTime.Now, 3, nr);
                 }
                 dbc.CommitTransaction();
                 return true;
@@ -3106,7 +3120,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         ToJsonMy2 ToJsonMy2 = JsonConvert.DeserializeObject<ToJsonMy2>(json);
         return ToJsonMy2;
     }
-    #region 
+    #region
     [CSMethod("GetProductImages1")]
     public object GetProductImages1(string pid)
     {
@@ -3188,7 +3202,71 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         return new { fileurl = list[0].fileFullUrl, isdefault = 0, fileid = list[0].fjId };
 
     }
-    #endregion 
+    #endregion
+
+    [CSMethod("Shpass")]
+    public void Shpass(string userid, string isshpass)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                dbc.BeginTransaction();
+                string sqlstr = @"update tb_b_user set IsSHPass=" + dbc.ToSqlValue(isshpass) + " where UserID=" + dbc.ToSqlValue(userid);
+                dbc.ExecuteNonQuery(sqlstr);
+
+                int type = 1;
+                string nr = "专线下架";
+                if (isshpass == "1")
+                {
+                    type = 2;
+                    nr = "专线重新上架";
+                }
+                recordlog(dbc, userid, DateTime.Now, type, nr);
+
+                dbc.CommitTransaction();
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 用户管理操作日志
+    /// </summary>
+    /// <param name="dbc"></param>
+    /// <param name="handlers"></param>
+    /// <param name="createtime"></param>
+    /// <param name="type">1.下架 2.重新上架  3.修改</param>
+    public void recordlog(DBConnection dbc, string handlers, DateTime createtime, int type, string content)
+    {
+        string leixing = "";
+        switch (type)
+        {
+            case 1:
+                leixing = "专线下架";
+                break;
+            case 2:
+                leixing = "专线重新上架";
+                break;
+            case 3:
+                leixing = "用户修改";
+                break;
+        }
+
+        var dt = dbc.GetEmptyDataTable("tb_b_record");
+        var dr = dt.NewRow();
+        dr["CaoZuoJiLuID"] = Guid.NewGuid();
+        dr["UserID"] = new Guid(handlers);
+        dr["CaoZuoLeiXing"] = leixing;
+        dr["CaoZuoNeiRong"] = content;
+        dr["CaoZuoTime"] = createtime;
+        dt.Rows.Add(dr);
+        dbc.InsertTable(dt);
+    }
 
 }
 public class ToJsonMy2
