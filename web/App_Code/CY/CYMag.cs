@@ -467,7 +467,7 @@ public class CYMag
     /// </summary>
     /// <param name="jsr"></param>
     [CSMethod("Cykp")]
-    public void Cykp(JSReader jsr,int zt)
+    public void Cykp(JSReader jsr, int zt)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -850,9 +850,19 @@ public class CYMag
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
-                    if ((Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50 && Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 1 && Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1
-                        && Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 1 && Convert.ToInt32(dt.Rows[0]["modetype"]) == 1) || (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50
-                        && Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1 && Convert.ToInt32(dt.Rows[0]["modetype"]) == 2))
+                    bool bo = false;
+                    if (dt.Rows[0]["carriagegetmode"].ToString() == "1")
+                    {
+                        bo = true;//现金，无需判断
+                    }
+                    if ((Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50 &&
+                        Convert.ToInt32(dt.Rows[0]["isoilpay"]) == 1 &&
+                        Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1 &&
+                        Convert.ToInt32(dt.Rows[0]["ismoneynewpay"]) == 1 &&
+                        (bo || Convert.ToInt32(dt.Rows[0]["modetype"]) == 1)) ||
+                        (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50 &&
+                        Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 1 &&
+                        (bo || Convert.ToInt32(dt.Rows[0]["modetype"]) == 2)))
                     {
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);
@@ -1017,7 +1027,7 @@ public class CYMag
                                     //}
                                     //else
                                     //{
-                                        money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
+                                    money = Convert.ToDecimal(dt.Rows[0]["carriagemoney"]);
                                     //}
                                 }
 
@@ -1137,7 +1147,7 @@ public class CYMag
                 {
                     if ((Convert.ToInt32(dt.Rows[0]["ismoneypay"]) == 0) && (Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 30 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 40 || Convert.ToInt32(dt.Rows[0]["carriagestatus"]) == 50))
                     {
-                               
+
 
                         DataTable odt = dbc.GetEmptyDataTable("tb_b_carriage");
                         DataTableTracker odtt = new DataTableTracker(odt);
@@ -1180,7 +1190,7 @@ public class CYMag
                     {
                         throw new Exception("没有可现金打款的承运单！");
                     }
-                    
+
                 }
                 else
                 {
@@ -1313,7 +1323,7 @@ public class CYMag
                     {
                         throw new Exception("没有可验收付打款的承运单！");
                     }
-                    
+
                 }
                 else
                 {
