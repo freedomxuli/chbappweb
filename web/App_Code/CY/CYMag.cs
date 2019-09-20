@@ -846,7 +846,7 @@ public class CYMag
             dbc.BeginTransaction();
             try
             {
-                string str = "select a.*,c.modetype,c.modecoefficient from tb_b_carriage a left join tb_b_user c on a.userid=c.UserID where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
+                string str = "select a.*,c.modetype,c.modecoefficient,c.carriagegetmode from tb_b_carriage a left join tb_b_user c on a.userid=c.UserID where a.status=0 and a.carriageid=" + dbc.ToSqlValue(carriageid);
                 DataTable dt = dbc.ExecuteDataTable(str);
                 if (dt.Rows.Count > 0)
                 {
