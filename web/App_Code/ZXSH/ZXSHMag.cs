@@ -24,10 +24,10 @@ using Newtonsoft.Json;
 [CSClass("ZXSHMag")]
 public class ZXSHMag
 {
-    string ServiceURL=System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
+    string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
 
     [CSMethod("GetZXList")]
-    public object GetZXList(int pagnum, int pagesize, string yhm, string xm,string isrelease)
+    public object GetZXList(int pagnum, int pagesize, string yhm, string xm, string isrelease)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -87,7 +87,7 @@ public class ZXSHMag
     }
 
     [CSMethod("GetZXListToFile", 2)]
-    public byte[] GetZXListToFile(string yhm, string xm,string isrelease)
+    public byte[] GetZXListToFile(string yhm, string xm, string isrelease)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -164,7 +164,7 @@ public class ZXSHMag
                 string str = @"select a.*,b.fqcs from [tb_b_user] a 
   left join (select count(SaleRecordID) as fqcs,SaleRecordUserID from tb_b_salerecord where status=0 and SaleRecordLX!=0 group by SaleRecordUserID) b
   on a.UserID=b.SaleRecordUserID
-  where a.IsSHPass=1 and a.ClientKind=1 "+ where +@" order by a.AddTime desc,a.UserName,a.UserXM";
+  where a.IsSHPass=1 and a.ClientKind=1 " + where + @" order by a.AddTime desc,a.UserName,a.UserXM";
 
                 //开始取分页数据
                 System.Data.DataTable dt = dbc.ExecuteDataTable(str);
@@ -181,28 +181,30 @@ public class ZXSHMag
                     }
                     cells[i + 1, 2].SetStyle(style4);
 
-                    var xl="";
-                    if (dt.Rows[i]["FromRoute"] != null && dt.Rows[i]["FromRoute"].ToString() != ""){
+                    var xl = "";
+                    if (dt.Rows[i]["FromRoute"] != null && dt.Rows[i]["FromRoute"].ToString() != "")
+                    {
                         xl += dt.Rows[i]["FromRoute"].ToString();
                     }
-                    if (dt.Rows[i]["ToRoute"] != null && dt.Rows[i]["ToRoute"].ToString() != ""){
+                    if (dt.Rows[i]["ToRoute"] != null && dt.Rows[i]["ToRoute"].ToString() != "")
+                    {
                         xl += "─" + dt.Rows[i]["ToRoute"].ToString();
                     }
                     cells[i + 1, 3].PutValue(xl);
                     cells[i + 1, 3].SetStyle(style4);
-                     var can="";
-                     if (dt.Rows[i]["IsCanRelease"] != null && dt.Rows[i]["IsCanRelease"].ToString() != "")
-                     {
-                         if (Convert.ToInt32(dt.Rows[i]["IsCanRelease"].ToString()) == 1)
-                         {
-                             can += "可以";
-                         }
-                         else
-                         {
-                             can += "不可以";
-                         }
-                     }
-                     cells[i + 1, 4].PutValue(can);
+                    var can = "";
+                    if (dt.Rows[i]["IsCanRelease"] != null && dt.Rows[i]["IsCanRelease"].ToString() != "")
+                    {
+                        if (Convert.ToInt32(dt.Rows[i]["IsCanRelease"].ToString()) == 1)
+                        {
+                            can += "可以";
+                        }
+                        else
+                        {
+                            can += "不可以";
+                        }
+                    }
+                    cells[i + 1, 4].PutValue(can);
                     cells[i + 1, 4].SetStyle(style4);
                     if (dt.Rows[i]["canReleaseTime"] != null && dt.Rows[i]["canReleaseTime"].ToString() != "")
                     {
@@ -264,15 +266,15 @@ public class ZXSHMag
             try
             {
 
-                string _url = ServiceURL+"tbbuserapply.selectApply";
+                string _url = ServiceURL + "tbbuserapply.selectApply";
                 string jsonParam = new JavaScriptSerializer().Serialize(new
                 {
-                    tradeCode="tbbuserapply.selectApply",
+                    tradeCode = "tbbuserapply.selectApply",
                     status = ispass,
-                    userid="",
-                    username=yhm,
-                    userxm=xm,
-                    currentPage=pagnum,
+                    userid = "",
+                    username = yhm,
+                    userxm = xm,
+                    currentPage = pagnum,
                     pageSize = 10
                 });
                 var request = (HttpWebRequest)WebRequest.Create(_url);
@@ -305,10 +307,10 @@ public class ZXSHMag
 
     public struct pagination
     {
-        public string current{ get; set; }
-        public string pageSize{ get; set; }
-        public string total{ get; set; }
-        public string totalPage{ get; set; }
+        public string current { get; set; }
+        public string pageSize { get; set; }
+        public string total { get; set; }
+        public string totalPage { get; set; }
     }
 
 
@@ -389,7 +391,7 @@ public class ZXSHMag
                 cells[0, 3].PutValue("线路");
                 cells[0, 3].SetStyle(style2);
                 cells.SetColumnWidth(3, 20);
-                cells[0, 4].PutValue("简介");           
+                cells[0, 4].PutValue("简介");
                 cells[0, 4].SetStyle(style2);
                 cells.SetColumnWidth(4, 20);
                 cells[0, 5].PutValue("是否通过");
@@ -494,33 +496,33 @@ public class ZXSHMag
     public object SHJJCG(string userId)
     {
         string _url = ServiceURL + "tbbuserapply.pass";
-            string jsonParam = new JavaScriptSerializer().Serialize(new
-            {
-                tradeCode = "tbbuserapply.pass",
-                id = userId
-            });
-            var request = (HttpWebRequest)WebRequest.Create(_url);
-            request.Method = "POST";
-            request.ContentType = "application/json;charset=UTF-8";
-            var byteData = Encoding.UTF8.GetBytes(jsonParam);
-            var length = byteData.Length;
-            request.ContentLength = length;
-            var writer = request.GetRequestStream();
-            writer.Write(byteData, 0, length);
-            writer.Close();
-            var response = (HttpWebResponse)request.GetResponse();
-            var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            tradeCode = "tbbuserapply.pass",
+            id = userId
+        });
+        var request = (HttpWebRequest)WebRequest.Create(_url);
+        request.Method = "POST";
+        request.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request.ContentLength = length;
+        var writer = request.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
 
-            return responseString;
+        return responseString;
     }
     [CSMethod("SHJJSB")]
-    public object SHJJSB(string userId,string yj)
+    public object SHJJSB(string userId, string yj)
     {
         string _url = ServiceURL + "tbbuserapply.reject";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
-            tradeCode="tbbuserapply.pass",
-	        id=userId,
+            tradeCode = "tbbuserapply.pass",
+            id = userId,
             reviewreason = yj
         });
         var request = (HttpWebRequest)WebRequest.Create(_url);
@@ -590,7 +592,7 @@ public class ZXSHMag
 
     #region  专线发布运费券审核功能
     [CSMethod("getZFQList")]
-    public object getZFQList(int pagnum, int pagesize, string userxm, string isVerifyType)
+    public object getZFQList(int pagnum, int pagesize, string userxm, string isVerifyType, string cx_beg, string cx_end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -598,15 +600,26 @@ public class ZXSHMag
             {
                 int cp = pagnum;
                 int ac = 0;
-                string where="";
-                if(!string.IsNullOrEmpty(userxm)){
-                    where+=" and "+dbc.C_Like("a.SaleRecordUserXM",userxm,LikeStyle.LeftAndRightLike);
+                string where = "";
+                if (!string.IsNullOrEmpty(userxm))
+                {
+                    where += " and " + dbc.C_Like("a.SaleRecordUserXM", userxm, LikeStyle.LeftAndRightLike);
                 }
 
                 if (!string.IsNullOrEmpty(isVerifyType))
                 {
                     where += " and " + dbc.C_EQ("a.SaleRecordVerifyType", Convert.ToInt32(isVerifyType));
                 }
+
+                if (!string.IsNullOrEmpty(cx_beg))
+                {
+                    where += " and a.SaleRecordTime >= " + dbc.ToSqlValue(Convert.ToDateTime(cx_beg));
+                }
+                if (!string.IsNullOrEmpty(cx_end))
+                {
+                    where += " and a.SaleRecordTime < " + dbc.ToSqlValue(Convert.ToDateTime(cx_end).AddDays(1));
+                }
+
                 string str = @"select a.*,b.ZXSaleListCitys,c.ZdMxMc as ProduceLx, d.ZdMxMc as PackLx,e.ZdMxMc as Fc,f.ZdMxMc as ZhLx,g.ZdMxMc as PhLx,h.FromRoute,h.ToRoute
  from  tb_b_salerecord a left join tb_b_zxsalelist b on a.SaleRecordID=b.SaleRecordID
  left join tb_b_zdmx c on b.ZXSaleListProduceLx=c.ZdMxID
@@ -616,7 +629,7 @@ public class ZXSHMag
 		    left join tb_b_zdmx g on b.ZXSaleListPhLx=g.ZdMxID
             left join tb_b_user h on a.SaleRecordUserID=h.UserID
    where a.status=0 and a.SaleRecordLX!=0  and a.SaleRecordVerifyType!=3 
-   and b.status=0 " + where +@"  order by a.addtime desc";
+   and b.status=0 " + where + @"  order by a.addtime desc";
                 System.Data.DataTable dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
                 return new { dt = dtPage, cp = cp, ac = ac };
             }
@@ -629,7 +642,7 @@ public class ZXSHMag
 
 
     [CSMethod("getZFQListToFile", 2)]
-    public byte[] getZFQListToFile(string userxm, string isVerifyType)
+    public byte[] getZFQListToFile(string userxm, string isVerifyType, string cx_beg, string cx_end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -713,6 +726,14 @@ public class ZXSHMag
                 if (!string.IsNullOrEmpty(isVerifyType))
                 {
                     where += " and " + dbc.C_EQ("a.SaleRecordVerifyType", Convert.ToInt32(isVerifyType));
+                }
+                if (!string.IsNullOrEmpty(cx_beg))
+                {
+                    where += " and a.SaleRecordTime >= " + dbc.ToSqlValue(Convert.ToDateTime(cx_beg));
+                }
+                if (!string.IsNullOrEmpty(cx_end))
+                {
+                    where += " and a.SaleRecordTime < " + dbc.ToSqlValue(Convert.ToDateTime(cx_end).AddDays(1));
                 }
                 string str = @"select a.*,b.ZXSaleListCitys,c.ZdMxMc as ProduceLx, d.ZdMxMc as PackLx,e.ZdMxMc as Fc,f.ZdMxMc as ZhLx,g.ZdMxMc as PhLx,h.FromRoute,h.ToRoute
  from  tb_b_salerecord a left join tb_b_zxsalelist b on a.SaleRecordID=b.SaleRecordID
@@ -845,7 +866,7 @@ public class ZXSHMag
     }
 
     [CSMethod("ZFQSH")]
-    public object ZFQSH(string SaleRecordID, int issh,string thyj)
+    public object ZFQSH(string SaleRecordID, int issh, string thyj)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -884,10 +905,10 @@ public class ZXSHMag
                         dt1.Rows.Add(sr1);
                         dbc.UpdateTable(dt1, dtt1);
 
-                        userid=sdt1.Rows[0]["UserID"].ToString();
+                        userid = sdt1.Rows[0]["UserID"].ToString();
 
 
-                        string str2 = "select * from tb_b_user where userid="+dbc.ToSqlValue(userid);
+                        string str2 = "select * from tb_b_user where userid=" + dbc.ToSqlValue(userid);
                         DataTable udt = dbc.ExecuteDataTable(str2);
                         if (udt.Rows.Count > 0)
                         {
@@ -933,7 +954,7 @@ public class ZXSHMag
                         }
                     }
 
-                    
+
                 }
                 dbc.CommitTransaction();
                 try

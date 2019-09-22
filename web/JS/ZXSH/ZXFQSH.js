@@ -76,7 +76,7 @@ function getUser(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
 }
 
 function sq(id) {
@@ -366,6 +366,23 @@ Ext.onReady(function () {
                                             value: ''
                                         },
                                         {
+                                            xtype: 'datefield',
+                                            id: 'cx_beg',
+                                            fieldLabel: '开放时间',//SaleRecordTime
+                                            width: 180,
+                                            format: 'Y-m-d',
+                                            labelWidth: 60
+                                        },
+                                        {
+                                            xtype: 'datefield',
+                                            id: 'cx_end',
+                                            fieldLabel: '~',//SaleRecordTime
+                                            width: 130,
+                                            format: 'Y-m-d',
+                                            labelWidth: 10,
+                                            labelSeparator:''
+                                        },
+                                        {
                                             xtype: 'buttongroup',
                                             title: '',
                                             items: [
@@ -391,7 +408,7 @@ Ext.onReady(function () {
                                                     text: '导出',
                                                     handler: function () {
                                                         if (privilege("专线审核_审核专线自发券_导出")) {
-                                                            DownloadFile("CZCLZ.ZXSHMag.getZFQListToFile", "审核专线自发券.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue());
+                                                            DownloadFile("CZCLZ.ZXSHMag.getZFQListToFile", "审核专线自发券.xls", Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isVerifyType").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                         }
                                                     }
                                                 }]
