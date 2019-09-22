@@ -21,7 +21,7 @@ var store = createSFW4Store({
         { name: 'caruser' }
     ],
     onPageChange: function (sto, nPage, sorters) {
-        getUser(nPage);
+        getCar(nPage);
     }
 });
 

@@ -502,4 +502,32 @@ group by a.SaleUserID) b  on a.UserID=b.SaleUserID
         var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
         return responseString;
     }
+
+    #region 平台派送红包
+    [CSMethod("SavePSHB")]
+    public object SavePSHB(int points, int validhour, string sanfangList)
+    {
+        JavaScriptSerializer js = new JavaScriptSerializer();
+        List<sanfang> list = js.Deserialize<List<sanfang>>(sanfangList);
+        string _url = "";// ServiceURL + "tbbpaisong.webpaisong";
+        string jsonParam = new JavaScriptSerializer().Serialize(new
+        {
+            points = points,
+            validhour = validhour,
+            sanfangList = list
+        });
+        var request1 = (HttpWebRequest)WebRequest.Create(_url);
+        request1.Method = "POST";
+        request1.ContentType = "application/json;charset=UTF-8";
+        var byteData = Encoding.UTF8.GetBytes(jsonParam);
+        var length = byteData.Length;
+        request1.ContentLength = length;
+        var writer = request1.GetRequestStream();
+        writer.Write(byteData, 0, length);
+        writer.Close();
+        var response = (HttpWebResponse)request1.GetResponse();
+        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+        return responseString;
+    }
+    #endregion
 }

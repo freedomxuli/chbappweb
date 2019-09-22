@@ -100,8 +100,8 @@ function ck(id) {
         console.log(r);
         var win = new addWin({ id: id });
         win.show(null, function () { })
-        Ext.getCmp("UserTel").setValue(r.UserTel);
-        Ext.getCmp("UserXM").setValue(r.param.userxm);
+        Ext.getCmp("userxm").setValue(r.param.userxm);
+        Ext.getCmp("drivername").setValue(r.param.drivername);
         Ext.getCmp("carnumber").setValue(r.param.carnumber);
         Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
         Ext.getCmp("mirrornumber").setValue(r.param.mirrornumber);
@@ -179,7 +179,8 @@ function sh(id) {
         var win = new addWin({ id: id });
         win.show(null, function () { })
         Ext.getCmp("UserTel").setValue(r.UserTel);
-        Ext.getCmp("UserXM").setValue(r.param.userxm);
+        Ext.getCmp("userxm").setValue(r.param.userxm);
+        Ext.getCmp("drivername").setValue(r.param.drivername);
         Ext.getCmp("carnumber").setValue(r.param.carnumber);
         Ext.getCmp("linkedunit").setValue(r.param.linkedunit);
         Ext.getCmp("mirrornumber").setValue(r.param.mirrornumber);
@@ -326,10 +327,18 @@ Ext.define('addWin', {
                     },
                      {
                          xtype: 'textfield',
-                         id: 'UserXM',
-                         name: 'UserXM',
+                         id: 'userxm',
+                         name: 'userxm',
                          labelWidth: 100,
                          fieldLabel: '司机名称',
+                         anchor: '100%'
+                     },
+                     {
+                         xtype: 'textfield',
+                         id: 'drivername',
+                         name: 'drivername',
+                         labelWidth: 100,
+                         fieldLabel: '司机账号',
                          anchor: '100%'
                      },
                      {
@@ -537,6 +546,16 @@ Ext.onReady(function () {
                                     return record.data.param.userxm;
                                 }
                             },
+                             {
+                                 xtype: 'gridcolumn',
+                                 sortable: false,
+                                 menuDisabled: true,
+                                 flex: 1,
+                                 text: "司机账号",
+                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                     return record.data.param.drivername;
+                                 }
+                             },
                             {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'UserName',
