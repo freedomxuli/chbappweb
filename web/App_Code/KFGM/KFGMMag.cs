@@ -22,6 +22,12 @@ public class sanfang
 {
      public string sanfanguserid { get; set; }
 }
+
+public class sanfangHT
+{
+    public string sanfanguserid { get; set; }
+    public string username { get; set; }
+}
 [CSClass("KFGMMag")]
 public class KFGMMag
 {
@@ -508,8 +514,8 @@ group by a.SaleUserID) b  on a.UserID=b.SaleUserID
     public object SavePSHB(int points, int validhour, string sanfangList)
     {
         JavaScriptSerializer js = new JavaScriptSerializer();
-        List<sanfang> list = js.Deserialize<List<sanfang>>(sanfangList);
-        string _url = "";// ServiceURL + "tbbpaisong.webpaisong";
+        List<sanfangHT> list = js.Deserialize<List<sanfangHT>>(sanfangList);
+        string _url = ServiceURL + "tbbpaisongredenvelope.webpaisongredenvelope";
         string jsonParam = new JavaScriptSerializer().Serialize(new
         {
             points = points,

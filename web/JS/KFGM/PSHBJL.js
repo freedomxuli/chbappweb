@@ -404,14 +404,14 @@ Ext.define('PSWin', {
 
                         var list = [];
                         for (var i = 0; i < sfstore1.data.length; i++) {
-                            list.push({ sanfanguserid: sfstore1.data.items[i].data.UserID })
+                            list.push({ sanfanguserid: sfstore1.data.items[i].data.UserID, username: sfstore1.data.items[i].data.UserName })
                         }
                         CS('CZCLZ.KFGMMag.SavePSHB', function (retVal) {
                             if (retVal) {
                                 var result = retVal.evalJSON();
                                 if (result.success) {
                                     Ext.MessageBox.alert('提示', "派送成功！");
-                                    getList(1);
+                                    getPSList(1);
                                 } else {
                                     Ext.MessageBox.alert('提示', result.details);
                                 }
@@ -559,6 +559,7 @@ Ext.onReady(function () {
                                 dataIndex: 'UserXM',
                                 sortable: false,
                                 menuDisabled: true,
+                                hidden: true,
                                 flex: 1,
                                 text: "专线"
                             },
@@ -683,7 +684,7 @@ Ext.onReady(function () {
                                                     text: '导出',
                                                     handler: function () {
                                                         if (privilege("开放购买运费券_派送红包记录_导出")) {
-                                                            DownloadFile("CZCLZ.CWBBMag.GetPSListZToFile", "派送记录.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                            DownloadFile("CZCLZ.CWBBMag.GetPSListZToFile_HB", "派送记录.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                         }
                                                     }
                                                 },
@@ -693,7 +694,7 @@ Ext.onReady(function () {
                                                     text: '批量导出明细',
                                                     handler: function () {
                                                         if (privilege("开放购买运费券_派送红包记录_导出")) {
-                                                            DownloadFile("CZCLZ.CWBBMag.GetPSSFToFilePL", "批量派送明细记录.xls",Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                            DownloadFile("CZCLZ.CWBBMag.GetPSSFToFilePL_HB", "批量派送明细记录.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                         }
                                                     }
                                                 },

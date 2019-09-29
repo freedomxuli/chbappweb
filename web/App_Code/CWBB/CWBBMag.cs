@@ -5986,7 +5986,7 @@ public class CWBBMag
                                 ";
                 str += where;
 
-                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by e.addtime desc,a.paisongid, a.getstatus,b.UserName");
+                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by e.addtime desc,a.getstatus,b.UserName");
 
                 dt.Columns.Add("sysj");
                 foreach (DataRow dr in dt.Rows)
@@ -6242,6 +6242,81 @@ public class CWBBMag
                 throw ex;
             }
 
+        }
+    }
+
+    [CSMethod("GetPSHBJL")]
+    public object GetPSHBJL(int pagnum, int pagesize,string yhm,string zt,string lx)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string where = "";
+
+                if (!string.IsNullOrEmpty(yhm))
+                {
+                    where += " and " + dbc.C_Like("b.UserName", yhm,LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(zt))
+                {
+                    if (zt == "2")
+                    {
+                        where += " and a.isuse in (1,3,9)";
+                    }
+                    else if (zt == "1")
+                    {
+                        where += " and a.isuse=1 ";
+                    }
+                    else if (zt == "0")
+                    {
+                        where += " and a.isuse=0 ";
+                    }
+                }
+                if (!string.IsNullOrEmpty(lx))
+                {
+                    where += " and " + dbc.C_EQ("a.type",Convert.ToInt32(lx));
+                }
+                string str = @"select a.*,b.UserName,b.UserXM from tb_b_redenvelope a left join tb_b_user b on  a.userid=b.UserID
+                                where 1=1 "+where+@"
+                            order by a.addtime desc";
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+                dtPage.Columns.Add("jzsj");
+                foreach (DataRow dr in dtPage.Rows)
+                {
+                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
+                    {
+                        dr["jzsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
+                    }
+                }
+                return new { dt = dtPage, cp = cp, ac = ac};
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+     [CSMethod("GetPSHBZJ")]
+    public object GetPSHBJL()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string str = @"select  (select sum(money) from tb_b_redenvelope) as zj,(select sum(money) from tb_b_redenvelope where isuse in (1,3,9)) as ysy,
+(select sum(money) from tb_b_redenvelope  where isuse=2) as gq,(select sum(money) from tb_b_redenvelope where isuse=0) as wsy";
+                DataTable dt= dbc.ExecuteDataTable(str);
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
     #endregion
