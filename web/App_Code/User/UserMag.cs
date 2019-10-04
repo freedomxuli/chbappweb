@@ -3268,6 +3268,138 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         dbc.InsertTable(dt);
     }
 
+    #region 分享记录
+    [CSMethod("GetShareRecordByPage")]
+    public object GetShareRecordByPage(int pagnum, int pagesize, string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  AddTime>='" + Convert.ToDateTime(beg).ToString() + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
+                }
+
+
+                string str = @"select SaleRecordUserID,SaleRecordUserXM,YEAR(addtime) y,month(addtime) m,day(addtime) d,COUNT(1) recordNum from tb_b_salerecord
+                                where Status=0 " + where + @"
+                                group by SaleRecordUserID,SaleRecordUserXM,YEAR(addtime),month(addtime),day(addtime) 
+                                order by y desc,m desc,d desc";
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("GetShareRecordToFile", 2)]
+    public byte[] GetShareRecordToFile(string beg, string end)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("日期");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("数量");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+
+                string where = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  AddTime>='" + Convert.ToDateTime(beg).ToString() + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
+                }
+
+
+                string str = @"select SaleRecordUserID,SaleRecordUserXM,YEAR(addtime) y,month(addtime) m,day(addtime) d,COUNT(1) recordNum from tb_b_salerecord
+                                where Status=0 " + where + @"
+                                group by SaleRecordUserID,SaleRecordUserXM,YEAR(addtime),month(addtime),day(addtime) 
+                                order by y desc,m desc,d desc";
+
+                //开始取分页数据
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(dt.Rows[i]["y"].ToString()) && !string.IsNullOrEmpty(dt.Rows[i]["m"].ToString()) && !string.IsNullOrEmpty(dt.Rows[i]["d"].ToString()))
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["y"].ToString() + "-" + dt.Rows[i]["m"].ToString() + "-" + dt.Rows[i]["d"].ToString());
+                    }
+                    else
+                    {
+                        cells[i + 1, 0].PutValue("");
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    cells[i + 1, 1].PutValue(dt.Rows[i]["recordNum"]);
+                    cells[i + 1, 1].SetStyle(style4);
+
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
+
 }
 public class ToJsonMy2
 {
