@@ -11,7 +11,8 @@ var shareStore = createSFW4Store({
        { name: 'y' },
        { name: 'm' },
        { name: 'd' },
-       { name: 'recordNum' }
+       { name: 'recordNum' },
+       { name: 'UserName' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getShareRecord(nPage);
@@ -27,7 +28,7 @@ function getShareRecord(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_username").getValue());
 }
 
 //-----------------------------------------------------------界    面-----------------------------------------------------------------
@@ -60,6 +61,14 @@ Ext.onReady(function () {
                         },
                         {
                             xtype: 'gridcolumn',
+                            dataIndex: 'UserName',
+                            sortable: false,
+                            menuDisabled: true,
+                            width: 130,
+                            text: "账号"
+                        },
+                        {
+                            xtype: 'gridcolumn',
                             dataIndex: 'recordNum',
                             sortable: false,
                             menuDisabled: true,
@@ -75,6 +84,13 @@ Ext.onReady(function () {
                             xtype: 'toolbar',
                             dock: 'top',
                             items: [
+                                {
+                                    id: 'cx_username',
+                                    xtype: 'textfield',
+                                    fieldLabel: '账号',
+                                    labelWidth: 60,
+                                    width: 190
+                                },
                                 {
                                     id: 'cx_beg',
                                     xtype: 'datefield',
@@ -111,7 +127,7 @@ Ext.onReady(function () {
                                             text: '导出',
                                             handler: function () {
                                                 if (privilege("系统维护中心_分享记录_导出")) {
-                                                    DownloadFile("CZCLZ.YHGLClass.GetShareRecordToFile", "分享记录.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                    DownloadFile("CZCLZ.YHGLClass.GetShareRecordToFile", "分享记录.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_username").getValue());
                                                 }
                                             }
                                         },

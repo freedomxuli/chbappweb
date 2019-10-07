@@ -3270,7 +3270,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
 
     #region 分享记录
     [CSMethod("GetShareRecordByPage")]
-    public object GetShareRecordByPage(int pagnum, int pagesize, string beg, string end)
+    public object GetShareRecordByPage(int pagnum, int pagesize, string beg, string end, string username)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3280,6 +3280,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 int ac = 0;
 
                 string where = "";
+                string where2 = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
                     where += " and  AddTime>='" + Convert.ToDateTime(beg).ToString() + "'";
@@ -3289,10 +3290,17 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     where += " and AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
                 }
 
+                if (!string.IsNullOrEmpty(username.Trim()))
+                {
+                    where2 = " where b.UserName like '%" + username + "%'";
+                }
 
-                string str = @"select SaleRecordUserID,SaleRecordUserXM,YEAR(addtime) y,month(addtime) m,day(addtime) d,COUNT(1) recordNum from tb_b_salerecord
-                                where Status=0 " + where + @"
-                                group by SaleRecordUserID,SaleRecordUserXM,YEAR(addtime),month(addtime),day(addtime) 
+                string str = @"select t.*,b.UserName,b.UserXM from(
+	                                select userid,YEAR(addtime) y,month(addtime) m,day(addtime) d,COUNT(1) recordNum from tb_b_share_record
+	                                where Status=0" + where + @"
+	                                group by userid,YEAR(addtime),month(addtime),day(addtime)
+                                )t
+                                left join tb_b_user b on t.userid=b.UserID " + where2 + @"
                                 order by y desc,m desc,d desc";
 
                 //开始取分页数据
@@ -3310,7 +3318,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetShareRecordToFile", 2)]
-    public byte[] GetShareRecordToFile(string beg, string end)
+    public byte[] GetShareRecordToFile(string beg, string end, string username)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3348,11 +3356,15 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 cells[0, 0].PutValue("日期");
                 cells[0, 0].SetStyle(style2);
                 cells.SetColumnWidth(0, 20);
-                cells[0, 1].PutValue("数量");
+                cells[0, 1].PutValue("账号");
                 cells[0, 1].SetStyle(style2);
                 cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("数量");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
 
                 string where = "";
+                string where2 = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
                     where += " and  AddTime>='" + Convert.ToDateTime(beg).ToString() + "'";
@@ -3362,13 +3374,19 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     where += " and AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
                 }
 
+                if (!string.IsNullOrEmpty(username.Trim()))
+                {
+                    where2 = " where b.UserName like '%" + username + "%'";
+                }
 
-                string str = @"select SaleRecordUserID,SaleRecordUserXM,YEAR(addtime) y,month(addtime) m,day(addtime) d,COUNT(1) recordNum from tb_b_salerecord
-                                where Status=0 " + where + @"
-                                group by SaleRecordUserID,SaleRecordUserXM,YEAR(addtime),month(addtime),day(addtime) 
+                string str = @"select t.*,b.UserName,b.UserXM from(
+	                                select userid,YEAR(addtime) y,month(addtime) m,day(addtime) d,COUNT(1) recordNum from tb_b_share_record
+	                                where Status=0" + where + @"
+	                                group by userid,YEAR(addtime),month(addtime),day(addtime)
+                                )t
+                                left join tb_b_user b on t.userid=b.UserID " + where2 + @"
                                 order by y desc,m desc,d desc";
 
-                //开始取分页数据
                 DataTable dt = dbc.ExecuteDataTable(str);
 
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -3382,9 +3400,19 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                         cells[i + 1, 0].PutValue("");
                     }
                     cells[i + 1, 0].SetStyle(style4);
-                    cells[i + 1, 1].PutValue(dt.Rows[i]["recordNum"]);
+
+                    if (!string.IsNullOrEmpty(dt.Rows[i]["UserName"].ToString()))
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    else
+                    {
+                        cells[i + 1, 1].PutValue("");
+                    }
                     cells[i + 1, 1].SetStyle(style4);
 
+                    cells[i + 1, 2].PutValue(dt.Rows[i]["recordNum"]);
+                    cells[i + 1, 2].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
