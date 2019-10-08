@@ -1324,7 +1324,7 @@ public class CWBBMag
 
     #region 自放券总表
     [CSMethod("GetZXZFList")]
-    public object GetZXZFList(int pagnum, int pagesize, string yhm, string xm,string sc, string beg, string end)
+    public object GetZXZFList(int pagnum, int pagesize, string yhm, string xm, string sc, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1357,7 +1357,7 @@ public class CWBBMag
                 string sjstr = "";
 
                 //上架时间
-                string sjwhere = "";    string sjwhere1 = "";
+                string sjwhere = ""; string sjwhere1 = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
                     sjwhere += " and  SaleRecordTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
@@ -1407,7 +1407,7 @@ public class CWBBMag
                     }
                 }
 
-                string str = @"select '"+sjstr+ @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
+                string str = @"select '" + sjstr + @"' as rq,  a.UserID,a.FromRoute,a.UserName,a.UserXM,b.sjdzq,c.ysyq,d.gqwsy,e.qxnwsy,f.sxq,g.zsq from tb_b_user a left join 
                             (select sum(SaleRecordPoints) as sjdzq,SaleRecordUserID from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
                             and status=0 " + sjwhere + @"  group by SaleRecordUserID) b on a.UserID=b.SaleRecordUserID
                             left join
@@ -1684,7 +1684,7 @@ public class CWBBMag
     }
 
     [CSMethod("getXSZBList")]
-    public object getXSZBList(int pagnum, int pagesize,string userId, string beg, string end)
+    public object getXSZBList(int pagnum, int pagesize, string userId, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1697,7 +1697,7 @@ public class CWBBMag
                 DataTable sjdt = dbc.ExecuteDataTable(sql);
 
                 //上架时间
-                string sjwhere = ""; 
+                string sjwhere = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
                     sjwhere += " and  c.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
@@ -3232,7 +3232,7 @@ public class CWBBMag
 
     #region 三方交易明细
     [CSMethod("GetSFJYList")]
-    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm,string beg, string end,string ordercode)
+    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm, string beg, string end, string ordercode)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3413,7 +3413,7 @@ public class CWBBMag
                                 left join tb_b_order d on c.OrderCode=d.OrderCode
                                 left join tb_b_user e on a.CardUserID=e.UserID
                                 left join tb_b_salerecord g on d.SaleRecordID=g.SaleRecordID
-                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where+where1 + @"
+                                where b.ClientKind=2 and d.status=0 and c.status=1 and d.ZhiFuZT=1  " + where + where1 + @"
                                 union all
                                 select b.UserName,d.AddTime as jysj,null as xfsj,e.UserXM,a.OrderCode,d.Money,'购买' as flag,d.redenvelopeid,d.redenvelopemoney as redmoney,
                                 case when g.SaleRecordLX=0 then '耗材券' when  g.SaleRecordLX is null then '耗材券'
@@ -3462,7 +3462,7 @@ public class CWBBMag
                         cells[i + 1, 5].PutValue(dt.Rows[i]["Money"]);
                     }
                     cells[i + 1, 5].SetStyle(style4);
-                    if (dt.Rows[i]["redenvelopeid"] != null && dt.Rows[i]["redenvelopeid"].ToString() != "")
+                    if (dt.Rows[i]["redmoney"] != null && dt.Rows[i]["redmoney"].ToString() != "" && Convert.ToInt32(dt.Rows[i]["redmoney"].ToString()) > 0)
                     {
                         cells[i + 1, 6].PutValue("是");
                     }
@@ -3652,7 +3652,7 @@ public class CWBBMag
                 str += where;
 
                 //开始取分页数据
-                DataTable dt= dbc.ExecuteDataTable(str + " order by a.AddTime desc,a.UserName,a.UserXM");
+                DataTable dt = dbc.ExecuteDataTable(str + " order by a.AddTime desc,a.UserName,a.UserXM");
 
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
@@ -4046,7 +4046,7 @@ public class CWBBMag
 
         }
     }
-    #endregion 
+    #endregion
 
     #region  派送
     [CSMethod("GetPSListZ")]
@@ -4326,7 +4326,7 @@ public class CWBBMag
                 cells[0, 7].PutValue("派送时间");
                 cells[0, 7].SetStyle(style2);
                 cells.SetColumnWidth(7, 20);
-                
+
 
                 string where = "";
 
@@ -4790,7 +4790,7 @@ public class CWBBMag
         }
 
     }
-    #endregion 
+    #endregion
 
     #region  每日明细
     [CSMethod("getMRMXList")]
@@ -4976,22 +4976,24 @@ public class CWBBMag
 
                 if (!string.IsNullOrEmpty(sj))
                 {
-                    where += " and (a.AddTime>='"+Convert.ToDateTime(sj).ToString("yyyy-MM-dd")+"' and a.AddTime<'"+Convert.ToDateTime(sj).AddDays(1).ToString("yyyy-MM-dd")+"')";
+                    where += " and (a.AddTime>='" + Convert.ToDateTime(sj).ToString("yyyy-MM-dd") + "' and a.AddTime<'" + Convert.ToDateTime(sj).AddDays(1).ToString("yyyy-MM-dd") + "')";
                 }
 
-                if(!string.IsNullOrEmpty(lx)){
-                    if(Convert.ToInt32(lx)==1){
-                        where+="and (b.SaleRecordLX=0 or b.SaleRecordLX is null)";
+                if (!string.IsNullOrEmpty(lx))
+                {
+                    if (Convert.ToInt32(lx) == 1)
+                    {
+                        where += "and (b.SaleRecordLX=0 or b.SaleRecordLX is null)";
                     }
                     else if (Convert.ToInt32(lx) == 2)
                     {
-                        where+="and b.SaleRecordLX<>0";
+                        where += "and b.SaleRecordLX<>0";
                     }
                 }
 
                 string str = @" select sum(a.Points) as points,c.UserXM,a.SaleUserID from tb_b_order a left join tb_b_salerecord b on a.SaleRecordID=b.SaleRecordID
                             left join tb_b_user c on a.SaleUserID=c.UserID
-                             where a.status=0 and a.ZhiFuZT=1 and b.Status=0   "+where+@" 
+                             where a.status=0 and a.ZhiFuZT=1 and b.Status=0   " + where + @" 
                               group by a.SaleUserID,c.UserXM order by c.UserXM ";
 
                 //开始取分页数据
@@ -5103,7 +5105,7 @@ public class CWBBMag
         }
 
     }
-    #endregion 
+    #endregion
 
     #region 销售情况
     [CSMethod("getXSQK")]
@@ -5111,7 +5113,8 @@ public class CWBBMag
     {
         using (DBConnection dbc = new DBConnection())
         {
-            try {
+            try
+            {
                 //今日销量 购买人数 购买人次
                 string str = @"select sum(a.Points) as xl,count(a.BuyUserID) as gmcs,count(distinct a.BuyUserID) as gmrs  from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID 
                 where a.status=0 and a.ZhiFuZT=1 and DateDiff(dd,a.AddTime,getdate())=0";
@@ -5253,7 +5256,8 @@ public class CWBBMag
 
 
     [CSMethod("getJXL")]
-    public object getJXL(){
+    public object getJXL()
+    {
         using (DBConnection dbc = new DBConnection())
         {
             try
@@ -5317,15 +5321,15 @@ public class CWBBMag
                 string str = @"select count(OrderID) as gmcs,BuyUserID from tb_b_order where status=0 and ZhiFuZT=1 and DateDiff(dd,AddTime,getdate())=0 group by BuyUserID";
                 DataTable dt = dbc.ExecuteDataTable(str);
 
-                int count1=0;
-                int count2=0;
+                int count1 = 0;
+                int count2 = 0;
                 DataRow[] drs1 = dt.Select("gmcs=2");
                 count1 = drs1.Length;
 
                 DataRow[] drs2 = dt.Select("gmcs>2");
                 count2 = drs2.Length;
 
-                return new {count1=count1,count2=count2};
+                return new { count1 = count1, count2 = count2 };
             }
             catch (Exception ex)
             {
@@ -5532,7 +5536,7 @@ public class CWBBMag
             }
         }
     }
-    #endregion 
+    #endregion
 
     #region 当月专线
     [CSMethod("getDYZXList")]
@@ -6246,7 +6250,7 @@ public class CWBBMag
     }
 
     [CSMethod("GetPSHBJL")]
-    public object GetPSHBJL(int pagnum, int pagesize,string yhm,string zt,string lx)
+    public object GetPSHBJL(int pagnum, int pagesize, string yhm, string zt, string lx)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -6258,7 +6262,7 @@ public class CWBBMag
 
                 if (!string.IsNullOrEmpty(yhm))
                 {
-                    where += " and " + dbc.C_Like("b.UserName", yhm,LikeStyle.LeftAndRightLike);
+                    where += " and " + dbc.C_Like("b.UserName", yhm, LikeStyle.LeftAndRightLike);
                 }
                 if (!string.IsNullOrEmpty(zt))
                 {
@@ -6277,10 +6281,10 @@ public class CWBBMag
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
-                    where += " and " + dbc.C_EQ("a.type",Convert.ToInt32(lx));
+                    where += " and " + dbc.C_EQ("a.type", Convert.ToInt32(lx));
                 }
                 string str = @"select a.*,b.UserName,b.UserXM from tb_b_redenvelope a left join tb_b_user b on  a.userid=b.UserID
-                                where 1=1 "+where+@"
+                                where 1=1 " + where + @"
                             order by a.addtime desc";
                 System.Data.DataTable dtPage = new System.Data.DataTable();
                 dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
@@ -6292,7 +6296,7 @@ public class CWBBMag
                         dr["jzsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
                     }
                 }
-                return new { dt = dtPage, cp = cp, ac = ac};
+                return new { dt = dtPage, cp = cp, ac = ac };
             }
             catch (Exception ex)
             {
@@ -6300,7 +6304,7 @@ public class CWBBMag
             }
         }
     }
-     [CSMethod("GetPSHBZJ")]
+    [CSMethod("GetPSHBZJ")]
     public object GetPSHBZJ()
     {
         using (DBConnection dbc = new DBConnection())
@@ -6309,7 +6313,7 @@ public class CWBBMag
             {
                 string str = @"select  (select sum(money) from tb_b_redenvelope) as zj,(select sum(money) from tb_b_redenvelope where isuse in (1,3,9)) as ysy,
 (select sum(money) from tb_b_redenvelope  where isuse=2) as gq,(select sum(money) from tb_b_redenvelope where isuse=0) as wsy";
-                DataTable dt= dbc.ExecuteDataTable(str);
+                DataTable dt = dbc.ExecuteDataTable(str);
 
                 return dt;
             }
@@ -6320,177 +6324,177 @@ public class CWBBMag
         }
     }
 
-     [CSMethod("GetPSHBJLToFile", 2)]
-     public byte[] GetPSHBJLToFile(string yhm,string zt,string lx)
-     {
-         using (DBConnection dbc = new DBConnection())
-         {
-             try
-             {
-                 Workbook workbook = new Workbook(); //工作簿
-                 Worksheet sheet = workbook.Worksheets[0]; //工作表
-                 Cells cells = sheet.Cells;//单元格
+    [CSMethod("GetPSHBJLToFile", 2)]
+    public byte[] GetPSHBJLToFile(string yhm, string zt, string lx)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
 
-                 //样式2
-                 Style style2 = workbook.Styles[workbook.Styles.Add()];
-                 style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
-                 style2.Font.Name = "宋体";//文字字体
-                 style2.Font.Size = 14;//文字大小
-                 style2.Font.IsBold = true;//粗体
-                 style2.IsTextWrapped = true;//单元格内容自动换行
-                 style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
-                 style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
-                 style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
-                 style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
-                 style2.IsLocked = true;
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
 
-                 //样式3
-                 Style style4 = workbook.Styles[workbook.Styles.Add()];
-                 style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
-                 style4.Font.Name = "宋体";//文字字体
-                 style4.Font.Size = 11;//文字大小
-                 style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
-                 style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
-                 style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
-                 style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
 
 
-                 cells.SetRowHeight(0, 20);
-                 cells[0, 0].PutValue("领取人");
-                 cells[0, 0].SetStyle(style2);
-                 cells.SetColumnWidth(0, 20);
-                 cells[0, 1].PutValue("金额");
-                 cells[0, 1].SetStyle(style2);
-                 cells.SetColumnWidth(1, 20);
-                 cells[0, 2].PutValue("类型");
-                 cells[0, 2].SetStyle(style2);
-                 cells.SetColumnWidth(2, 20);
-                 cells[0, 3].PutValue("截止时间");
-                 cells[0, 3].SetStyle(style2);
-                 cells.SetColumnWidth(3, 20);
-                 cells[0, 4].PutValue("状态");
-                 cells[0, 4].SetStyle(style2);
-                 cells.SetColumnWidth(4, 20);
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("领取人");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("金额");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("类型");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("截止时间");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("状态");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 20);
 
-                 string where = "";
+                string where = "";
 
-                 if (!string.IsNullOrEmpty(yhm))
-                 {
-                     where += " and " + dbc.C_Like("b.UserName", yhm, LikeStyle.LeftAndRightLike);
-                 }
-                 if (!string.IsNullOrEmpty(zt))
-                 {
-                     if (zt == "1")
-                     {
-                         where += " and a.isuse in (1,3,9)";
-                     }
-                     else if (zt == "2")
-                     {
-                         where += " and a.isuse=2 ";
-                     }
-                     else if (zt == "0")
-                     {
-                         where += " and a.isuse=0 ";
-                     }
-                 }
-                 if (!string.IsNullOrEmpty(lx))
-                 {
-                     where += " and " + dbc.C_EQ("a.type", Convert.ToInt32(lx));
-                 }
-                 string str = @"select a.*,b.UserName,b.UserXM from tb_b_redenvelope a left join tb_b_user b on  a.userid=b.UserID
+                if (!string.IsNullOrEmpty(yhm))
+                {
+                    where += " and " + dbc.C_Like("b.UserName", yhm, LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(zt))
+                {
+                    if (zt == "1")
+                    {
+                        where += " and a.isuse in (1,3,9)";
+                    }
+                    else if (zt == "2")
+                    {
+                        where += " and a.isuse=2 ";
+                    }
+                    else if (zt == "0")
+                    {
+                        where += " and a.isuse=0 ";
+                    }
+                }
+                if (!string.IsNullOrEmpty(lx))
+                {
+                    where += " and " + dbc.C_EQ("a.type", Convert.ToInt32(lx));
+                }
+                string str = @"select a.*,b.UserName,b.UserXM from tb_b_redenvelope a left join tb_b_user b on  a.userid=b.UserID
                                 where 1=1 " + where + @"
                             order by a.addtime desc";
-                 System.Data.DataTable dt = new System.Data.DataTable();
-                 dt = dbc.ExecuteDataTable(str);
-                 dt.Columns.Add("jzsj");
-                 foreach (DataRow dr in dt.Rows)
-                 {
-                     if (dr["validhour"] != null && dr["validhour"].ToString() != "")
-                     {
-                         dr["jzsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
-                     }
-                 }
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str);
+                dt.Columns.Add("jzsj");
+                foreach (DataRow dr in dt.Rows)
+                {
+                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
+                    {
+                        dr["jzsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
+                    }
+                }
 
-                 for (int i = 0; i < dt.Rows.Count; i++)
-                 {
-                     if (dt.Rows[i]["UserName"] != null && dt.Rows[i]["UserName"].ToString() != "")
-                     {
-                         cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
-                     }
-                     cells[i + 1, 0].SetStyle(style4);
-                     if (dt.Rows[i]["money"] != null && dt.Rows[i]["money"].ToString() != "")
-                     {
-                         cells[i + 1, 1].PutValue(dt.Rows[i]["money"]);
-                     }
-                     cells[i + 1, 1].SetStyle(style4);
-                     string type = "";
-                     if (dt.Rows[i]["type"] != null && dt.Rows[i]["type"].ToString() != "")
-                     {
-                         if (Convert.ToInt32(dt.Rows[i]["type"]) == 0)
-                         {
-                             type= "新人红包";
-                         }
-                         else if (Convert.ToInt32(dt.Rows[i]["type"]) == 1)
-                         {
-                             type = "分享";
-                         }
-                         else if (Convert.ToInt32(dt.Rows[i]["type"]) == 2)
-                         {
-                             type = "订单红包";
-                         }
-                         else if (Convert.ToInt32(dt.Rows[i]["type"]) == 3)
-                         {
-                             type = "平台派送红包";
-                         }
-                         else if (Convert.ToInt32(dt.Rows[i]["type"]) == 4)
-                         {
-                             type = "抽奖红包";
-                         }
-                         cells[i + 1, 2].PutValue(type);
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["UserName"] != null && dt.Rows[i]["UserName"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["money"] != null && dt.Rows[i]["money"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(dt.Rows[i]["money"]);
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    string type = "";
+                    if (dt.Rows[i]["type"] != null && dt.Rows[i]["type"].ToString() != "")
+                    {
+                        if (Convert.ToInt32(dt.Rows[i]["type"]) == 0)
+                        {
+                            type = "新人红包";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["type"]) == 1)
+                        {
+                            type = "分享";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["type"]) == 2)
+                        {
+                            type = "订单红包";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["type"]) == 3)
+                        {
+                            type = "平台派送红包";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["type"]) == 4)
+                        {
+                            type = "抽奖红包";
+                        }
+                        cells[i + 1, 2].PutValue(type);
 
-                     }
-                     cells[i + 1, 2].SetStyle(style4);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
 
-                     if (dt.Rows[i]["jzsj"] != null && dt.Rows[i]["jzsj"].ToString() != "")
-                     {
-                         cells[i + 1, 3].PutValue(Convert.ToDateTime(dt.Rows[i]["jzsj"]).ToString("yyyy-MM-dd hh:mm:ss"));
-                     }
-                     cells[i + 1, 3].SetStyle(style4);
+                    if (dt.Rows[i]["jzsj"] != null && dt.Rows[i]["jzsj"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(Convert.ToDateTime(dt.Rows[i]["jzsj"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
 
-                     string isuse = "";
-                     if (dt.Rows[i]["isuse"] != null && dt.Rows[i]["isuse"].ToString() != "")
-                     {
+                    string isuse = "";
+                    if (dt.Rows[i]["isuse"] != null && dt.Rows[i]["isuse"].ToString() != "")
+                    {
 
-                         if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 2)
-                         {
-                             isuse= "过期";
-                         }
-                         else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 0)
-                         {
-                             isuse = "未使用";
-                         }
-                         else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 1 || Convert.ToInt32(dt.Rows[i]["isuse"]) == 3 || Convert.ToInt32(dt.Rows[i]["isuse"]) == 9)
-                         {
-                             isuse = "已使用";
-                         }
+                        if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 2)
+                        {
+                            isuse = "过期";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 0)
+                        {
+                            isuse = "未使用";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 1 || Convert.ToInt32(dt.Rows[i]["isuse"]) == 3 || Convert.ToInt32(dt.Rows[i]["isuse"]) == 9)
+                        {
+                            isuse = "已使用";
+                        }
 
-                         cells[i + 1, 4].PutValue(isuse);
+                        cells[i + 1, 4].PutValue(isuse);
 
-                     }
-                     cells[i + 1, 4].SetStyle(style4);
+                    }
+                    cells[i + 1, 4].SetStyle(style4);
 
-                 }
+                }
 
-                 MemoryStream ms = workbook.SaveToStream();
-                 byte[] bt = ms.ToArray();
-                 return bt;
-             }
-             catch (Exception ex)
-             {
-                 throw ex;
-             }
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-         }
-     }
+        }
+    }
     #endregion
 }

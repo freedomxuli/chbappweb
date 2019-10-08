@@ -94,7 +94,7 @@ Ext.onReady(function () {
                                 dataIndex: 'UserXM',
                                 sortable: false,
                                 menuDisabled: true,
-                                flex:1,
+                                flex: 1,
                                 text: "专线名称"
                             },
                             {
@@ -117,14 +117,14 @@ Ext.onReady(function () {
                             },
                              {
                                  xtype: 'gridcolumn',
-                                 dataIndex: 'redenvelopeid',
+                                 dataIndex: 'redmoney',
                                  width: 140,
                                  sortable: false,
                                  menuDisabled: true,
                                  text: "是否使用红包",
                                  renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                      var str = "否";
-                                     if (value) {
+                                     if (Number(value) > 0) {
                                          str = "是";
                                      }
                                      return str;
