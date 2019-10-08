@@ -75,7 +75,7 @@ function SF(userId) {
 }
 
 function getSFList(nPage) {
-    CS('CZCLZ.CWBBMag.GetPSSF', function (retVal) {
+    CS('CZCLZ.CWBBMag.GetPSSF_HB', function (retVal) {
         sfstore.setData({
             data: retVal.dt,
             pageSize: pageSize,
@@ -208,7 +208,7 @@ Ext.define('SFList', {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.GetPSSFToFile", "派送三方明细表.xls", me.userId);
+                                                        DownloadFile("CZCLZ.CWBBMag.GetPSSFToFile_HB", "派送三方明细表.xls", me.userId);
                                                     }
                                                 },
                                             ]

@@ -212,7 +212,7 @@ Ext.onReady(function () {
                                               xtype: 'combobox',
                                               id: 'cx_lx',
                                               width: 160,
-                                              fieldLabel: '状态',
+                                              fieldLabel: '类型',
                                               editable: false,
                                               labelWidth: 40,
                                               store: Ext.create('Ext.data.Store', {
@@ -245,6 +245,16 @@ Ext.onReady(function () {
                                                     }
                                                 }
                                             ]
+                                        },
+                                        {
+                                            xtype: 'button',
+                                            iconCls: 'view',
+                                            text: '导出',
+                                            handler: function () {
+                                                if (privilege("财务报表_红包汇总_导出")) {
+                                                    DownloadFile("CZCLZ.CWBBMag.GetPSHBJLToFile", "红包汇总.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_lx").getValue());
+                                                }
+                                            }
                                         }
                                     ]
                                 },
