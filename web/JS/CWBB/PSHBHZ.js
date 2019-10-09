@@ -127,9 +127,13 @@ Ext.onReady(function () {
                                         return "过期";
                                     } else if (value == 0) {
                                         return "未使用";
-                                    } else if (value == 1 || value == 3 || value == 9) {
-                                        return "已使用";
-                                    }
+                                    } else if (value == 1) {
+                                        return "待支付";
+                                    } else if (value == 3) {
+                                        return "已支付";
+                                    } else if (value == 9) {
+                                        return "已废弃";
+                                    } 
                                 }
 
                             }
@@ -155,9 +159,23 @@ Ext.onReady(function () {
                                      xtype: 'displayfield',
                                      width: 160,
                                      labelWidth: 50,
-                                     id: 'ysy',
-                                     fieldLabel: '已使用'
+                                     id: 'dzf',
+                                     fieldLabel: '待支付'
                                  },
+                                  {
+                                      xtype: 'displayfield',
+                                      width: 160,
+                                      labelWidth: 50,
+                                      id: 'yzf',
+                                      fieldLabel: '已支付'
+                                  },
+                                   {
+                                       xtype: 'displayfield',
+                                       width: 160,
+                                       labelWidth: 50,
+                                       id: 'yfq',
+                                       fieldLabel: '已废弃'
+                                   },
                                   {
                                       xtype: 'displayfield',
                                       width: 160,
@@ -200,7 +218,9 @@ Ext.onReady(function () {
                                                   ],//过期：isuse=2；未使用：isuse = 0；已使用：isuse in (1，3，9)
                                                   data: [{ 'val': '', 'txt': '全部' },
                                                           { 'val': 0, 'txt': '未使用' },
-                                                          { 'val': 1, 'txt': '已使用' },
+                                                          { 'val': 1, 'txt': '待支付' },
+                                                          { 'val': 3, 'txt': '已支付' },
+                                                          { 'val': 9, 'txt': '已废弃' },
                                                           { 'val': 2, 'txt': '过期' }
                                                           ]
                                               }),
@@ -282,7 +302,9 @@ Ext.onReady(function () {
     CS('CZCLZ.CWBBMag.GetPSHBZJ', function (retVal) {
         if (retVal) {
             Ext.getCmp("zj").setValue(retVal[0]["zj"]);
-            Ext.getCmp("ysy").setValue(retVal[0]["ysy"]);
+            Ext.getCmp("dzf").setValue(retVal[0]["dzf"]);
+            Ext.getCmp("yzf").setValue(retVal[0]["yzf"]);
+            Ext.getCmp("yfq").setValue(retVal[0]["yfq"]);
             Ext.getCmp("gq").setValue(retVal[0]["gq"]);
             Ext.getCmp("wsy").setValue(retVal[0]["wsy"]);
 

@@ -48,6 +48,7 @@ var xszbstore = createSFW4Store({
        { name: 'zje' },
        { name: 'pjzk' },
        { name: 'yj' },
+       { name: 'hbje' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getXSZBList(nPage);
@@ -63,7 +64,8 @@ var mxstore = Ext.create('Ext.data.Store', {
         { name: 'wsyje' },
         { name: 'SaleRecordDiscount' },
         { name: 'UserName' },
-        { name: 'xfrq' }
+        { name: 'xfrq' },
+        { name: 'hbje' }
     ]
 });
 
@@ -196,6 +198,14 @@ Ext.define('XSZBList', {
                                             width: 150,
                                             text: '消费（已使用）金额'
                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'hbje',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 150,
+                                             text: '红包金额'
+                                         },
                                         {
                                             xtype: 'gridcolumn',
                                             dataIndex: 'gqje',
@@ -307,7 +317,7 @@ Ext.define('MXList', {
     layout: {
         type: 'fit'
     },
-    title: '自放券明细',
+    title: '自发券明细',
     modal: true,
 
     initComponent: function () {
@@ -358,6 +368,14 @@ Ext.define('MXList', {
                                             width: 100,
                                             text: '消费（已使用）金额'
                                         },
+                                         {
+                                             xtype: 'gridcolumn',
+                                             dataIndex: 'hbje',
+                                             sortable: false,
+                                             menuDisabled: true,
+                                             width: 100,
+                                             text: '红包金额'
+                                         },
                                         {
                                             xtype: 'gridcolumn',
                                             dataIndex: 'gqje',
@@ -414,7 +432,7 @@ Ext.define('MXList', {
                                                     iconCls: 'view',
                                                     text: '导出',
                                                     handler: function () {
-                                                        DownloadFile("CZCLZ.CWBBMag.getXSMXListToFile", "自放券销售名明细表.xls", userId, rq);
+                                                        DownloadFile("CZCLZ.CWBBMag.getXSMXListToFile", "自发券销售明细表.xls", userId, rq);
                                                     }
                                                 },
                                             ]

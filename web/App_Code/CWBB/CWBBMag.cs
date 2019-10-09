@@ -1707,9 +1707,9 @@ public class CWBBMag
                     sjwhere += " and c.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.rq,b.FromRoute,b.UserName,b.UserXM,a.xsdzq,c.xfje,d.gqje,e.wsyje,a.zje,a.pjzk,a.yj from
+                string str = @"select a.rq,b.FromRoute,b.UserName,b.UserXM,a.xsdzq,a.hbje,c.xfje,d.gqje,e.wsyje,a.zje,a.pjzk,a.yj from
 		                    (select sum(c.Points) as xsdzq,sum(c.Money) as zje,sum(c.CHBMoney) as yj, CONVERT(varchar(100), c.AddTime, 23) as rq,c.SaleUserID,
-		                    AVG(d.SaleRecordDiscount) as pjzk from tb_b_order c 
+		                    AVG(d.SaleRecordDiscount) as pjzk,sum(c.redenvelopemoney) as hbje from tb_b_order c 
 		                    left join tb_b_salerecord d on c.SaleRecordID=d.SaleRecordID  where d.status=0  and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 
 		                    and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and c.status=0 " + sjwhere + @" and c.ZhiFuZT=1 and c.SaleUserID=@UserID  group by CONVERT(varchar(100), c.AddTime, 23),c.SaleUserID) a 
@@ -1819,6 +1819,9 @@ public class CWBBMag
                 cells[0, 10].PutValue("佣金");
                 cells[0, 10].SetStyle(style2);
                 cells.SetColumnWidth(10, 20);
+                cells[0, 11].PutValue("红包金额");
+                cells[0, 11].SetStyle(style2);
+                cells.SetColumnWidth(11, 20);
 
 
                 string sql = @"select max(SaleRecordTime) as maxtime,min(SaleRecordTime) as mintime from tb_b_salerecord where SaleRecordLX!=0 and SaleRecordVerifyType=1 and SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1)
@@ -1836,9 +1839,9 @@ public class CWBBMag
                     sjwhere += " and c.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.rq,b.FromRoute,b.UserName,b.UserXM,a.xsdzq,c.xfje,d.gqje,e.wsyje,a.zje,a.pjzk,a.yj from
+                string str = @"select a.rq,b.FromRoute,b.UserName,b.UserXM,a.xsdzq,a.hbje,c.xfje,d.gqje,e.wsyje,a.zje,a.pjzk,a.yj from
 		                    (select sum(c.Points) as xsdzq,sum(c.Money) as zje,sum(c.CHBMoney) as yj, CONVERT(varchar(100), c.AddTime, 23) as rq,c.SaleUserID,
-		                    AVG(d.SaleRecordDiscount) as pjzk from tb_b_order c 
+		                    AVG(d.SaleRecordDiscount) as pjzk,sum(c.redenvelopemoney) as hbje from tb_b_order c 
 		                    left join tb_b_salerecord d on c.SaleRecordID=d.SaleRecordID  where d.status=0  and d.SaleRecordLX!=0 and d.SaleRecordVerifyType=1 
 		                    and d.SaleRecordBelongID in (select UserID from tb_b_user where ClientKind=1) 
                             and c.status=0 " + sjwhere + @" and c.ZhiFuZT=1 and c.SaleUserID=@UserID  group by CONVERT(varchar(100), c.AddTime, 23),c.SaleUserID) a 
@@ -1913,6 +1916,11 @@ public class CWBBMag
                         cells[i + 1, 10].PutValue(dt.Rows[i]["yj"]);
                     }
                     cells[i + 1, 10].SetStyle(style4);
+                    if (dt.Rows[i]["hbje"] != null && dt.Rows[i]["hbje"].ToString() != "")
+                    {
+                        cells[i + 1, 11].PutValue(dt.Rows[i]["hbje"]);
+                    }
+                    cells[i + 1, 11].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -1936,7 +1944,7 @@ public class CWBBMag
             {
                 string str = @"  select a.AddTime,a.Points, case when c.Points>0 then a.Money end as xfje,
 		                        case when g.gqje>0 then a.Money end as gqje,case when f.wsyje>0 then a.Money end as wsyje,
-                                d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq from tb_b_order a 
+                                d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq,a.redenvelopemoney as hbje from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
@@ -2021,11 +2029,14 @@ public class CWBBMag
                 cells[0, 7].PutValue("消费日期");
                 cells[0, 7].SetStyle(style2);
                 cells.SetColumnWidth(7, 20);
+                cells[0, 8].PutValue("红包金额");
+                cells[0, 8].SetStyle(style2);
+                cells.SetColumnWidth(8, 20);
 
 
                 string str = @"  select a.AddTime,a.Points, case when c.Points>0 then a.Money end as xfje,
 		                        case when g.gqje>0 then a.Money end as gqje,case when f.wsyje>0 then a.Money end as wsyje,
-                                d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq from tb_b_order a 
+                                d.SaleRecordDiscount,e.UserName,c.AddTime as xfrq,a.redenvelopemoney as hbje from tb_b_order a 
 		                        left join tb_b_pay c on a.OrderCode=c.OrderCode
 		                        left join tb_b_salerecord d on a.SaleRecordID=d.SaleRecordID 
 		                        left join tb_b_user e on a.BuyUserID=e.UserID
@@ -2081,6 +2092,11 @@ public class CWBBMag
                         cells[i + 1, 7].PutValue(Convert.ToDateTime(dt.Rows[i]["xfrq"]).ToString("yyyy-MM-dd"));
                     }
                     cells[i + 1, 7].SetStyle(style4);
+                    if (dt.Rows[i]["hbje"] != null && dt.Rows[i]["hbje"].ToString() != "")
+                    {
+                        cells[i + 1, 8].PutValue(dt.Rows[i]["hbje"]);
+                    }
+                    cells[i + 1, 8].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
@@ -6266,18 +6282,7 @@ public class CWBBMag
                 }
                 if (!string.IsNullOrEmpty(zt))
                 {
-                    if (zt == "1")
-                    {
-                        where += " and a.isuse in (1,3,9)";
-                    }
-                    else if (zt == "2")
-                    {
-                        where += " and a.isuse=2 ";
-                    }
-                    else if (zt == "0")
-                    {
-                        where += " and a.isuse=0 ";
-                    }
+                    where += " and " + dbc.C_EQ("a.isuse", Convert.ToInt32(zt));
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
@@ -6311,7 +6316,8 @@ public class CWBBMag
         {
             try
             {
-                string str = @"select  (select sum(money) from tb_b_redenvelope) as zj,(select sum(money) from tb_b_redenvelope where isuse in (1,3,9)) as ysy,
+                string str = @"select  (select sum(money) from tb_b_redenvelope) as zj,(select sum(money) from tb_b_redenvelope where isuse=1) as dzf,
+(select sum(money) from tb_b_redenvelope where isuse=3) as yzf,(select sum(money) from tb_b_redenvelope where isuse=9) as yfq,
 (select sum(money) from tb_b_redenvelope  where isuse=2) as gq,(select sum(money) from tb_b_redenvelope where isuse=0) as wsy";
                 DataTable dt = dbc.ExecuteDataTable(str);
 
@@ -6384,18 +6390,7 @@ public class CWBBMag
                 }
                 if (!string.IsNullOrEmpty(zt))
                 {
-                    if (zt == "1")
-                    {
-                        where += " and a.isuse in (1,3,9)";
-                    }
-                    else if (zt == "2")
-                    {
-                        where += " and a.isuse=2 ";
-                    }
-                    else if (zt == "0")
-                    {
-                        where += " and a.isuse=0 ";
-                    }
+                    where += " and " + dbc.C_EQ("a.isuse", Convert.ToInt32(zt));
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
