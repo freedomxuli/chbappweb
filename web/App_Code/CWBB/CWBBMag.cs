@@ -3248,7 +3248,7 @@ public class CWBBMag
 
     #region 三方交易明细
     [CSMethod("GetSFJYList")]
-    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm, string beg, string end, string ordercode)
+    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm, string beg, string end, string ordercode,string xfbeg, string xfend)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3282,6 +3282,15 @@ public class CWBBMag
                 {
                     where1 += " and " + dbc.C_Like("c.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
                     where += " and " + dbc.C_Like("d.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(xfbeg))
+                {
+                    where1 += " and  a.AddTime>='" + Convert.ToDateTime(xfbeg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(xfend))
+                {
+                    where1 += " and a.AddTime<='" + Convert.ToDateTime(xfend).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
                 string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,d.redenvelopeid,d.redenvelopemoney as redmoney,
@@ -3327,7 +3336,7 @@ public class CWBBMag
     }
 
     [CSMethod("GetSFJYListToFile", 2)]
-    public byte[] GetSFJYListToFile(string yhm, string xm, string beg, string end, string ordercode)
+    public byte[] GetSFJYListToFile(string yhm, string xm, string beg, string end, string ordercode, string xfbeg, string xfend)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -3419,6 +3428,15 @@ public class CWBBMag
                 {
                     where1 += " and " + dbc.C_Like("c.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
                     where += " and " + dbc.C_Like("d.OrderCode", ordercode.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(xfbeg))
+                {
+                    where1 += " and  a.AddTime>='" + Convert.ToDateTime(xfbeg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(xfend))
+                {
+                    where1 += " and a.AddTime<='" + Convert.ToDateTime(xfend).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
                 string str = @"select b.UserName,d.AddTime as jysj,a.AddTime as xfsj,e.UserXM,c.OrderCode,d.Money,'消费' as flag,d.redenvelopeid,d.redenvelopemoney as redmoney,

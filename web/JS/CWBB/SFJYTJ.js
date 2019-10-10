@@ -3,6 +3,8 @@ var cx_yhm;
 var cx_xm;
 var cx_beg;
 var cx_end;
+var cx_beg_xf;
+var cx_end_xf;
 var gmuserid = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
@@ -39,7 +41,7 @@ function getUser(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue(), Ext.getCmp("cx_beg_xf").getValue(), Ext.getCmp("cx_end_xf").getValue());
 }
 
 //************************************页面方法***************************************
@@ -183,13 +185,29 @@ Ext.onReady(function () {
                                         {
                                             id: 'cx_beg',
                                             xtype: 'datefield',
-                                            fieldLabel: '时间',
+                                            fieldLabel: '交易时间',
                                             format: 'Y-m-d',
                                             labelWidth: 80,
                                             width: 210
                                         },
                                         {
                                             id: 'cx_end',
+                                            xtype: 'datefield',
+                                            format: 'Y-m-d',
+                                            fieldLabel: '至',
+                                            labelWidth: 20,
+                                            width: 150
+                                        },
+                                        {
+                                            id: 'cx_beg_xf',
+                                            xtype: 'datefield',
+                                            fieldLabel: '消费时间',
+                                            format: 'Y-m-d',
+                                            labelWidth: 80,
+                                            width: 210
+                                        },
+                                        {
+                                            id: 'cx_end_xf',
                                             xtype: 'datefield',
                                             format: 'Y-m-d',
                                             fieldLabel: '至',
@@ -223,7 +241,7 @@ Ext.onReady(function () {
                                                     text: '导出',
                                                     handler: function () {
                                                         if (privilege("财务报表_三方交易明细_导出")) {
-                                                            DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue());
+                                                            DownloadFile("CZCLZ.CWBBMag.GetSFJYListToFile", "三方交易表.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_ordercode").getValue(), Ext.getCmp("cx_beg_xf").getValue(), Ext.getCmp("cx_end_xf").getValue());
                                                         }
                                                     }
                                                 },
@@ -249,6 +267,8 @@ Ext.onReady(function () {
     cx_xm = Ext.getCmp("cx_xm").getValue();
     cx_beg = Ext.getCmp("cx_beg").getValue();
     cx_end = Ext.getCmp("cx_end").getValue();
+    cx_beg_xf = Ext.getCmp("cx_beg_xf").getValue();
+    cx_end_xf = Ext.getCmp("cx_end_xf").getValue();
     getUser(1);
 
 })
