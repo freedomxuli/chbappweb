@@ -325,6 +325,13 @@ Ext.onReady(function () {
                                                     },
                                                     {
                                                         xtype: 'textfield',
+                                                        id: 'cx_mc_sf_zx',
+                                                        width: 160,
+                                                        labelWidth: 60,
+                                                        fieldLabel: '专线'
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
                                                         id: 'cx_mc_sf',
                                                         width: 160,
                                                         labelWidth: 70,
@@ -343,7 +350,7 @@ Ext.onReady(function () {
                                                         iconCls: 'view',
                                                         text: '导出记录',
                                                         handler: function () {
-                                                            DownloadFile("CZCLZ.YHGLClass.GetSFXFToFile", "三方用户消费统计表.xls", Ext.getCmp("cx_kind_sf").getValue(), Ext.getCmp("cx_beg_sf").getValue(), Ext.getCmp("cx_end_sf").getValue(), Ext.getCmp("cx_mc_sf").getValue());
+                                                            DownloadFile("CZCLZ.YHGLClass.GetSFXFToFile", "三方用户消费统计表.xls", Ext.getCmp("cx_kind_sf").getValue(), Ext.getCmp("cx_beg_sf").getValue(), Ext.getCmp("cx_end_sf").getValue(), Ext.getCmp("cx_mc_sf").getValue(), Ext.getCmp("cx_mc_sf_zx").getValue());
                                                         }
                                                     }
                                                 ]
@@ -396,5 +403,5 @@ function getConsumeListBySF(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_kind_sf").getValue(), Ext.getCmp("cx_beg_sf").getValue(), Ext.getCmp("cx_end_sf").getValue(), Ext.getCmp("cx_mc_sf").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_kind_sf").getValue(), Ext.getCmp("cx_beg_sf").getValue(), Ext.getCmp("cx_end_sf").getValue(), Ext.getCmp("cx_mc_sf").getValue(), Ext.getCmp("cx_mc_sf_zx").getValue());
 }

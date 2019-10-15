@@ -395,7 +395,7 @@ public class UserMag
     }
 
     [CSMethod("GetOrderListBySF")]
-    public object GetOrderListBySF(int pagnum, int pagesize, string kind, string btime, string etime, string mc)
+    public object GetOrderListBySF(int pagnum, int pagesize, string kind, string btime, string etime, string mc, string zxmc)
     {
         using (var db = new DBConnection())
         {
@@ -440,6 +440,12 @@ public class UserMag
                     where3 += " and " + db.C_Like("c.UserName", mc, LikeStyle.LeftAndRightLike);
                 }
 
+                if (!string.IsNullOrEmpty(zxmc))
+                {
+                    where1 += " and " + db.C_Like("b.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                    where2 += " and " + db.C_Like("b.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                    where3 += " and " + db.C_Like("b.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                }
                 string str = @"select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'转让' as KIND,'耗材券' as FLAG  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID 
@@ -1124,7 +1130,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetSFXFToFile", 2)]
-    public byte[] GetSFXFToFile(string kind, string btime, string etime, string mc)
+    public byte[] GetSFXFToFile(string kind, string btime, string etime, string mc,string zxmc)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1226,6 +1232,12 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     where3 += " and " + dbc.C_Like("c.UserName", mc, LikeStyle.LeftAndRightLike);
                 }
 
+                if (!string.IsNullOrEmpty(zxmc))
+                {
+                    where1 += " and " + dbc.C_Like("b.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                    where2 += " and " + dbc.C_Like("b.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                    where3 += " and " + dbc.C_Like("b.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                }
                 string str = @"select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'转让' as KIND,'耗材券' as FLAG  from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID 
