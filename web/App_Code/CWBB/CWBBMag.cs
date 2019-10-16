@@ -6335,7 +6335,7 @@ public class CWBBMag
             try
             {
                 string str = @"select  (select sum(money) from tb_b_redenvelope) as zj,(select sum(money) from tb_b_redenvelope where isuse=1) as dzf,
-(select sum(money) from tb_b_redenvelope where isuse=3) as yzf,(select sum(money) from tb_b_redenvelope where isuse=9) as yfq,
+(select sum(money) from tb_b_redenvelope where isuse=9) as yzf,(select sum(money) from tb_b_redenvelope where isuse=3) as yfq,
 (select sum(money) from tb_b_redenvelope  where isuse=2) as gq,(select sum(money) from tb_b_redenvelope where isuse=0) as wsy";
                 DataTable dt = dbc.ExecuteDataTable(str);
 
@@ -6486,9 +6486,17 @@ public class CWBBMag
                         {
                             isuse = "未使用";
                         }
-                        else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 1 || Convert.ToInt32(dt.Rows[i]["isuse"]) == 3 || Convert.ToInt32(dt.Rows[i]["isuse"]) == 9)
+                        else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 1)
+                        {
+                            isuse = "待支付";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 9)
                         {
                             isuse = "已使用";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["isuse"]) == 3)
+                        {
+                            isuse = "已废弃";
                         }
 
                         cells[i + 1, 4].PutValue(isuse);

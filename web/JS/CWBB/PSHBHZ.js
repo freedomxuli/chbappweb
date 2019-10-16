@@ -130,9 +130,9 @@ Ext.onReady(function () {
                                     } else if (value == 1) {
                                         return "待支付";
                                     } else if (value == 3) {
-                                        return "已支付";
-                                    } else if (value == 9) {
                                         return "已废弃";
+                                    } else if (value == 9) {
+                                        return "已使用";
                                     } 
                                 }
 
@@ -167,7 +167,7 @@ Ext.onReady(function () {
                                       width: 160,
                                       labelWidth: 50,
                                       id: 'yzf',
-                                      fieldLabel: '已支付'
+                                      fieldLabel: '已使用'
                                   },
                                    {
                                        xtype: 'displayfield',
@@ -219,8 +219,8 @@ Ext.onReady(function () {
                                                   data: [{ 'val': '', 'txt': '全部' },
                                                           { 'val': 0, 'txt': '未使用' },
                                                           { 'val': 1, 'txt': '待支付' },
-                                                          { 'val': 3, 'txt': '已支付' },
-                                                          { 'val': 9, 'txt': '已废弃' },
+                                                          { 'val': 3, 'txt': '已废弃' },
+                                                          { 'val': 9, 'txt': '已使用' },
                                                           { 'val': 2, 'txt': '过期' }
                                                           ]
                                               }),
