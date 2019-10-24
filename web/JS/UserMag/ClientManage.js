@@ -49,7 +49,13 @@ var store = createSFW4Store({
         { name: 'carriageoilrate' },
         { name: 'carriagemoneyrate' },
         { name: 'isidentification' },
-        { name: 'IsSHPass' }
+        { name: 'IsSHPass' },
+        { name: 'isdonate' },
+        { name: 'donateratio' },
+        { name: 'isshowsource' },
+        { name: 'redenvelopequota' },
+        { name: 'iscost' },
+        { name: 'ischbmember' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -205,6 +211,14 @@ function EditUser(id) {
             Ext.getCmp('modecoefficient').show();
             Ext.getCmp('carriagemaxmoney').show();
             Ext.getCmp('mirrornumber').show();
+
+            Ext.getCmp('isdonate').show();//是否下单送红包 显示
+            Ext.getCmp('donateratio').show();//下单送红包比例 显示
+            Ext.getCmp('isshowsource').show();//是否显示发布来源 显示
+            Ext.getCmp('iscost').show();//是否收取佣金； 显示
+            Ext.getCmp('ischbmember').show();//是否查货宝会员 显示
+
+
         } else if (r.ClientKind == 2) {
             Ext.getCmp('modetype').hide();
             Ext.getCmp('modetype').setValue(2);
@@ -495,6 +509,18 @@ function shpass(id, isshpass) {
             }, CS.onError, id, isshpass);
         }
     });
+}
+
+//设置下单送红包上限额度
+function buyRedNum(uid, num) {
+    var win = new upRedNumWin({ UserID: uid, redenvelopequota: num });
+    win.show(null, function () {
+        if (num == null || num == 'null' || num == "") {
+            Ext.getCmp('redenvelopequota').setValue(0)
+        } else {
+            Ext.getCmp('redenvelopequota').setValue(num)
+        }
+    })
 }
 //************************************页面方法***************************************
 
@@ -1391,6 +1417,103 @@ Ext.define('addWin', {
                         queryMode: 'local',
                         displayField: 'TEXT',
                         valueField: 'VALUE'
+                    },
+                    {
+                        xtype: 'combobox',
+                        id: 'isdonate',
+                        name: 'isdonate',
+                        anchor: '100%',
+                        fieldLabel: '是否下单送红包',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 80,
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['VALUE', 'TEXT'],
+                            data: [
+                                { 'VALUE': 0, 'TEXT': '赠送' }, { 'VALUE': 1, 'TEXT': '不赠送' }
+                            ]
+                        }),
+                        queryMode: 'local',
+                        displayField: 'TEXT',
+                        valueField: 'VALUE',
+                        value: 1,
+                        hidden: true
+                    },
+                    {
+                        xtype: 'numberfield',
+                        id: 'donateratio',
+                        name: 'donateratio',
+                        fieldLabel: '下单送红包比例',
+                        labelWidth: 80,
+                        anchor: '100%',
+                        minValue: 1,
+                        maxValue: 99,
+                        value: 5,
+                        allowDecimals: false,
+                        hidden: true
+                    },
+                    {
+                        xtype: 'combobox',
+                        id: 'isshowsource',
+                        name: 'isshowsource',
+                        anchor: '100%',
+                        fieldLabel: '是否显示发布来源',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 80,
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['VALUE', 'TEXT'],
+                            data: [
+                                { 'VALUE': 0, 'TEXT': '显示' }, { 'VALUE': 1, 'TEXT': '不显示' }
+                            ]
+                        }),
+                        queryMode: 'local',
+                        displayField: 'TEXT',
+                        valueField: 'VALUE',
+                        value: 0,
+                        hidden: true
+                    },
+                    {
+                        xtype: 'combobox',
+                        id: 'iscost',
+                        name: 'iscost',
+                        anchor: '100%',
+                        fieldLabel: '是否收取佣金',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 80,
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['VALUE', 'TEXT'],
+                            data: [
+                                { 'VALUE': 0, 'TEXT': '是' }, { 'VALUE': 1, 'TEXT': '否' }
+                            ]
+                        }),
+                        queryMode: 'local',
+                        displayField: 'TEXT',
+                        valueField: 'VALUE',
+                        value: 1,
+                        hidden: true
+                    },
+                    {
+                        xtype: 'combobox',
+                        id: 'ischbmember',
+                        name: 'ischbmember',
+                        anchor: '100%',
+                        fieldLabel: '是否查货宝会员',
+                        allowBlank: false,
+                        editable: false,
+                        labelWidth: 80,
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['VALUE', 'TEXT'],
+                            data: [
+                                { 'VALUE': 0, 'TEXT': '是' }, { 'VALUE': 1, 'TEXT': '否' }
+                            ]
+                        }),
+                        queryMode: 'local',
+                        displayField: 'TEXT',
+                        valueField: 'VALUE',
+                        value: 1,
+                        hidden: true
                     }
                 ],
                 buttonAlign: 'center',
@@ -1652,6 +1775,79 @@ Ext.define('OrderList', {
     }
 
 });
+
+Ext.define('upRedNumWin', {
+    extend: 'Ext.window.Window',
+    height: 275,
+    width: 350,
+    modal: true,
+    layout: {
+        type: 'fit'
+    },
+    title: '设置下单送红包上限额度',
+    initComponent: function () {
+        var me = this;
+        var userid = me.UserID
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'form',
+                    id: 'yjform',
+                    bodyPadding: 10,
+                    items: [
+                        {
+                            xtype: 'numberfield',
+                            id: 'redenvelopequota',
+                            name: 'redenvelopequota',
+                            fieldLabel: '现有额度',
+                            labelWidth: 80,
+                            value: 0,
+                            allowDecimals: false,
+                            anchor: '100%',
+                            readOnly: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            id: 'addnum',
+                            name: 'addnum',
+                            fieldLabel: '增加额度',
+                            labelWidth: 80,
+                            value: 0,
+                            allowDecimals: false,
+                            anchor: '100%',
+                            minValue: 0
+                        }
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '确认',
+                            iconCls: 'dropyes',
+                            handler: function () {
+                                CS('CZCLZ.YHGLClass.AddRedNum', function (retVal) {
+                                    if (retVal) {
+                                        getUser(1);
+                                        Ext.MessageBox.alert('提示', "拒绝成功！");
+                                    }
+                                }, CS.onError, userid, Ext.getCmp("redenvelopequota").getValue(), Ext.getCmp("addnum").getValue());
+                                this.up('window').close();
+                            }
+                        },
+                        {
+                            text: '取消',
+                            iconCls: 'close',
+                            handler: function () {
+                                this.up('window').close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+});
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
@@ -1818,13 +2014,13 @@ Ext.onReady(function () {
                     {
                         text: '操作',
                         dataIndex: 'UserID',
-                        width: 620,
+                        width: 650,
                         sortable: false,
                         menuDisabled: true,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                             var str;
                             if (record.data.ClientKind == 1) {
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>  <a onclick='AddPhoto1(\"" + value + "\");'>添加认证照片</a>";
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>  <a onclick='AddPhoto1(\"" + value + "\");'>添加认证照片</a>  <a onclick='buyRedNum(\"" + value + "\",\"" + record.data.redenvelopequota + "\");'>下单购买红包上限</a>";
                             } else if (record.data.ClientKind == 2) {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
                             }

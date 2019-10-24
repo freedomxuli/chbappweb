@@ -947,7 +947,8 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @"select a.*,c.roleName,b.roleId,d.SalePoints,e.Points as KFGMPoints from tb_b_user a left join tb_b_user_role b on a.UserID=b.UserID
+                string str = @"select a.*,c.roleName,b.roleId,d.SalePoints,e.Points as KFGMPoints from tb_b_user a 
+                               left join tb_b_user_role b on a.UserID=b.UserID
                                left join tb_b_roledb c on b.roleId=c.roleId
                                left join (select sum(points) SalePoints,UserID from tb_b_plattosale where status = 0 and pointkind=0 and points > 0  group by UserID) d on a.UserID = d.UserID 
                                left join tb_b_platpoints e on a.UserID = e.UserID 
@@ -1130,7 +1131,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetSFXFToFile", 2)]
-    public byte[] GetSFXFToFile(string kind, string btime, string etime, string mc,string zxmc)
+    public byte[] GetSFXFToFile(string kind, string btime, string etime, string mc, string zxmc)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -2186,6 +2187,51 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["isidentification"] = DBNull.Value;
                     }
+                    //下单是否赠送红包，0:赠送；1:不赠送；默认为1
+                    if (!string.IsNullOrEmpty(jsr["isdonate"].ToString()))
+                    {
+                        dr["isdonate"] = Convert.ToInt32(jsr["isdonate"].ToString());
+                    }
+                    else
+                    {
+                        dr["isdonate"] = DBNull.Value;
+                    }
+                    //下单赠送红包比例,1-99之间
+                    if (!string.IsNullOrEmpty(jsr["donateratio"].ToString()))
+                    {
+                        dr["donateratio"] = Convert.ToInt32(jsr["donateratio"].ToString());
+                    }
+                    else
+                    {
+                        dr["donateratio"] = DBNull.Value;
+                    }
+                    //是否显示发布来源：0:显示；1:不显示；默认为0
+                    if (!string.IsNullOrEmpty(jsr["isshowsource"].ToString()))
+                    {
+                        dr["isshowsource"] = Convert.ToInt32(jsr["isshowsource"].ToString());
+                    }
+                    else
+                    {
+                        dr["isshowsource"] = DBNull.Value;
+                    }
+                    //是否收取佣金；0:是；1:否；默认为1
+                    if (!string.IsNullOrEmpty(jsr["iscost"].ToString()))
+                    {
+                        dr["iscost"] = Convert.ToInt32(jsr["iscost"].ToString());
+                    }
+                    else
+                    {
+                        dr["iscost"] = DBNull.Value;
+                    }
+                    //是否查货宝会员；0:是；1:否；默认为1
+                    if (!string.IsNullOrEmpty(jsr["ischbmember"].ToString()))
+                    {
+                        dr["ischbmember"] = Convert.ToInt32(jsr["ischbmember"].ToString());
+                    }
+                    else
+                    {
+                        dr["ischbmember"] = DBNull.Value;
+                    }
 
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
@@ -2314,6 +2360,51 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     {
                         dr["isidentification"] = DBNull.Value;
                     }
+                    //下单是否赠送红包，0:赠送；1:不赠送；默认为1
+                    if (!string.IsNullOrEmpty(jsr["isdonate"].ToString()))
+                    {
+                        dr["isdonate"] = Convert.ToInt32(jsr["isdonate"].ToString());
+                    }
+                    else
+                    {
+                        dr["isdonate"] = DBNull.Value;
+                    }
+                    //下单赠送红包比例,1-99之间
+                    if (!string.IsNullOrEmpty(jsr["donateratio"].ToString()))
+                    {
+                        dr["donateratio"] = Convert.ToInt32(jsr["donateratio"].ToString());
+                    }
+                    else
+                    {
+                        dr["donateratio"] = DBNull.Value;
+                    }
+                    //是否显示发布来源：0:显示；1:不显示；默认为0
+                    if (!string.IsNullOrEmpty(jsr["isshowsource"].ToString()))
+                    {
+                        dr["isshowsource"] = Convert.ToInt32(jsr["isshowsource"].ToString());
+                    }
+                    else
+                    {
+                        dr["isshowsource"] = DBNull.Value;
+                    }
+                    //是否收取佣金；0:是；1:否；默认为1
+                    if (!string.IsNullOrEmpty(jsr["iscost"].ToString()))
+                    {
+                        dr["iscost"] = Convert.ToInt32(jsr["iscost"].ToString());
+                    }
+                    else
+                    {
+                        dr["iscost"] = DBNull.Value;
+                    }
+                    //是否查货宝会员；0:是；1:否；默认为1
+                    if (!string.IsNullOrEmpty(jsr["ischbmember"].ToString()))
+                    {
+                        dr["ischbmember"] = Convert.ToInt32(jsr["ischbmember"].ToString());
+                    }
+                    else
+                    {
+                        dr["ischbmember"] = DBNull.Value;
+                    }
 
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);
@@ -2346,6 +2437,68 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
             }
         }
 
+    }
+
+    /// <summary>
+    /// 红包下单额度增加
+    /// </summary>
+    /// <param name="userid"></param>
+    /// <param name="oldnum"></param>
+    /// <param name="addnum"></param>
+    /// <returns></returns>
+    [CSMethod("AddRedNum")]
+    public bool AddRedNum(string userid, string OldNum, string AddNum)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                #region 参数处理
+                decimal oldnum = 0m;
+                decimal addnum = 0m;
+                if (!string.IsNullOrEmpty(OldNum))
+                {
+                    oldnum = Convert.ToDecimal(OldNum);
+                }
+                if (!string.IsNullOrEmpty(AddNum))
+                {
+                    addnum = Convert.ToDecimal(AddNum);
+                }
+                #endregion
+
+                dbc.BeginTransaction();
+                DateTime nowti = DateTime.Now;
+                //更新用户表
+                string sqlstr = "update tb_b_user set redenvelopequota=isnull(redenvelopequota,0)+" + addnum + " where UserID=" + dbc.ToSqlValue(userid);
+                dbc.ExecuteNonQuery(sqlstr);
+
+                //操作日志
+                string nr = SystemUser.CurrentUser.UserName + "在" + nowti.ToString() + "时间增加了下单红包额度：" + addnum + "元，原额度为：" + oldnum + "元";
+                recordlog(dbc, userid, DateTime.Now, 4, nr);
+
+                //红包下单记录表
+                var dt = dbc.GetEmptyDataTable("tb_b_user_quota");
+                var dr = dt.NewRow();
+                dr["id"] = Guid.NewGuid();
+                dr["userid"] = Guid.Parse(userid);
+                dr["quota"] = addnum;
+                dr["status"] = 0;
+                dr["adduser"] = SystemUser.CurrentUser.UserID;
+                dr["addtime"] = nowti;
+                dr["updateuser"] = SystemUser.CurrentUser.UserID;
+                dr["updatetime"] = nowti;
+                dt.Rows.Add(dr);
+                dbc.InsertTable(dt);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
     }
 
     //[CSMethod("SaveUser")]
@@ -3252,7 +3405,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     /// <param name="dbc"></param>
     /// <param name="handlers"></param>
     /// <param name="createtime"></param>
-    /// <param name="type">1.下架 2.重新上架  3.修改</param>
+    /// <param name="type">1.下架 2.重新上架  3.修改 4.下单红包额度</param>
     public void recordlog(DBConnection dbc, string handlers, DateTime createtime, int type, string content)
     {
         string leixing = "";
@@ -3266,6 +3419,9 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 break;
             case 3:
                 leixing = "用户修改";
+                break;
+            case 4:
+                leixing = "下单红包额度";
                 break;
         }
 
