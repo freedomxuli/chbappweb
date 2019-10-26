@@ -2,6 +2,8 @@
 var cx_yhm;
 var cx_zt;
 var cx_lx;
+var cx_beg;
+var cx_end;
 var id = "";
 //************************************数据源*****************************************
 var store = createSFW4Store({
@@ -41,7 +43,7 @@ function getList(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_lx").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_lx").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
 }
 
 
@@ -91,7 +93,7 @@ Ext.onReady(function () {
                                  flex: 1,
                                  text: "类型",
                                  renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                     //0：新人红包；1：分享（暂不使用）；2、订单红包；3、平台派送红包；4、抽奖红包
+                                     //0：新人红包；1：分享（暂不使用）；2、订单红包；3、平台派送红包；4、抽奖红包type = 5，“购买送红包”；type = 6，“新人复购红包”
                                      if (value == 0) {
                                          return "新人红包";
                                      } else if (value == 1) {
@@ -102,6 +104,10 @@ Ext.onReady(function () {
                                          return "平台派送红包";
                                      } else if (value == 4) {
                                          return "抽奖红包";
+                                     } else if (value == 5) {
+                                         return "购买送红包";
+                                     } else if (value == 6) {
+                                         return "新人复购红包";
                                      }
                                  }
                              },
@@ -227,8 +233,38 @@ Ext.onReady(function () {
                                               queryMode: 'local',
                                               displayField: 'txt',
                                               valueField: 'val',
-                                              value: ''
-                                          }, {
+                                              value: '',
+                                              listeners: {
+                                                  'select': function (view, re) {
+                                                      if (Ext.getCmp("cx_zt").value == 9) {
+                                                          Ext.getCmp("cx_beg").show();
+                                                          Ext.getCmp("cx_end").show();
+                                                      } else {
+                                                          Ext.getCmp("cx_beg").hide();
+                                                          Ext.getCmp("cx_end").hide();
+                                                      }
+                                                  }
+                                              }
+                                          },
+                                          {
+                                              id: 'cx_beg',
+                                              xtype: 'datefield',
+                                              fieldLabel: '时间',
+                                              format: 'Y-m-d',
+                                              labelWidth: 40,
+                                              width: 150,
+                                              hidden:true
+
+                                          },
+                                        {
+                                            id: 'cx_end',
+                                            xtype: 'datefield',
+                                            format: 'Y-m-d',
+                                            fieldLabel: '至',
+                                            labelWidth: 20,
+                                            width: 140,
+                                            hidden: true
+                                        }, {
                                               xtype: 'combobox',
                                               id: 'cx_lx',
                                               width: 160,
@@ -239,13 +275,15 @@ Ext.onReady(function () {
                                                   fields: [
                                                      { name: 'val' },
                                                      { name: 'txt' }
-                                                  ], //0：新人红包；1：分享（暂不使用）；2、订单红包；3、平台派送红包；4、抽奖红包
+                                                  ], //0：新人红包；1：分享（暂不使用）；2、订单红包；3、平台派送红包；4、抽奖红包type = 5，“购买送红包”；type = 6，“新人复购红包”
                                                   data: [{ 'val': '', 'txt': '全部' },
                                                           { 'val': 0, 'txt': '新人红包' },
                                                           { 'val': 1, 'txt': '分享' },
                                                           { 'val': 2, 'txt': '订单红包' },
                                                           { 'val': 3, 'txt': '平台派送红包' },
-                                                          { 'val': 4, 'txt': '抽奖红包' }]
+                                                          { 'val': 4, 'txt': '抽奖红包' },
+                                                          { 'val': 5, 'txt': '购买送红包' },
+                                                          { 'val': 6, 'txt': '新人复购红包' }]
                                               }),
                                               queryMode: 'local',
                                               displayField: 'txt',
@@ -272,7 +310,7 @@ Ext.onReady(function () {
                                             text: '导出',
                                             handler: function () {
                                                 if (privilege("财务报表_红包汇总_导出")) {
-                                                    DownloadFile("CZCLZ.CWBBMag.GetPSHBJLToFile", "红包汇总.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_lx").getValue());
+                                                    DownloadFile("CZCLZ.CWBBMag.GetPSHBJLToFile", "红包汇总.xls", Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_zt").getValue(), Ext.getCmp("cx_lx").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
                                                 }
                                             }
                                         }
@@ -297,6 +335,8 @@ Ext.onReady(function () {
     cx_yhm = Ext.getCmp("cx_yhm").getValue();
     cx_zt = Ext.getCmp("cx_zt").getValue();
     cx_lx = Ext.getCmp("cx_lx").getValue();
+    cx_beg = Ext.getCmp("cx_beg").getValue();
+    cx_end = Ext.getCmp("cx_end").getValue();
     getList(1);
 
     CS('CZCLZ.CWBBMag.GetPSHBZJ', function (retVal) {

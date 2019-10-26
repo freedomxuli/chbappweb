@@ -6284,7 +6284,7 @@ public class CWBBMag
     }
 
     [CSMethod("GetPSHBJL")]
-    public object GetPSHBJL(int pagnum, int pagesize, string yhm, string zt, string lx)
+    public object GetPSHBJL(int pagnum, int pagesize, string yhm, string zt, string lx,string beg,string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -6301,6 +6301,19 @@ public class CWBBMag
                 if (!string.IsNullOrEmpty(zt))
                 {
                     where += " and " + dbc.C_EQ("a.isuse", Convert.ToInt32(zt));
+
+                    if (Convert.ToInt32(zt) == 9)
+                    {
+                        if (!string.IsNullOrEmpty(beg))
+                        {
+                            where += " and  a.updatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                        }
+                        if (!string.IsNullOrEmpty(end))
+                        {
+                            where += " and a.updatetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                        }
+
+                    }
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
@@ -6349,7 +6362,7 @@ public class CWBBMag
     }
 
     [CSMethod("GetPSHBJLToFile", 2)]
-    public byte[] GetPSHBJLToFile(string yhm, string zt, string lx)
+    public byte[] GetPSHBJLToFile(string yhm, string zt, string lx, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -6409,6 +6422,18 @@ public class CWBBMag
                 if (!string.IsNullOrEmpty(zt))
                 {
                     where += " and " + dbc.C_EQ("a.isuse", Convert.ToInt32(zt));
+                    if (Convert.ToInt32(zt) == 9)
+                    {
+                        if (!string.IsNullOrEmpty(beg))
+                        {
+                            where += " and  a.updatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                        }
+                        if (!string.IsNullOrEmpty(end))
+                        {
+                            where += " and a.updatetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                        }
+
+                    }
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
@@ -6462,6 +6487,14 @@ public class CWBBMag
                         else if (Convert.ToInt32(dt.Rows[i]["type"]) == 4)
                         {
                             type = "抽奖红包";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["type"]) == 5)
+                        {
+                            type = "购买送红包";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["type"]) == 6)
+                        {
+                            type = "新人复购红包";
                         }
                         cells[i + 1, 2].PutValue(type);
 
