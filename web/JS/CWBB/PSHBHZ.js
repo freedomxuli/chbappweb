@@ -233,18 +233,19 @@ Ext.onReady(function () {
                                               queryMode: 'local',
                                               displayField: 'txt',
                                               valueField: 'val',
-                                              value: '',
-                                              listeners: {
-                                                  'select': function (view, re) {
-                                                      if (Ext.getCmp("cx_zt").value == 9) {
-                                                          Ext.getCmp("cx_beg").show();
-                                                          Ext.getCmp("cx_end").show();
-                                                      } else {
-                                                          Ext.getCmp("cx_beg").hide();
-                                                          Ext.getCmp("cx_end").hide();
-                                                      }
-                                                  }
-                                              }
+                                              value: ''
+                                              //,
+                                              //listeners: {
+                                              //    'select': function (view, re) {
+                                              //        if (Ext.getCmp("cx_zt").value == 9) {
+                                              //            Ext.getCmp("cx_beg").show();
+                                              //            Ext.getCmp("cx_end").show();
+                                              //        } else {
+                                              //            Ext.getCmp("cx_beg").hide();
+                                              //            Ext.getCmp("cx_end").hide();
+                                              //        }
+                                              //    }
+                                              //}
                                           },
                                           {
                                               id: 'cx_beg',
@@ -252,8 +253,7 @@ Ext.onReady(function () {
                                               fieldLabel: '时间',
                                               format: 'Y-m-d',
                                               labelWidth: 40,
-                                              width: 150,
-                                              hidden:true
+                                              width: 150
 
                                           },
                                         {
@@ -262,8 +262,7 @@ Ext.onReady(function () {
                                             format: 'Y-m-d',
                                             fieldLabel: '至',
                                             labelWidth: 20,
-                                            width: 140,
-                                            hidden: true
+                                            width: 140
                                         }, {
                                               xtype: 'combobox',
                                               id: 'cx_lx',

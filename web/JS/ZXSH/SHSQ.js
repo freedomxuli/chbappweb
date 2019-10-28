@@ -154,8 +154,10 @@ Ext.onReady(function () {
                                 dataIndex: 'id',
                                 text: '操作',
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    var str = "<a href='JavaScript:void(0)' onclick='sh(\"" + value + "\")'>审核</a>";
-                                    return str;
+                                    if (!record.data.shr) {
+                                        var str = "<a href='JavaScript:void(0)' onclick='sh(\"" + value + "\")'>审核</a>";
+                                        return str;
+                                    }
                                 }
                             }
 

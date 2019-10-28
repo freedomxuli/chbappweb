@@ -6301,19 +6301,15 @@ public class CWBBMag
                 if (!string.IsNullOrEmpty(zt))
                 {
                     where += " and " + dbc.C_EQ("a.isuse", Convert.ToInt32(zt));
+                }
 
-                    if (Convert.ToInt32(zt) == 9)
-                    {
-                        if (!string.IsNullOrEmpty(beg))
-                        {
-                            where += " and  a.updatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
-                        }
-                        if (!string.IsNullOrEmpty(end))
-                        {
-                            where += " and a.updatetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
-                        }
-
-                    }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.updatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.updatetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
@@ -6422,18 +6418,15 @@ public class CWBBMag
                 if (!string.IsNullOrEmpty(zt))
                 {
                     where += " and " + dbc.C_EQ("a.isuse", Convert.ToInt32(zt));
-                    if (Convert.ToInt32(zt) == 9)
-                    {
-                        if (!string.IsNullOrEmpty(beg))
-                        {
-                            where += " and  a.updatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
-                        }
-                        if (!string.IsNullOrEmpty(end))
-                        {
-                            where += " and a.updatetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
-                        }
+                }
 
-                    }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.updatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.updatetime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
                 if (!string.IsNullOrEmpty(lx))
                 {
