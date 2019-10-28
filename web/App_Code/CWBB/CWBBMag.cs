@@ -3248,7 +3248,7 @@ public class CWBBMag
 
     #region 三方交易明细
     [CSMethod("GetSFJYList")]
-    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm, string beg, string end, string ordercode,string xfbeg, string xfend)
+    public object GetSFJYList(int pagnum, int pagesize, string yhm, string xm, string beg, string end, string ordercode, string xfbeg, string xfend)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -6284,7 +6284,7 @@ public class CWBBMag
     }
 
     [CSMethod("GetPSHBJL")]
-    public object GetPSHBJL(int pagnum, int pagesize, string yhm, string zt, string lx,string beg,string end)
+    public object GetPSHBJL(int pagnum, int pagesize, string yhm, string zt, string lx, string beg, string end)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -6537,6 +6537,135 @@ public class CWBBMag
                     }
                     cells[i + 1, 4].SetStyle(style4);
 
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
+
+    #region 用户剩余红包统计
+    [CSMethod("GetRedenvelopeByPage")]
+    public object GetRedenvelopeByPage(int pagnum, int pagesize, string num)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(num))
+                {
+                    where = " where a.ResidueNum =" + Convert.ToInt32(num);
+                }
+
+                string str = @"select a.*,b.UserName,b.UserXM from (
+	                            select userid,COUNT(*) ResidueNum from tb_b_redenvelope a
+	                            where isuse=0
+	                            group by userid
+                            )a
+                            left join tb_b_user b on a.userid=b.userid " + where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("GetRedenvelopeToFile", 2)]
+    public byte[] GetShareRecordToFile(string num)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("账号");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("剩余红包数量");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(num))
+                {
+                    where = " where a.ResidueNum =" + Convert.ToInt32(num);
+                }
+
+                string str = @"select a.*,b.UserName,b.UserXM from (
+	                            select userid,COUNT(*) ResidueNum from tb_b_redenvelope a
+	                            where isuse=0
+	                            group by userid
+                            )a
+                            left join tb_b_user b on a.userid=b.userid " + where;
+
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    
+
+                    if (!string.IsNullOrEmpty(dt.Rows[i]["UserName"].ToString()))
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    else
+                    {
+                        cells[i + 1, 0].PutValue("");
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+
+                    cells[i + 1, 1].PutValue(dt.Rows[i]["ResidueNum"]);
+                    cells[i + 1, 1].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();
