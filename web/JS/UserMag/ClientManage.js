@@ -1827,7 +1827,7 @@ Ext.define('upRedNumWin', {
                                 CS('CZCLZ.YHGLClass.AddRedNum', function (retVal) {
                                     if (retVal) {
                                         getUser(1);
-                                        Ext.MessageBox.alert('提示', "拒绝成功！");
+                                        Ext.MessageBox.alert('提示', "修改成功！");
                                     }
                                 }, CS.onError, userid, Ext.getCmp("redenvelopequota").getValue(), Ext.getCmp("addnum").getValue());
                                 this.up('window').close();
