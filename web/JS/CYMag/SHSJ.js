@@ -33,6 +33,7 @@ var store = createSFW4Store({
        { name: 'paramphoto3' },
        { name: 'paramphoto4' },
        { name: 'paramphoto5' },
+       { name: 'paramphoto6' },
        { name: 'status' },
        { name: 'param' },
         { name: 'caruser' }
@@ -167,6 +168,16 @@ function ck(id) {
                 }));
             }
         }
+        if (r.paramphoto6.fileList) {
+            if (r.paramphoto6.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto6.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto6.fileList[0].fjId
+                }));
+            }
+        }
         Ext.getCmp("btn1").hide();
         Ext.getCmp("btn2").hide();
         Ext.getCmp("btn3").show();
@@ -243,6 +254,16 @@ function sh(id) {
                     isSelected: isDefault,
                     src: r.paramphoto5.fileList[0].fileFullUrl,
                     fileid: r.paramphoto5.fileList[0].fjId
+                }));
+            }
+        }
+        if (r.paramphoto6.fileList) {
+            if (r.paramphoto6.fileList.length > 0) {
+                var isDefault = false;
+                Ext.getCmp('uploadproductpic').add(new SelectImg({
+                    isSelected: isDefault,
+                    src: r.paramphoto6.fileList[0].fileFullUrl,
+                    fileid: r.paramphoto6.fileList[0].fjId
                 }));
             }
         }
