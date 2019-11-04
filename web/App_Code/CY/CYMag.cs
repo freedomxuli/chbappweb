@@ -1506,7 +1506,7 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", isinvoice);
                 }
-                where += " and " + dbc.C_EQ("a.carriagestatus", 90); 
+                where += " and " + dbc.C_EQ("a.carriagestatus", 90);
                 if (!string.IsNullOrEmpty(ismoneypay))
                 {
                     where += " and " + dbc.C_EQ("a.ismoneypay", ismoneypay); ;
@@ -1521,12 +1521,18 @@ public class CYMag
                                 when 11 then 6
                                 when 20 then 7
                                 when 21 then 8
-                                else 9 end as px,c.modetype,c.modecoefficient,c.carriagegetmode 
+                                else 9 end as px,c.modetype,c.modecoefficient,c.carriagegetmode,
+                                f.FJ_ID fjid0,f.Full_Url fjurl0,
+                                g.FJ_ID fjid1,g.Full_Url fjurl1,
+                                h.FJ_ID fjid2,h.Full_Url fjurl2 
                               from tb_b_carriage a 
                             left join tb_b_user b on a.driverid=b.UserID 
                             inner join tb_b_user c on a.userid=c.UserID and c.ClientKind=1
                             left join  tb_b_car d on a.carid=d.id
                             left join tb_b_carriagechb e on c.carriagechbid=e.id
+                            left join tb_b_carriage_photo f on a.carriageid=f.carriageid and f.type=0 and f.status=0
+                            left join tb_b_carriage_photo g on a.carriageid=g.carriageid and g.type=1 and g.status=0
+                            left join tb_b_carriage_photo h on a.carriageid=h.carriageid and h.type=2 and h.status=0
                             where a.status=0 and 1=1 
                                  ";
                 str += where;
@@ -1671,7 +1677,7 @@ public class CYMag
                 {
                     where += " and " + dbc.C_EQ("a.isinvoice", iskp);
                 }
-                where += " and " + dbc.C_EQ("a.carriagestatus", 90); 
+                where += " and " + dbc.C_EQ("a.carriagestatus", 90);
                 if (!string.IsNullOrEmpty(moneypay))
                 {
                     where += " and " + dbc.C_EQ("a.ismoneypay", moneypay); ;
@@ -1901,58 +1907,203 @@ public class CYMag
     }
 
     [CSMethod("UploadPicForcarriage", 1)]
-    public object UploadPicForcarriage(FileData[] fds, string UserID)
+    public object UploadPicForcarriage(FileData[] fds, string carriageid, int type)
     {
-        string ServiceURL = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
-        WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL + "uploadMultipleFiles");
-        MsMultiPartFormData form = new MsMultiPartFormData();
-        form.AddFormField("devilField", "中国人");
-        form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
-        form.PrepareFormData();
-        request.ContentType = "multipart/form-data; boundary=" + form.Boundary;
-        request.Method = "POST";
-        Stream stream = request.GetRequestStream();
-        foreach (var b in form.GetFormData())
+        try
         {
-            stream.WriteByte(b);
-        }
-        stream.Close();
-        string responseContent = "";
-        using (HttpWebResponse res = (HttpWebResponse)request.GetResponse())
-        {
-            using (Stream resStream = res.GetResponseStream())
-            {
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = resStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    responseContent += Encoding.UTF8.GetString(buffer, 0, read);
-                }
-            }
-            res.Close();
-        }
-        JavaScriptSerializer js = new JavaScriptSerializer();
-        List<FJ> list = js.Deserialize<List<FJ>>(responseContent);
-        string _url = ServiceURL + "tbbuserphoto.update";
-        string jsonParam = new JavaScriptSerializer().Serialize(new
-        {
-            userid = UserID,
-            userphotogltype = 0,
-            fileList = list
-        });
-        var request1 = (HttpWebRequest)WebRequest.Create(_url);
-        request1.Method = "POST";
-        request1.ContentType = "application/json;charset=UTF-8";
-        var byteData = Encoding.UTF8.GetBytes(jsonParam);
-        var length = byteData.Length;
-        request1.ContentLength = length;
-        var writer = request1.GetRequestStream();
-        writer.Write(byteData, 0, length);
-        writer.Close();
-        var response = (HttpWebResponse)request1.GetResponse();
-        var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
-        return new { fileurl = list[0].fileFullUrl, isdefault = 0, fileid = list[0].fjId };
+            string url = System.Configuration.ConfigurationManager.AppSettings["ServiceURL"].ToString();
 
+            WebRequest request = (HttpWebRequest)WebRequest.Create(url + "uploadAdver");
+            MsMultiPartFormData form = new MsMultiPartFormData();
+            form.AddFormField("devilField", "中国人");
+            form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
+            form.PrepareFormData();
+            request.ContentType = "multipart/form-data; boundary=" + form.Boundary;
+            request.Method = "POST";
+            Stream stream = request.GetRequestStream();
+            foreach (var b in form.GetFormData())
+            {
+                stream.WriteByte(b);
+            }
+            stream.Close();
+            string responseContent = "";
+            using (HttpWebResponse res = (HttpWebResponse)request.GetResponse())
+            {
+                using (Stream resStream = res.GetResponseStream())
+                {
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = resStream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        responseContent += Encoding.UTF8.GetString(buffer, 0, read);
+                    }
+                }
+                res.Close();
+            }
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            List<FJ> list = js.Deserialize<List<FJ>>(responseContent);
+            #region 插入数据
+            using (DBConnection dbc = new DBConnection())
+            {
+                try
+                {
+                    dbc.BeginTransaction();
+                    string sqlStr = @"update tb_b_carriage_photo set status=1 
+                where carriageid=" + dbc.ToSqlValue(carriageid) + " and type=" + type;
+                    dbc.ExecuteNonQuery(sqlStr);
+
+                    DataTable photoDt = dbc.GetEmptyDataTable("tb_b_carriage_photo");
+                    DataRow phdr = photoDt.NewRow();
+                    phdr["carriagephotoid"] = Guid.NewGuid();
+                    phdr["carriageid"] = carriageid;
+                    phdr["type"] = type;
+                    phdr["FJ_ID"] = list[0].fjId;
+                    phdr["status"] = 0;
+                    phdr["adduser"] = SystemUser.CurrentUser.UserID;
+                    phdr["addtime"] = DateTime.Now;
+                    phdr["updateuser"] = SystemUser.CurrentUser.UserID;
+                    phdr["updatetime"] = DateTime.Now;
+                    phdr["Full_Url"] = list[0].fileFullUrl;
+                    photoDt.Rows.Add(phdr);
+                    dbc.InsertTable(photoDt);
+
+                    dbc.CommitTransaction();
+                }
+                catch (Exception ex)
+                {
+                    dbc.RoolbackTransaction();
+                    throw ex;
+                }
+
+            }
+            #endregion
+
+            return new { fileurl = list[0].fileFullUrl, isdefault = 0, fileid = list[0].fjId };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+
+
+
+
+    }
+
+    [CSMethod("PushWr")]
+    public bool PushWr(string carriageid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                DateTime _dtStart = new DateTime(1970, 1, 1, 8, 0, 0);
+                string sqlstr = @"select a.*,b.dq_bm f_dq_bm,c.dq_bm t_dq_bm,d.UserXM,d.UserName,e.carnumber,f.addtime flowaddtime,
+g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full_Url3 from tb_b_carriage a
+                                left join tb_b_dq b on a.carriagefromcity=b.dq_mc
+                                left join tb_b_dq c on a.carriagetocity=c.dq_mc
+                                left join tb_b_user d on a.driverid=d.UserID
+                                left join tb_b_car e on a.carid=e.id
+                                left join tb_b_carriage_flow f on a.carriageid=f.carriageid and f.carriagestatus=90
+                                left join tb_b_carriage_flow g on a.carriageid=g.carriageid and g.carriagestatus=50
+                                left join tb_b_carriage_photo h on a.carriageid=h.carriageid and h.type=0 and h.status=0
+                                left join tb_b_carriage_photo i on a.carriageid=i.carriageid and i.type=1 and i.status=0
+                                left join tb_b_carriage_photo j on a.carriageid=j.carriageid and j.type=2 and j.status=0
+                                where a.carriageid=" + dbc.ToSqlValue(carriageid);
+                DataTable dt = dbc.ExecuteDataTable(sqlstr);
+                if (dt.Rows.Count == 0)
+                {
+                    return false;
+                }
+                //1.发布货源接口
+                string url = System.Configuration.ConfigurationManager.AppSettings["ServiceBaseURL"].ToString();
+                var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "car/PlanGoods/add");
+                request1.Method = "POST";
+                request1.ContentType = "application/json;charset=UTF-8";
+                var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                {
+                    goods_no = dt.Rows[0]["carriageid"].ToString(),//(合作方货源编号)
+                    goods_price = string.IsNullOrEmpty(dt.Rows[0]["carriagepoints"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriagepoints"]) / 30000, //(运输单价(单位：分))
+                    goods_type = "999",// (货物类型)
+                    goods_name = "百货",//(货物名称)
+                    goods_num = 30000,// (货量(单位：KG))
+                    load_time = Convert.ToInt64(Convert.ToDateTime(dt.Rows[0]["addtime"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//(起运时间(时间戳))
+                    load_place_id = dt.Rows[0]["f_dq_bm"].ToString(),// 找tb_b_dq表找编码 (装货地id(省市区编码或港口编码))
+                    unload_place_id = dt.Rows[0]["t_dq_bm"].ToString(),// 找tb_b_dq表找编码（卸货地id(省市区编码或港口编码)）
+                    load_place_detail = "物流园区",//(装货地详细地址(不包含省市区))
+                    unload_place_detail = dt.Rows[0]["carriageaddress"].ToString(),//(卸货地详细地址(不包含省市区))
+                    shipper_contact_name = dt.Rows[0]["UserXM"].ToString(),//(托运方联系人名称)
+                    shipper_contact_mobile = dt.Rows[0]["UserName"].ToString(),//(托运方手机号)
+                    consi_name = "查货宝",//(收货方名称)
+                    consi_contact_name = "查货宝联系人",//      (收货联系人姓名)
+                    consi_contact_mobile = "查货宝联系人手机"//   (收货人手机号)
+                }));
+                var length1 = byteData1.Length;
+                request1.ContentLength = length1;
+                var writer1 = request1.GetRequestStream();
+                writer1.Write(byteData1, 0, length1);
+                writer1.Close();
+
+                //2.预约货源
+                DataRow dr2 = dt.Rows[0];
+                decimal carriageoilmoney = 0m;
+                if (!string.IsNullOrEmpty(dr2["carriageoilmoney"].ToString()))
+                {
+                    carriageoilmoney = Convert.ToDecimal(dr2["carriageoilmoney"].ToString());
+                }
+                decimal carriagemoneynew = 0m;
+                if (!string.IsNullOrEmpty(dr2["carriagemoneynew"].ToString()))
+                {
+                    carriagemoneynew = Convert.ToDecimal(dr2["carriagemoneynew"].ToString());
+                }
+                decimal carriagemoney = 0m;
+                if (!string.IsNullOrEmpty(dr2["carriagemoney"].ToString()))
+                {
+                    carriagemoney = Convert.ToDecimal(dr2["carriagemoney"].ToString());
+                }
+                var request2 = (HttpWebRequest)WebRequest.Create(ServiceURL + "car/PlanGoods/createOrder");
+                request2.Method = "POST";
+                request2.ContentType = "application/json;charset=UTF-8";
+                var byteData2 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
+                {
+                    goods_no = dr2["carriageid"].ToString(),//（合作方货源编号）
+                    order_no = dr2["carriagecode"].ToString(),//tb_b_carriage.carriagecode（合作方唯一业务单号）
+                    waybill_amount = carriageoilmoney + carriagemoney + carriagemoneynew,//(tb_b_carriage.carriageoilmoney+carriagemoney+carriagemoneynew) (合同金额(司机的劳务费+油费+过路费、单位：分)）
+                    invoice_amount = (carriagemoney + carriagemoneynew) * 1.03m,//(tb_b_carriage.carriagemoney+carriagemoneynew) *1.03（开票金额(含税、司机的劳务费*(1+0.03)、单位：分、开票金额计算公式以商务合同约定为准)）
+                    labour_amount = carriagemoney + carriagemoneynew,//(tb_b_carriage.carriagemoney+carriagemoneynew) （运输劳务费用(不含税、单位：分)）
+                    contract_time = Convert.ToInt64(Convert.ToDateTime(dr2["addtime"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//（合同签订日期(时间戳)）
+                    carrier_mobile = dr2["UserName"].ToString(),//（承运人手机号(个体承运人为司机手机号)）
+                    transport_mobile = dr2["UserName"].ToString(),//（司机手机号）
+                    transport_type = 1,//（运输工具类型(1车辆 2船舶)(目前传1)）
+                    trans_vehicle_name = dr2["carnumber"].ToString(),//tb_b_carriage.carid.tb_b_car.carnumber（运输工具名称(车牌号)）
+                    unload_time = Convert.ToInt64(Convert.ToDateTime(dr2["flowaddtime"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//tb_b_carriage_flow.addtime(carriage status = 90)（卸货时间(时间戳)）
+                    finish_time = Convert.ToInt64(Convert.ToDateTime(dr2["flowaddtime2"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//(carriage status = 50)（交易完成时间(时间戳)）
+                    pay_style = "第三方支付",//（支付方式）
+                    pay_channel = "宝付",//（支付渠道）
+                    pay_pic = dr2["Full_Url1"],//tb_b_carriage.photo(type = 0)（支付凭证图片URL地址(支持多张，逗号拼接)）
+                    contract_pic = dr2["Full_Url2"],//tb_b_carriage.photo(type = 1)（合同图片URL地址(支持多张，逗号拼接)）
+                    reply_pic = dr2["Full_Url3"]//tb_b_carriage.photo(type = 2)（回单图片URL地址(支持多张，逗号拼接)）
+                }));
+                var length2 = byteData2.Length;
+                request2.ContentLength = length2;
+                var writer2 = request2.GetRequestStream();
+                writer2.Write(byteData2, 0, length2);
+                writer2.Close();
+
+                dbc.BeginTransaction();
+                //3.更新tb_b_carriage
+                sqlstr = "update tb_b_carriage set ispushwr=0 where carriageid=" + dbc.ToSqlValue(carriageid);
+                dbc.ExecuteNonQuery(sqlstr);
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
     }
     #endregion
 }

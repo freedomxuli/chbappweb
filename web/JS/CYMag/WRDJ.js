@@ -44,7 +44,13 @@ var carriageStore = createSFW4Store({
         { name: 'caruser' },
         { name: 'carriagegetmode' },
         { name: 'kp' },
-        { name: 'ispushwr' }
+        { name: 'ispushwr' },
+        { name: 'fjid0' },
+        { name: 'fjurl0' },
+        { name: 'fjid1' },
+        { name: 'fjurl1' },
+        { name: 'fjid2' },
+        { name: 'fjurl2' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         DataBind(nPage);
@@ -63,30 +69,88 @@ function DataBind(nPage) {
     }, CS.onError, nPage, pageSize, Ext.getCmp("cx_carriagecode").getValue(), Ext.getCmp("cx_UserXM").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isinvoice").getValue(), Ext.getCmp("cx_ismoneypay").getValue());
 }
 
-function TSWR() {
-    var win = new tswrWin();
-    win.show(null, function () { })
+function TSWR(carriageid) {
+    var r = carriageStore.findRecord("carriageid", carriageid).data;
+    console.log(r);
+    var win = new tswrWin({ carriageid: carriageid });
+    win.show(null, function () {
+        var isDefault = false;
+        Ext.getCmp('uploadpic0').add(new SelectImg({
+            isSelected: isDefault,
+            src: r.fjurl0,
+            fileid: r.fjid0
+        }));
+        var isDefault = false;
+        Ext.getCmp('uploadpic1').add(new SelectImg({
+            isSelected: isDefault,
+            src: r.fjurl1,
+            fileid: r.fjid1
+        }));
+        var isDefault = false;
+        Ext.getCmp('uploadpic2').add(new SelectImg({
+            isSelected: isDefault,
+            src: r.fjurl2,
+            fileid: r.fjid2
+        }));
+    })
 }
 //上传图片
-function tp(type) {
-    var win = new phWin({ type: type });
+function tp(id, type) {
+    var win = new phWin({ carriageid: id, type: type });
     win.show();
 }
+
+//-----------------------------------------------------------------附件展示-----------------------------------------------------------------
+Ext.define('SelectImg', {
+    extend: 'Ext.Img',
+    height: 390,
+    width: 360,
+    constructor: function (config) {
+        var me = this;
+        config = config || {};
+        config.cls = config.isSelected ? "clsSelected" : "clsUnselected";
+        me.callParent([config]);
+        me.on('render', function () {
+            Ext.fly(me.el).on('click', function () {
+                window.open(me.src);
+                var oldSelectImg = Ext.getCmp('uploadpicC').query('image[isSelected=true]');
+                if (oldSelectImg.length < 0 || oldSelectImg[0] != me) {
+                    me.removeCls('clsUnselected');
+                    me.addCls('clsSelected');
+                    me.isSelected = true;
+                    if (oldSelectImg.length > 0) {
+                        oldSelectImg[0].removeCls('clsSelected');
+                        oldSelectImg[0].addCls('clsUnselected');
+                        oldSelectImg[0].isSelected = false;
+                    }
+                }
+            });
+        });
+
+    },
+
+    initComponent: function () {
+        var me = this;
+        me.callParent(arguments);
+    }
+});
+
 //-----------------------------------------------------------------附件-----------------------------------------------------------------
 Ext.define('phWin', {
     extend: 'Ext.window.Window',
     title: "上传",
-    height: 80,
-    width: 400,
+    height: 160,
+    width: 560,
     modal: true,
     layout: 'border',
     id: 'sbBdwin',
     initComponent: function () {
         var me = this;
+        var carriageid = me.carriageid;
         var type = me.type;
         me.items = [{
             xtype: 'UploaderPanel',
-            id: 'uploadpic',
+            id: 'uploadpicC',
             region: 'center',
             layout: 'column',
 
@@ -107,21 +171,19 @@ Ext.define('phWin', {
                     columnWidth: 0.2,
                     margin: '0 5',
                     handler: function () {
-                        var screen = "";
-                        if (type == 1) { screen = "750*1334"; }
-                        else if (type == 2) { screen = "1242*2208"; }
-                        else if (type == 3) { screen = "1125*2436"; }
-
-                        Ext.getCmp('uploadpic').upload('CZCLZ.CYMag.UploadPicForcarriage', function (retVal) {
+                        Ext.getCmp('uploadpicC').upload('CZCLZ.CYMag.UploadPicForcarriage', function (retVal) {
                             var isDefault = false;
-                            if (retVal.isdefault == 1)
+                            if (retVal.isdefault == 1) {
                                 isDefault = true;
-                            Ext.getCmp('uploadpic').add(new SelectImg({
+                            }
+                            Ext.getCmp('uploadpic' + type).removeAll();
+                            Ext.getCmp('uploadpic' + type).add(new SelectImg({
                                 isSelected: isDefault,
                                 src: retVal.fileurl,
                                 fileid: retVal.fileid
                             }));
-                        }, CS.onError, UserID);
+                            me.close();
+                        }, CS.onError, carriageid, type);
                     }
                 }
             ]
@@ -144,7 +206,7 @@ Ext.define('tswrWin', {
     title: '物润推送',
     initComponent: function () {
         var me = this;
-        var id = me.id;
+        var id = me.carriageid;
         me.items = [
             {
                 xtype: 'panel',
@@ -164,15 +226,16 @@ Ext.define('tswrWin', {
                             {
                                 text: '合同上传',
                                 handler: function () {
-                                    tp(1);
+                                    tp(id, 0);
                                 }
                             }
                         ],
                         items: [
                             {
-                                id: 'uploadproductpic5',
-                                html: '',
-                                xtype: 'label',
+                                xtype: 'UploaderPanel',
+                                id: 'uploadpic0',
+                                region: 'center',
+                                autoScroll: true
                             }
                         ]
                     },
@@ -185,15 +248,16 @@ Ext.define('tswrWin', {
                             {
                                 text: '支付明细上传',
                                 handler: function () {
-                                    tp(2);
+                                    tp(id, 2);
                                 }
                             }
                         ],
                         items: [
                             {
-                                id: 'uploadproductpic6',
-                                html: '',
-                                xtype: 'label',
+                                xtype: 'UploaderPanel',
+                                id: 'uploadpic2',
+                                region: 'center',
+                                autoScroll: true
                             }
                         ]
                     },
@@ -206,15 +270,16 @@ Ext.define('tswrWin', {
                             {
                                 text: '回单上传',
                                 handler: function () {
-                                    tp(3);
+                                    tp(id, 1);
                                 }
                             }
                         ],
                         items: [
                             {
-                                id: 'uploadproductpic7',
-                                html: '',
-                                xtype: 'label',
+                                xtype: 'UploaderPanel',
+                                id: 'uploadpic1',
+                                region: 'center',
+                                autoScroll: true
                             }
                         ]
                     }
@@ -224,19 +289,27 @@ Ext.define('tswrWin', {
                     {
                         text: '合同模板下载',
                         handler: function () {
-                            this.up('window').close();
+                            //DownloadFile("CZCLZ.YHGLClass.GetEWMToFile1", "二维码.jpg", id);
                         }
                     },
                     {
                         text: '回单模板下载',
                         handler: function () {
-
+                            //DownloadFile("CZCLZ.YHGLClass.GetEWMToFile1", "二维码.jpg", id);
                         }
                     },
                     {
                         text: '推送物润',
                         handler: function () {
-
+                            Ext.MessageBox.confirm("提示", "是否推送？", function (obj) {
+                                if (obj == "yes") {
+                                    CS('CZCLZ.CYMag.PushWr', function (retVal) {
+                                        Ext.Msg.alert('提醒', '推送成功！');
+                                        DataBind(1);
+                                        Ext.getCmp("tswrWin").close();
+                                    }, CS.onError, id);
+                                }
+                            });
                         }
                     }
                 ]
@@ -277,7 +350,7 @@ Ext.define('CYDView', {
                         width: 100,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                             if (record.data.ispushwr == 1) {
-                                var str = "<a onclick='TSWR(\"" + value + "\",\"" + record.data.carriagestatus + "\",\"" + record.data.userid + "\",\"" + record.data.carriagegetmode + "\");'>推送物润</a>";
+                                var str = "<a onclick='TSWR(\"" + value + "\");'>推送物润</a>";
                                 return str;
                             }
                         }
