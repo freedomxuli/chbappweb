@@ -6137,26 +6137,22 @@ left join tb_b_user d on b.sanfanguserid = d.UserID  )  a where 1=1
             {
                 int cp = pagnum;
                 int ac = 0;
-                string str = @"select a.*,b.UserName,c.addtime,c.validhour from tb_b_paisongredenvelope_detail a left join  
-                              tb_b_user b on a.sanfanguserid=b.UserID
-							  left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid
-                              where paisongredenvelopeid=@id and a.status=0
-                              order by a.getstatus,b.UserName";
+                string str = @"select a.getpoints,a.getstatus, a.gettime,b.UserName,c.updatetime as sfsj,c.validhour from tb_b_paisongredenvelope_detail a left join  
+                            tb_b_user b on a.sanfanguserid=b.UserID
+                            left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid and a.sanfanguserid = c.userid
+                            left join tb_b_paisongredenvelope d on a.paisongredenvelopeid=d.id 
+                            where paisongredenvelopeid=@id and a.status=0 and d.addtime >= '2019-11-04'
+                                       union
+                                          select a.getpoints,a.getstatus, a.gettime,b.UserName,c.updatetime as sfsj,c.validhour from tb_b_paisongredenvelope_detail a left join  
+                            tb_b_user b on a.sanfanguserid=b.UserID
+                            left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid 
+                            left join tb_b_paisongredenvelope d on a.paisongredenvelopeid=d.id 
+                            where paisongredenvelopeid=@id and a.status=0 and d.addtime < '2019-11-04' order by a.getstatus,b.UserName";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@id", id);
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
                 dtPage = dbc.GetPagedDataTable(cmd, pagesize, ref cp, out ac);
-                dtPage.Columns.Add("sfsj");
-                foreach (DataRow dr in dtPage.Rows)
-                {
-                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
-                    {
-                        dr["sfsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
-                    }
-                }
-
-
                 return new { dt = dtPage, cp = cp, ac = ac };
             }
             catch (Exception ex)
@@ -6219,22 +6215,20 @@ left join tb_b_user d on b.sanfanguserid = d.UserID  )  a where 1=1
                 cells.SetColumnWidth(4, 20);
 
 
-                string str = @"select a.*,b.UserName,c.addtime,c.validhour from tb_b_paisongredenvelope_detail a left join  
-                              tb_b_user b on a.sanfanguserid=b.UserID
-							  left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid
-                              where paisongredenvelopeid=@id and a.status=0
-                              order by a.getstatus,b.UserName";
+                string str = @"select a.getpoints,a.getstatus, a.gettime,b.UserName,c.updatetime as sfsj,c.validhour from tb_b_paisongredenvelope_detail a left join  
+                            tb_b_user b on a.sanfanguserid=b.UserID
+                            left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid and a.sanfanguserid = c.userid
+                            left join tb_b_paisongredenvelope d on a.paisongredenvelopeid=d.id 
+                            where paisongredenvelopeid=@id and a.status=0 and d.addtime >= '2019-11-04'
+                                       union
+                                          select a.getpoints,a.getstatus, a.gettime,b.UserName,c.updatetime as sfsj,c.validhour from tb_b_paisongredenvelope_detail a left join  
+                            tb_b_user b on a.sanfanguserid=b.UserID
+                            left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid 
+                            left join tb_b_paisongredenvelope d on a.paisongredenvelopeid=d.id 
+                            where paisongredenvelopeid=@id and a.status=0 and d.addtime < '2019-11-04' order by a.getstatus,b.UserName";
                 SqlCommand cmd = new SqlCommand(str);
                 cmd.Parameters.AddWithValue("@id", id);
                 System.Data.DataTable dt = dbc.ExecuteDataTable(cmd);
-                dt.Columns.Add("sfsj");
-                foreach (DataRow dr in dt.Rows)
-                {
-                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
-                    {
-                        dr["sfsj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
-                    }
-                }
 
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
