@@ -6007,33 +6007,43 @@ public class CWBBMag
 
                 if (!string.IsNullOrEmpty(beg))
                 {
-                    where += " and  e.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                    where += " and  pssj>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
                 }
                 if (!string.IsNullOrEmpty(end))
                 {
-                    where += " and e.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    where += " and pssj<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
 
-                string str = @" 
-                          select a.*,b.UserName,e.addtime as pssj,e.points,c.addtime,c.validhour,c.isuse from tb_b_paisongredenvelope_detail a left join  
-                            tb_b_user b on a.sanfanguserid=b.UserID
-                            left join tb_b_redenvelope c on a.paisongredenvelopeid=c.paisongdetailid
-                            left join tb_b_paisongredenvelope e on a.paisongredenvelopeid=e.id
-                            where a.status=0 and e.status=0  and e.points>0
+                string str = @"     select *  from (
+                        select a.addtime as pssj,a.points,b.getpoints,b.getstatus, b.gettime,c.updatetime,c.validhour,c.isuse,d.UserName from (
+ select id,addtime,points from tb_b_paisongredenvelope where addtime < '2019-11-04' and points > 0 and status = 0
+) a
+left join tb_b_paisongredenvelope_detail b on a.id = b.paisongredenvelopeid and status = 0
+left join (select paisongdetailid,updatetime,validhour,isuse,userid from tb_b_redenvelope where AddTime<'2019-11-04' and type = 3) c on b.id = c.paisongdetailid
+left join tb_b_user d on b.sanfanguserid = d.UserID
+union
+select a.addtime as pssj,a.points,b.getpoints,b.getstatus, b.gettime,b.updatetime,b.validhour,b.isuse,d.UserName from (
+ select id,addtime,points from tb_b_paisongredenvelope where addtime >= '2019-11-04' and points > 0 and status = 0
+) a
+left join (
+    select b.paisongredenvelopeid, b.getpoints,b.getstatus,b.sanfanguserid,b.gettime,c.updatetime,c.validhour,c.isuse from tb_b_paisongredenvelope_detail b
+left join tb_b_redenvelope c on b.paisongredenvelopeid = c.paisongdetailid and b.sanfanguserid = c.userid and b.gettime >= '2019-11-04'
+) b on a.id = b.paisongredenvelopeid
+left join tb_b_user d on b.sanfanguserid = d.UserID  )  a where 1=1
                                 
                                 ";
                 str += where;
 
-                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by e.addtime desc,a.getstatus,b.UserName");
+                System.Data.DataTable dt = dbc.ExecuteDataTable(str + " order by pssj desc,getstatus,UserName");
 
-                dt.Columns.Add("sysj");
-                foreach (DataRow dr in dt.Rows)
-                {
-                    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
-                    {
-                        dr["sysj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
-                    }
-                }
+                //dt.Columns.Add("sysj");
+                //foreach (DataRow dr in dt.Rows)
+                //{
+                //    if (dr["validhour"] != null && dr["validhour"].ToString() != "")
+                //    {
+                //        dr["sysj"] = Convert.ToDateTime(dr["addtime"]).AddHours(Convert.ToInt32(dr["validhour"].ToString()));
+                //    }
+                //}
 
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
@@ -6092,9 +6102,9 @@ public class CWBBMag
                     cells[i + 1, 4].PutValue(sfsy);
                     cells[i + 1, 4].SetStyle(style4);
 
-                    if (dt.Rows[i]["sysj"] != null && dt.Rows[i]["sysj"].ToString() != "")
+                    if (dt.Rows[i]["updatetime"] != null && dt.Rows[i]["updatetime"].ToString() != "")
                     {
-                        cells[i + 1, 5].PutValue(Convert.ToDateTime(dt.Rows[i]["sysj"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                        cells[i + 1, 5].PutValue(Convert.ToDateTime(dt.Rows[i]["updatetime"]).ToString("yyyy-MM-dd hh:mm:ss"));
                     }
                     cells[i + 1, 5].SetStyle(style4);
 
