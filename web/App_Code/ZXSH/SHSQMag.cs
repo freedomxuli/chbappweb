@@ -26,7 +26,7 @@ public class SHSQMag
 {
 
     [CSMethod("GetSHSQList")]
-    public object GetSHSQList(int pagnum, int pagesize, string zt, string beg, string end)
+    public object GetSHSQList(int pagnum, int pagesize, string zt, string beg, string end,string zxmc)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -54,6 +54,10 @@ public class SHSQMag
                 {
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
                 }
+                if (!string.IsNullOrEmpty(zxmc))
+                {
+                    where += " and " + dbc.C_Like("c.UserXM", zxmc, LikeStyle.LeftAndRightLike);
+                }
 
                 string str= @"select a.*,b.UserXM as shr,c.UserXM as zxmc from tb_b_empower_release a left join tb_b_user b on a.reviewuser=b.UserID
                     left join tb_b_user c on a.adduser=c.UserID
@@ -73,7 +77,7 @@ public class SHSQMag
     }
 
     [CSMethod("GetSHSQListToFile", 2)]
-    public byte[] GetSHSQListToFile(string zt, string beg, string end)
+    public byte[] GetSHSQListToFile(string zt, string beg, string end, string zxmc)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -143,6 +147,10 @@ public class SHSQMag
                 if (!string.IsNullOrEmpty(end))
                 {
                     where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(zxmc))
+                {
+                    where += " and " + dbc.C_Like("c.UserXM", zxmc, LikeStyle.LeftAndRightLike);
                 }
 
                 string str = @"select a.*,b.UserXM as shr,c.UserXM as zxmc from tb_b_empower_release a left join tb_b_user b on a.reviewuser=b.UserID

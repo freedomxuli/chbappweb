@@ -51,7 +51,7 @@ function getList(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_isVerifyType").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_isVerifyType").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_xm").getValue());
 }
 
 function sh(id) {
@@ -171,6 +171,13 @@ Ext.onReady(function () {
                                     dock: 'top',
                                     items: [
                                         {
+                                            xtype: 'textfield',
+                                            id: 'cx_xm',
+                                            width: 160,
+                                            labelWidth: 70,
+                                            fieldLabel: '物流名称'
+                                        },
+                                        {
                                             xtype: 'combobox',
                                             id: 'cx_isVerifyType',
                                             width: 260,
@@ -226,7 +233,7 @@ Ext.onReady(function () {
                                                     text: '导出',
                                                     handler: function () {
                                                         if (privilege("专线审核_审核授权_导出")) {
-                                                            DownloadFile("CZCLZ.SHSQMag.GetSHSQListToFile", "审核授权.xls", Ext.getCmp("cx_isVerifyType").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                            DownloadFile("CZCLZ.SHSQMag.GetSHSQListToFile", "审核授权.xls", Ext.getCmp("cx_isVerifyType").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_xm").getValue());
                                                         }
                                                     }
                                                 }]
