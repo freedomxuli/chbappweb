@@ -910,7 +910,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetClientList")]
-    public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm, string beg, string end)
+    public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm, string beg, string end,string isdonate)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -945,6 +945,10 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 if (!string.IsNullOrEmpty(end))
                 {
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(isdonate))
+                {
+                    where += " and a.isdonate = " + isdonate;
                 }
 
                 string str = @"select a.*,c.roleName,b.roleId,d.SalePoints,e.Points as KFGMPoints from tb_b_user a 
@@ -1302,7 +1306,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetZXUSERToFile", 2)]
-    public byte[] GetZXUSERToFile(string beg, string end)
+    public byte[] GetZXUSERToFile(string beg, string end,string isdonate)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1395,6 +1399,10 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 cells[0, 12].PutValue("承运最大限额");
                 cells[0, 12].SetStyle(style2);
                 cells.SetColumnWidth(12, 20);
+
+                cells[0, 13].PutValue("赠送红包额度");
+                cells[0, 13].SetStyle(style2);
+                cells.SetColumnWidth(13, 20);
                 string where = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
@@ -1403,6 +1411,10 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 if (!string.IsNullOrEmpty(end))
                 {
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
+                }
+                if (!string.IsNullOrEmpty(isdonate))
+                {
+                    where += " and a.isdonate='" + isdonate + "'";
                 }
 
                 string str = @"select a.*,c.roleName,b.roleId,d.SalePoints,e.Points as KFGMPoints from tb_b_user a left join tb_b_user_role b on a.UserID=b.UserID
@@ -1470,6 +1482,12 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                         cells[i + 1, 12].PutValue(Convert.ToDecimal(dt.Rows[i]["carriagemaxmoney"]));
                     }
                     cells[i + 1, 12].SetStyle(style4);
+
+                    if (dt.Rows[i]["redenvelopequota"] != DBNull.Value)
+                    {
+                        cells[i + 1, 13].PutValue(Convert.ToDecimal(dt.Rows[i]["redenvelopequota"]));
+                    }
+                    cells[i + 1, 13].SetStyle(style4);
                 }
 
                 MemoryStream ms = workbook.SaveToStream();

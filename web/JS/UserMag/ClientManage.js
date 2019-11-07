@@ -124,6 +124,26 @@ var roleStore = Ext.create('Ext.data.Store', {
     ]
 });
 
+var isdonateStore = Ext.create('Ext.data.Store', {
+    fields: [
+        { name: 'val' },
+        { name: 'text' }
+    ],
+    data: [
+        {
+            'val': '',
+            'text': '全部',
+        },
+        {
+            'val': '0',
+            'text': '是',
+        },
+        {
+            'val': '1',
+            'text': '否',
+        }
+    ]
+});
 var roleStore1 = Ext.create('Ext.data.Store', {
     fields: [
         { name: 'ClientKind' },
@@ -190,7 +210,7 @@ function getUser(nPage) {
             total: retVal.ac,
             currentPage: retVal.cp
         });
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isdonate").getValue());
 }
 
 
@@ -1955,6 +1975,13 @@ Ext.onReady(function () {
                     },
                     {
                         xtype: 'gridcolumn',
+                        dataIndex: 'redenvelopequota',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "赠送红包额度"
+                    },
+                    {
+                        xtype: 'gridcolumn',
                         dataIndex: 'KFGMPoints',
                         width: 140,
                         sortable: false,
@@ -2085,6 +2112,19 @@ Ext.onReady(function () {
                                     width: 150
                                 },
                                 {
+                                    xtype: 'combobox',
+                                    id: 'cx_isdonate',
+                                    width: 220,
+                                    fieldLabel: '是否配置赠送红包',
+                                    editable: false,
+                                    labelWidth: 110,
+                                    store: isdonateStore,
+                                    queryMode: 'local',
+                                    displayField: 'text',
+                                    valueField: 'val',
+                                    value: ''
+                                },
+                                {
                                     xtype: 'buttongroup',
                                     title: '',
                                     items: [
@@ -2139,7 +2179,7 @@ Ext.onReady(function () {
                                             iconCls: 'view',
                                             text: '导出专线用户统计表',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.YHGLClass.GetZXUSERToFile", "专线用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                DownloadFile("CZCLZ.YHGLClass.GetZXUSERToFile", "专线用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isdonate").getValue());
                                             }
                                         },
                                         {

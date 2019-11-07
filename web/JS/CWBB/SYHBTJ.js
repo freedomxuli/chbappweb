@@ -96,7 +96,7 @@ Ext.onReady(function () {
                                             iconCls: 'view',
                                             text: '导出',
                                             handler: function () {
-                                                if (privilege("系统维护中心_分享记录_导出")) {
+                                                if (privilege("系统维护中心_用户红包剩余统计_导出")) {
                                                     DownloadFile("CZCLZ.CWBBMag.GetRedenvelopeToFile", "红包剩余数量统计表.xls", Ext.getCmp("cx_residuenum").getValue());
                                                 }
                                             }
