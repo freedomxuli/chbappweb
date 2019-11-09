@@ -19,9 +19,11 @@ var store = createSFW4Store({
         { name: 'linkedunit' },
         { name: 'drivermemo' },
         { name: 'caruser' },
-        { name: 'ispushwr' },
+        { name: 'ispushwr_car' },
+        { name: 'ispushwr_driver' },
         { name: 'idcard' },
-        { name: 'roadnumber' }
+        { name: 'roadnumber' },
+        { name: 'drivername' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getCar(nPage);
@@ -97,11 +99,21 @@ function tp2(type, userId) {
     win2.show();
 }
 
-function TS(id) {
-    CS('CZCLZ.CarMag.TS', function (retVal) {
+function TSCar(id) {
+    CS('CZCLZ.CarMag.TSCar', function (retVal) {
         if (retVal) {
             getCar(1);
-            Ext.MessageBox.alert('确认', '推送成功！');
+            Ext.MessageBox.alert('确认', '推送车辆成功！');
+        }
+    }, CS.onError, id);
+}
+
+
+function TSDriver(id) {
+    CS('CZCLZ.CarMag.TSDriver', function (retVal) {
+        if (retVal) {
+            getCar(1);
+            Ext.MessageBox.alert('确认', '推送司机成功！');
         }
     }, CS.onError, id);
 }
@@ -606,16 +618,22 @@ Ext.onReady(function () {
                     {
                         text: '操作',
                         dataIndex: 'id',
-                        width: 180,
+                        width: 270,
                         sortable: false,
                         menuDisabled: true,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                             var str;
                             str = "<a onclick='EditCar(\"" + value + "\");'>修改</a>  <a onclick='EditPic(\"" + value + "\");'>图片修改</a>";
-                            if (record.data.ispushwr == 0) {
-                                str += "  <a onclick='TS(\"" + value + "\");'>修改推送</a>"
+                            if (record.data.ispushwr_car == 0) {
+                                str += "  <a onclick='TSCar(\"" + value + "\");'>修改车辆推送</a>"
                             } else {
-                                str += "  <a onclick='TS(\"" + value + "\");'>新增推送</a>"
+                                str += "  <a onclick='TSCar(\"" + value + "\");'>新增车辆推送</a>"
+                            }
+
+                            if (record.data.ispushwr_driver == 0) {
+                                str += "  <a onclick='TSDriver(\"" + value + "\");'>修改司机推送</a>"
+                            } else {
+                                str += "  <a onclick='TSDriver(\"" + value + "\");'>新增司机推送</a>"
                             }
                             return str;
                         }

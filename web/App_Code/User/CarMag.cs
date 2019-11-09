@@ -125,7 +125,7 @@ public class CarMag
                       var sj = "";
                       if (!jsr["drivername"].IsNull && !jsr["drivername"].IsEmpty)
                       {
-                          DataTable sjdt = dbc.ExecuteDataTable("select * from tb_b_user where isdriver = 1 and clientkind = 1 and userName=" + dbc.ToSqlValue(jsr["drivername"].ToString()));
+                          DataTable sjdt = dbc.ExecuteDataTable("select * from tb_b_user where clientkind = 1 and userName=" + dbc.ToSqlValue(jsr["drivername"].ToString()));
                           if (sjdt.Rows.Count > 0)
                           {
                               sj = sjdt.Rows[0]["UserID"].ToString();
@@ -278,8 +278,8 @@ public class CarMag
           }
       }
 
-      [CSMethod("TS")]
-      public object TS(string carid)
+      [CSMethod("TSCar")]
+      public object TSCar(string carid)
       {
           using (DBConnection dbc = new DBConnection())
           {
@@ -295,7 +295,7 @@ public class CarMag
                   if (dt.Rows.Count > 0)
                   {
 
-                      if (dt.Rows[0]["ispushwr"].ToString() == "0")
+                      if (dt.Rows[0]["ispushwr_car"].ToString() == "0")
                       {
                           string driving_license_pic_url = "";
                           DataRow[] drs7 = picdt.Select("carphotogltype=7", "addtime desc");
@@ -340,73 +340,17 @@ public class CarMag
                           var response = (HttpWebResponse)request.GetResponse();
                           var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
 
-                          string id_pic1_pic_url = "";
-                          DataRow[] drs2 = picdt.Select("carphotogltype=2", "addtime desc");
-                          if (drs2.Length > 0)
-                          {
-                              id_pic1_pic_url = PICServiceURL + drs2[0]["FJ_ID"].ToString() + "." + drs2[0]["FJ_MC"].ToString();
-                          }
-                          else
-                          {
-                              throw new Exception("请先上传身份证头像面再推送！");
-                          }
-
-                          string id_pic2_pic_url = "";
-                          DataRow[] drs3 = picdt.Select("carphotogltype=3", "addtime desc");
-                          if (drs3.Length > 0)
-                          {
-                              id_pic2_pic_url = PICServiceURL + drs3[0]["FJ_ID"].ToString() + "." + drs3[0]["FJ_MC"].ToString();
-                          }
-                          else
-                          {
-                              throw new Exception("请先上传身份证头像面再推送！");
-                          }
-
-                          string driver_lic_pic_url = "";
-                          DataRow[] drs9 = picdt.Select("carphotogltype=9", "addtime desc");
-                          if (drs9.Length > 0)
-                          {
-                              driver_lic_pic_url = PICServiceURL + drs9[0]["FJ_ID"].ToString() + "." + drs9[0]["FJ_MC"].ToString();
-                          }
-                          else
-                          {
-                              throw new Exception("请先上传身份证头像面再推送！");
-                          }
-
-                          string _url_sj = System.Configuration.ConfigurationManager.AppSettings["CARServiceURL"].ToString() + "ApiDriver/edit";
-                          string jsonParam_sj = new JavaScriptSerializer().Serialize(new
-                          {
-                              id_card_no = dt.Rows[0]["idcard"],//                  身份证号码 (已身份证号码为准)
-                              real_name = dt.Rows[0]["driverxm"],//                  姓名
-                              mobile = dt.Rows[0]["caruser"],//                    联系手机号
-                              id_pic1_pic_url = id_pic1_pic_url,//             身份证头像面
-                              id_pic2_pic_url = id_pic2_pic_url,//             身份证国徽面
-                              driver_lic_pic_url = driver_lic_pic_url//          驾驶证图片
-                          });
-                          var request_sj = (HttpWebRequest)WebRequest.Create(_url_sj);
-                          request_sj.Method = "POST";
-                          request_sj.ContentType = "application/json;charset=UTF-8";
-                          var byteData_sj = Encoding.UTF8.GetBytes(jsonParam_sj);
-                          var length_sj = byteData.Length;
-                          request_sj.ContentLength = length_sj;
-                          var writer_sj = request_sj.GetRequestStream();
-                          writer_sj.Write(byteData, 0, length_sj);
-                          writer_sj.Close();
-                          var response_sj = (HttpWebResponse)request_sj.GetResponse();
-                          var responseString_sj = new StreamReader(response_sj.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
-
 
                           JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
-                          JObject jo_sj = (JObject)JsonConvert.DeserializeObject(responseString_sj);
                           try
                           {
-                              if (Convert.ToBoolean(jo_sj["success"].ToString()) && Convert.ToBoolean(jo["success"].ToString()))
+                              if (jo["code"].ToString() == "0")
                               {
                                   DataTable odt = dbc.GetEmptyDataTable("tb_b_car");
                                   DataTableTracker odtt = new DataTableTracker(odt);
                                   DataRow odr = odt.NewRow();
                                   odr["id"] = carid;
-                                  odr["ispushwr"] = 0;
+                                  odr["ispushwr_car"] = 0;
                                   odt.Rows.Add(odr);
                                   dbc.UpdateTable(odt, odtt);
 
@@ -420,7 +364,7 @@ public class CarMag
                           }
                           catch (Exception ex)
                           {
-                              throw new Exception(jo["details"].ToString() + jo_sj["details"].ToString());
+                              throw new Exception(jo["msg"].ToString());
                           }
                       }
                       else
@@ -469,6 +413,68 @@ public class CarMag
                           var response = (HttpWebResponse)request.GetResponse();
                           var responseString = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
 
+                          JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
+                          try
+                          {
+                              if (jo["code"].ToString() == "0")
+                              {
+                                  DataTable odt = dbc.GetEmptyDataTable("tb_b_car");
+                                  DataTableTracker odtt = new DataTableTracker(odt);
+                                  DataRow odr = odt.NewRow();
+                                  odr["id"] = carid;
+                                  odr["ispushwr_car"] = 0;
+                                  odt.Rows.Add(odr);
+                                  dbc.UpdateTable(odt, odtt);
+
+                                  dbc.CommitTransaction();
+                                  return true;
+                              }
+                              else
+                              {
+                                  throw new Exception("推送失败");
+                              }
+                          }
+                          catch (Exception ex)
+                          {
+                              //if (jo["msg"].ToString() == "车辆牌照号已存在!")
+                              //{
+                              //    dbc.ExecuteDataTable("update tb_b_car  set ispushwr=0 where  id=" + dbc.ToSqlValue(carid));
+                              //}
+                              throw new Exception(jo["msg"].ToString());
+                          }
+                      }
+
+                  }
+
+                  return true;
+              }
+              catch (Exception ex)
+              {
+                  throw ex;
+              }
+          }
+      }
+
+
+      [CSMethod("TSDriver")]
+      public object TSDriver(string carid)
+      {
+          using (DBConnection dbc = new DBConnection())
+          {
+              try
+              {
+                  string str = "select * from tb_b_car where id=" + dbc.ToSqlValue(carid);
+                  DataTable dt = dbc.ExecuteDataTable(str);
+
+                  string picstr = @"select a.carid,a.carphotoglid,a.carphotogltype,b.FJ_ID,b.FJ_MC,a.addtime  from tb_b_carphoto a left join tb_b_FJ b on a.FJ_ID=b.FJ_ID where a.status=0 and a.carid="
+                                + dbc.ToSqlValue(carid);
+                  DataTable picdt = dbc.ExecuteDataTable(picstr);
+
+                  if (dt.Rows.Count > 0)
+                  {
+
+                      if (dt.Rows[0]["ispushwr_driver"].ToString() == "0")
+                      {
                           string id_pic1_pic_url = "";
                           DataRow[] drs2 = picdt.Select("carphotogltype=2", "addtime desc");
                           if (drs2.Length > 0)
@@ -499,7 +505,91 @@ public class CarMag
                           }
                           else
                           {
+                              throw new Exception("请先上传驾驶证再推送！");
+                          }
+
+                          string _url_sj = System.Configuration.ConfigurationManager.AppSettings["CARServiceURL"].ToString() + "ApiDriver/edit";
+                          string jsonParam_sj = new JavaScriptSerializer().Serialize(new
+                          {
+                              id_card_no = dt.Rows[0]["idcard"],//                  身份证号码 (已身份证号码为准)
+                              real_name = dt.Rows[0]["driverxm"],//                  姓名
+                              mobile = dt.Rows[0]["caruser"],//                    联系手机号
+                              id_pic1_pic_url = id_pic1_pic_url,//             身份证头像面
+                              id_pic2_pic_url = id_pic2_pic_url,//             身份证国徽面
+                              driver_lic_pic_url = driver_lic_pic_url//          驾驶证图片
+                          });
+                          var request_sj = (HttpWebRequest)WebRequest.Create(_url_sj);
+                          request_sj.Method = "POST";
+                          request_sj.ContentType = "application/json;charset=UTF-8";
+                          var byteData_sj = Encoding.UTF8.GetBytes(jsonParam_sj);
+                          var length_sj = byteData_sj.Length;
+                          request_sj.ContentLength = length_sj;
+                          var writer_sj = request_sj.GetRequestStream();
+                          writer_sj.Write(byteData_sj, 0, length_sj);
+                          writer_sj.Close();
+                          var response_sj = (HttpWebResponse)request_sj.GetResponse();
+                          var responseString_sj = new StreamReader(response_sj.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
+
+
+                          JObject jo_sj = (JObject)JsonConvert.DeserializeObject(responseString_sj);
+                          try
+                          {
+                              if (jo_sj["code"].ToString() == "0")
+                              {
+                                  DataTable odt = dbc.GetEmptyDataTable("tb_b_car");
+                                  DataTableTracker odtt = new DataTableTracker(odt);
+                                  DataRow odr = odt.NewRow();
+                                  odr["id"] = carid;
+                                  odr["ispushwr_driver"] = 0;
+                                  odt.Rows.Add(odr);
+                                  dbc.UpdateTable(odt, odtt);
+
+                                  dbc.CommitTransaction();
+                                  return true;
+                              }
+                              else
+                              {
+                                  throw new Exception("推送失败");
+                              }
+                          }
+                          catch (Exception ex)
+                          {
+                              throw new Exception(jo_sj["msg"].ToString());
+                          }
+                      }
+                      else
+                      {
+                          string id_pic1_pic_url = "";
+                          DataRow[] drs2 = picdt.Select("carphotogltype=2", "addtime desc");
+                          if (drs2.Length > 0)
+                          {
+                              id_pic1_pic_url = PICServiceURL + drs2[0]["FJ_ID"].ToString() + "." + drs2[0]["FJ_MC"].ToString();
+                          }
+                          else
+                          {
                               throw new Exception("请先上传身份证头像面再推送！");
+                          }
+
+                          string id_pic2_pic_url = "";
+                          DataRow[] drs3 = picdt.Select("carphotogltype=3", "addtime desc");
+                          if (drs3.Length > 0)
+                          {
+                              id_pic2_pic_url = PICServiceURL + drs3[0]["FJ_ID"].ToString() + "." + drs3[0]["FJ_MC"].ToString();
+                          }
+                          else
+                          {
+                              throw new Exception("请先上传身份证头像面再推送！");
+                          }
+
+                          string driver_lic_pic_url = "";
+                          DataRow[] drs9 = picdt.Select("carphotogltype=9", "addtime desc");
+                          if (drs9.Length > 0)
+                          {
+                              driver_lic_pic_url = PICServiceURL + drs9[0]["FJ_ID"].ToString() + "." + drs9[0]["FJ_MC"].ToString();
+                          }
+                          else
+                          {
+                              throw new Exception("请先上传驾驶证再推送！");
                           }
 
                           string _url_sj = System.Configuration.ConfigurationManager.AppSettings["CARServiceURL"].ToString() + "ApiDriver/add";
@@ -516,26 +606,25 @@ public class CarMag
                           request_sj.Method = "POST";
                           request_sj.ContentType = "application/json;charset=UTF-8";
                           var byteData_sj = Encoding.UTF8.GetBytes(jsonParam_sj);
-                          var length_sj = byteData.Length;
+                          var length_sj = byteData_sj.Length;
                           request_sj.ContentLength = length_sj;
                           var writer_sj = request_sj.GetRequestStream();
-                          writer_sj.Write(byteData, 0, length_sj);
+                          writer_sj.Write(byteData_sj, 0, length_sj);
                           writer_sj.Close();
                           var response_sj = (HttpWebResponse)request_sj.GetResponse();
                           var responseString_sj = new StreamReader(response_sj.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
 
 
-                          JObject jo = (JObject)JsonConvert.DeserializeObject(responseString);
                           JObject jo_sj = (JObject)JsonConvert.DeserializeObject(responseString_sj);
                           try
                           {
-                              if (Convert.ToBoolean(jo_sj["success"].ToString()) && Convert.ToBoolean(jo["success"].ToString()))
+                              if (jo_sj["code"].ToString()=="0")
                               {
                                   DataTable odt = dbc.GetEmptyDataTable("tb_b_car");
                                   DataTableTracker odtt = new DataTableTracker(odt);
                                   DataRow odr = odt.NewRow();
                                   odr["id"] = carid;
-                                  odr["ispushwr"] = 0;
+                                  odr["ispushwr_driver"] = 0;
                                   odt.Rows.Add(odr);
                                   dbc.UpdateTable(odt, odtt);
 
@@ -553,7 +642,7 @@ public class CarMag
                               //{
                               //    dbc.ExecuteDataTable("update tb_b_car  set ispushwr=0 where  id=" + dbc.ToSqlValue(carid));
                               //}
-                              throw new Exception(jo["msg"].ToString() + jo_sj["msg"].ToString());
+                              throw new Exception(jo_sj["msg"].ToString());
                           }
                       }
 
