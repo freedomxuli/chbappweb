@@ -1991,13 +1991,20 @@ public class CYMag
 
     }
 
+    public int ConvertDateTimeInt(DateTime time)
+    {
+        System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+        return (int)(time - startTime).TotalSeconds;
+    }
+
     [CSMethod("PushWr")]
-    public bool PushWr(string carriageid)
+    public string PushWr(string carriageid)
     {
         using (DBConnection dbc = new DBConnection())
         {
             try
             {
+                #region 准备数据
                 DateTime _dtStart = new DateTime(1970, 1, 1, 8, 0, 0);
                 string sqlstr = @"select a.*,b.dq_bm f_dq_bm,c.dq_bm t_dq_bm,d.UserXM,d.UserName,e.carnumber,f.addtime flowaddtime,
 g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full_Url3 from tb_b_carriage a
@@ -2014,38 +2021,65 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
                 DataTable dt = dbc.ExecuteDataTable(sqlstr);
                 if (dt.Rows.Count == 0)
                 {
-                    return false;
+                    return "称运单不存在。";
                 }
-                //1.发布货源接口
+                #endregion
+
+                carriageid = carriageid.Replace("-", "");
                 string url = System.Configuration.ConfigurationManager.AppSettings["ServiceBaseURL"].ToString();
-                var request1 = (HttpWebRequest)WebRequest.Create(ServiceURL + "car/PlanGoods/add");
+                #region 1.发布货源接口
+                DataRow dr1 = dt.Rows[0];
+                DateTime addtime = Convert.ToDateTime(dr1["addtime"].ToString());
+
+                var request1 = (HttpWebRequest)WebRequest.Create(url + "car/PlanGoods/add");
                 request1.Method = "POST";
                 request1.ContentType = "application/json;charset=UTF-8";
                 var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
                 {
-                    goods_no = dt.Rows[0]["carriageid"].ToString(),//(合作方货源编号)
-                    goods_price = string.IsNullOrEmpty(dt.Rows[0]["carriagepoints"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriagepoints"]) / 30000, //(运输单价(单位：分))
+                    goods_no = carriageid,//(合作方货源编号)
+                    goods_price = string.IsNullOrEmpty(dr1["carriagepoints"].ToString()) ? 0m : Convert.ToDecimal(dr1["carriagepoints"]) / 30000, //(运输单价(单位：分))
                     goods_type = "999",// (货物类型)
                     goods_name = "百货",//(货物名称)
                     goods_num = 30000,// (货量(单位：KG))
-                    load_time = Convert.ToInt64(Convert.ToDateTime(dt.Rows[0]["addtime"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//(起运时间(时间戳))
-                    load_place_id = dt.Rows[0]["f_dq_bm"].ToString(),// 找tb_b_dq表找编码 (装货地id(省市区编码或港口编码))
-                    unload_place_id = dt.Rows[0]["t_dq_bm"].ToString(),// 找tb_b_dq表找编码（卸货地id(省市区编码或港口编码)）
+                    load_time = ConvertDateTimeInt(addtime),//(起运时间(时间戳))
+                    load_place_id = dr1["f_dq_bm"].ToString(),// 找tb_b_dq表找编码 (装货地id(省市区编码或港口编码))
+                    unload_place_id = dr1["t_dq_bm"].ToString(),// 找tb_b_dq表找编码（卸货地id(省市区编码或港口编码)）
                     load_place_detail = "物流园区",//(装货地详细地址(不包含省市区))
-                    unload_place_detail = dt.Rows[0]["carriageaddress"].ToString(),//(卸货地详细地址(不包含省市区))
-                    shipper_contact_name = dt.Rows[0]["UserXM"].ToString(),//(托运方联系人名称)
-                    shipper_contact_mobile = dt.Rows[0]["UserName"].ToString(),//(托运方手机号)
+                    unload_place_detail = dr1["carriageaddress"].ToString(),//(卸货地详细地址(不包含省市区))
+                    shipper_contact_name = dr1["UserXM"].ToString(),//(托运方联系人名称)
+                    shipper_contact_mobile = dr1["UserName"].ToString(),//(托运方手机号)
                     consi_name = "查货宝",//(收货方名称)
-                    consi_contact_name = "查货宝联系人",//      (收货联系人姓名)
-                    consi_contact_mobile = "查货宝联系人手机"//   (收货人手机号)
+                    consi_contact_name = "刘洁宏",//      (收货联系人姓名)
+                    consi_contact_mobile = "15051939262"//   (收货人手机号)
                 }));
                 var length1 = byteData1.Length;
                 request1.ContentLength = length1;
                 var writer1 = request1.GetRequestStream();
                 writer1.Write(byteData1, 0, length1);
                 writer1.Close();
+                HttpWebResponse response;
+                try
+                {
+                    //获得响应流
+                    response = (HttpWebResponse)request1.GetResponse();
+                }
+                catch (WebException ex)
+                {
+                    response = ex.Response as HttpWebResponse;
+                }
+                Stream s = response.GetResponseStream();
+                StreamReader sRead = new StreamReader(s);
+                string postContent = sRead.ReadToEnd();
+                sRead.Close();
+                JavaScriptSerializer js = new JavaScriptSerializer();
+                resultWr res1 = js.Deserialize<resultWr>(postContent);
+                if (res1.code != 0 && res1.code != 110)
+                {
+                    return res1.msg;
+                }
+                #endregion
 
-                //2.预约货源
+                #region 2.预约货源
                 DataRow dr2 = dt.Rows[0];
                 decimal carriageoilmoney = 0m;
                 if (!string.IsNullOrEmpty(dr2["carriageoilmoney"].ToString()))
@@ -2062,23 +2096,31 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
                 {
                     carriagemoney = Convert.ToDecimal(dr2["carriagemoney"].ToString());
                 }
-                var request2 = (HttpWebRequest)WebRequest.Create(ServiceURL + "car/PlanGoods/createOrder");
+                if (string.IsNullOrEmpty(dr2["flowaddtime"].ToString()))
+                {
+                    return "卸货时间不存在。";
+                }
+                if (string.IsNullOrEmpty(dr2["flowaddtime2"].ToString()))
+                {
+                    return "交易完成时间不存在。";
+                }
+                var request2 = (HttpWebRequest)WebRequest.Create(url + "car/PlanGoods/createOrder");
                 request2.Method = "POST";
                 request2.ContentType = "application/json;charset=UTF-8";
                 var byteData2 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
                 {
-                    goods_no = dr2["carriageid"].ToString(),//（合作方货源编号）
+                    goods_no = carriageid,//（合作方货源编号）
                     order_no = dr2["carriagecode"].ToString(),//tb_b_carriage.carriagecode（合作方唯一业务单号）
                     waybill_amount = carriageoilmoney + carriagemoney + carriagemoneynew,//(tb_b_carriage.carriageoilmoney+carriagemoney+carriagemoneynew) (合同金额(司机的劳务费+油费+过路费、单位：分)）
                     invoice_amount = (carriagemoney + carriagemoneynew) * 1.03m,//(tb_b_carriage.carriagemoney+carriagemoneynew) *1.03（开票金额(含税、司机的劳务费*(1+0.03)、单位：分、开票金额计算公式以商务合同约定为准)）
                     labour_amount = carriagemoney + carriagemoneynew,//(tb_b_carriage.carriagemoney+carriagemoneynew) （运输劳务费用(不含税、单位：分)）
-                    contract_time = Convert.ToInt64(Convert.ToDateTime(dr2["addtime"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//（合同签订日期(时间戳)）
+                    contract_time = ConvertDateTimeInt(addtime),//（合同签订日期(时间戳)）
                     carrier_mobile = dr2["UserName"].ToString(),//（承运人手机号(个体承运人为司机手机号)）
                     transport_mobile = dr2["UserName"].ToString(),//（司机手机号）
                     transport_type = 1,//（运输工具类型(1车辆 2船舶)(目前传1)）
                     trans_vehicle_name = dr2["carnumber"].ToString(),//tb_b_carriage.carid.tb_b_car.carnumber（运输工具名称(车牌号)）
-                    unload_time = Convert.ToInt64(Convert.ToDateTime(dr2["flowaddtime"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//tb_b_carriage_flow.addtime(carriage status = 90)（卸货时间(时间戳)）
-                    finish_time = Convert.ToInt64(Convert.ToDateTime(dr2["flowaddtime2"].ToString()).Subtract(_dtStart).TotalMilliseconds).ToString(),//(carriage status = 50)（交易完成时间(时间戳)）
+                    unload_time = ConvertDateTimeInt(Convert.ToDateTime(dr2["flowaddtime"].ToString())),//tb_b_carriage_flow.addtime(carriage status = 90)（卸货时间(时间戳)）
+                    finish_time = ConvertDateTimeInt(Convert.ToDateTime(dr2["flowaddtime2"].ToString())),//(carriage status = 50)（交易完成时间(时间戳)）
                     pay_style = "第三方支付",//（支付方式）
                     pay_channel = "宝付",//（支付渠道）
                     pay_pic = dr2["Full_Url1"],//tb_b_carriage.photo(type = 0)（支付凭证图片URL地址(支持多张，逗号拼接)）
@@ -2090,21 +2132,136 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
                 var writer2 = request2.GetRequestStream();
                 writer2.Write(byteData2, 0, length2);
                 writer2.Close();
+                HttpWebResponse response2;
+                try
+                {
+                    //获得响应流
+                    response2 = (HttpWebResponse)request2.GetResponse();
+                }
+                catch (WebException ex)
+                {
+                    response2 = ex.Response as HttpWebResponse;
+                }
+                Stream s2 = response2.GetResponseStream();
+                StreamReader sRead2 = new StreamReader(s2);
+                string postContent2 = sRead2.ReadToEnd();
+                sRead2.Close();
 
-                dbc.BeginTransaction();
+                JavaScriptSerializer js2 = new JavaScriptSerializer();
+                resultWr res2 = js.Deserialize<resultWr>(postContent2);
+                if (res2.code != 0)
+                {
+                    return res2.msg;
+                }
+                #endregion
+
                 //3.更新tb_b_carriage
                 sqlstr = "update tb_b_carriage set ispushwr=0 where carriageid=" + dbc.ToSqlValue(carriageid);
                 dbc.ExecuteNonQuery(sqlstr);
-                dbc.CommitTransaction();
-                return true;
+                return "推送成功";
             }
             catch (Exception ex)
             {
-                dbc.RoolbackTransaction();
                 throw ex;
             }
         }
     }
+
+    /// <summary>
+    /// 生成并下载合同
+    /// </summary>
+    /// <param name="carriageid"></param>
+    /// <returns></returns>
+    [CSMethod("DealHt", 2)]
+    public byte[] DealHt(string carriageid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            Aspose.Words.Document doc = new Aspose.Words.Document(System.Web.HttpContext.Current.Server.MapPath("~/Mb/司机协议（干线运输服务）20191108.docx"));
+            //获取书签
+            Aspose.Words.Bookmark sjxm = doc.Range.Bookmarks["司机姓名"];
+            Aspose.Words.Bookmark sjxm2 = doc.Range.Bookmarks["司机姓名2"];
+            Aspose.Words.Bookmark cysj = doc.Range.Bookmarks["承运时间"];
+            Aspose.Words.Bookmark skr = doc.Range.Bookmarks["收款人"];
+
+            string sqlstr = @"select b.driverxm,c.UserXM,a.addtime from tb_b_carriage a
+                            left join tb_b_car b on a.carid=b.id
+                            left join tb_b_user c on b.caruser=c.UserName
+                            where a.carriageid=" + dbc.ToSqlValue(carriageid);
+            DataTable dt = dbc.ExecuteDataTable(sqlstr);
+            if (dt.Rows.Count > 0)
+            {
+                sjxm.Text = dt.Rows[0]["driverxm"].ToString();
+                sjxm2.Text = dt.Rows[0]["driverxm"].ToString();
+                cysj.Text = Convert.ToDateTime(dt.Rows[0]["addtime"].ToString()).ToString("yyyy年MM月dd日");
+                skr.Text = dt.Rows[0]["UserXM"].ToString();
+            }
+            doc.MailMerge.DeleteFields();
+            var docStream = new MemoryStream();
+            doc.Save(docStream, Aspose.Words.Saving.SaveOptions.CreateSaveOptions(Aspose.Words.SaveFormat.Doc));
+            byte[] filedata = docStream.ToArray();
+            return filedata;
+        }
+    }
+
+    /// <summary>
+    /// 下载支付明细模板
+    /// </summary>
+    /// <returns></returns>
+    [CSMethod("DealPayLine", 2)]
+    public byte[] DealPayLine()
+    {
+        Aspose.Words.Document doc = new Aspose.Words.Document(System.Web.HttpContext.Current.Server.MapPath("~/Mb/支付明细.docx"));
+        var docStream = new MemoryStream();
+        doc.Save(docStream, Aspose.Words.Saving.SaveOptions.CreateSaveOptions(Aspose.Words.SaveFormat.Doc));
+        byte[] filedata = docStream.ToArray();
+        return filedata;
+    }
+
+    [CSMethod("DealHd", 2)]
+    public byte[] DealHd(string carriageid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            Workbook workbook = new Workbook(System.Web.HttpContext.Current.Server.MapPath("~/Mb/回单模板.xlsx"));//工作簿
+            Worksheet sheet = workbook.Worksheets[0]; //工作表
+            Cells cells = sheet.Cells;//单元格
+
+            string sqlstr = @"select c.UserXM,d.addtime,a.carriagefromprovince,a.carriagefromcity,a.carriagetoprovince,a.carriagetocity,b.driverxm,b.caruser,a.carriagemoney,a.carriagemoneynew from tb_b_carriage a
+                            left join tb_b_car b on a.carid=b.id
+                            left join tb_b_user c on b.caruser=c.UserName
+                            left join tb_b_carriage_flow d on a.carriageid=d.carriageid and d.carriagestatus=90
+                            where a.carriageid=" + dbc.ToSqlValue(carriageid);
+            DataTable dt = dbc.ExecuteDataTable(sqlstr);
+            if (dt.Rows.Count > 0)
+            {
+                cells[1, 1].PutValue(dt.Rows[0]["UserXM"].ToString());
+                cells[1, 3].PutValue(string.IsNullOrEmpty(dt.Rows[0]["addtime"].ToString()) ? "" : Convert.ToDateTime(dt.Rows[0]["addtime"].ToString()).ToString("yyyy/MM/dd hh:mm:ss"));
+                cells[2, 1].PutValue(dt.Rows[0]["carriagefromprovince"].ToString() + dt.Rows[0]["carriagefromcity"].ToString() + "物流园区");
+                cells[2, 3].PutValue(dt.Rows[0]["carriagetoprovince"].ToString() + dt.Rows[0]["carriagetocity"].ToString());
+                cells[4, 1].PutValue(dt.Rows[0]["driverxm"].ToString());
+                cells[4, 3].PutValue(dt.Rows[0]["caruser"].ToString());
+                decimal money1 = string.IsNullOrEmpty(dt.Rows[0]["carriagemoney"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriagemoney"].ToString());
+                decimal money2 = string.IsNullOrEmpty(dt.Rows[0]["carriagemoneynew"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriagemoneynew"].ToString());
+                cells[5, 1].PutValue(money1 + money2);
+            }
+
+            MemoryStream ms = workbook.SaveToStream();
+            byte[] bt = ms.ToArray();
+            return bt;
+        }
+    }
     #endregion
+}
+
+public class resultWr
+{
+    private string _msg;
+    private int _code;
+    private string _data;
+
+    public string msg { get; set; }
+    public int code { get; set; }
+    public string data { get; set; }
 }
 

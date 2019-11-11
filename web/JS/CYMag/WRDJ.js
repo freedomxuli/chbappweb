@@ -289,13 +289,20 @@ Ext.define('tswrWin', {
                     {
                         text: '合同模板下载',
                         handler: function () {
-                            //DownloadFile("CZCLZ.YHGLClass.GetEWMToFile1", "二维码.jpg", id);
+                            DownloadFile("CZCLZ.CYMag.DealHt", "合同模板.doc", id);
+                        }
+                    },
+                    {
+                        text: '支付明细模板下载',
+                        handler: function () {
+                            alert(1111);
+                            DownloadFile("CZCLZ.CYMag.DealPayLine", "支付明细模板.doc","");
                         }
                     },
                     {
                         text: '回单模板下载',
                         handler: function () {
-                            //DownloadFile("CZCLZ.YHGLClass.GetEWMToFile1", "二维码.jpg", id);
+                            DownloadFile("CZCLZ.CYMag.DealHd", "回单模板.xls", id);
                         }
                     },
                     {
@@ -304,7 +311,7 @@ Ext.define('tswrWin', {
                             Ext.MessageBox.confirm("提示", "是否推送？", function (obj) {
                                 if (obj == "yes") {
                                     CS('CZCLZ.CYMag.PushWr', function (retVal) {
-                                        Ext.Msg.alert('提醒', '推送成功！');
+                                        Ext.Msg.alert('提醒', retVal);
                                         DataBind(1);
                                         Ext.getCmp("tswrWin").close();
                                     }, CS.onError, id);
@@ -349,10 +356,25 @@ Ext.define('CYDView', {
                         text: "操作",
                         width: 100,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                            if (record.data.ispushwr == 1) {
-                                var str = "<a onclick='TSWR(\"" + value + "\");'>推送物润</a>";
-                                return str;
-                            }
+                            //if (record.data.ispushwr == 1) {
+                            var str = "<a onclick='TSWR(\"" + value + "\");'>推送物润</a>";
+                            return str;
+                            //}
+                        }
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'ispushwr',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "推送状态",
+                        width: 100,
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            if (value == 1) {
+                                return "未推送";
+                            } else if (value == 0) {
+                                return "已推送";
+                            } 
                         }
                     },
                     {

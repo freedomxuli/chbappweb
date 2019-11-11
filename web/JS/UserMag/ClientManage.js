@@ -2041,7 +2041,7 @@ Ext.onReady(function () {
                     {
                         text: '操作',
                         dataIndex: 'UserID',
-                        width: 650,
+                        width: 700,
                         sortable: false,
                         menuDisabled: true,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {

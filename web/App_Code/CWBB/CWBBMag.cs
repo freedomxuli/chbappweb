@@ -6649,7 +6649,7 @@ left join tb_b_user d on b.sanfanguserid = d.UserID  )  a where 1=1
 
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    
+
 
                     if (!string.IsNullOrEmpty(dt.Rows[i]["UserName"].ToString()))
                     {
@@ -6662,6 +6662,397 @@ left join tb_b_user d on b.sanfanguserid = d.UserID  )  a where 1=1
                     cells[i + 1, 0].SetStyle(style4);
 
                     cells[i + 1, 1].PutValue(dt.Rows[i]["ResidueNum"]);
+                    cells[i + 1, 1].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
+
+    #region 专线自发布统计
+    [CSMethod("GetZxzfbTjByPage")]
+    public object GetZxzfbTjByPage(int pagnum, int pagesize, JSReader jsr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                #region 参数
+                JSReader[] jsr_fenda = jsr.ToArray();
+                string cx_gzs = jsr_fenda[0];
+                string gzsWhere = "";
+                if (!string.IsNullOrEmpty(cx_gzs))
+                {
+                    gzsWhere += " and a.num >=" + cx_gzs;
+                }
+                string cx_gzs2 = jsr_fenda[1];
+                if (!string.IsNullOrEmpty(cx_gzs2))
+                {
+                    gzsWhere += " and a.num <=" + cx_gzs2;
+                }
+                string cx_zhpf = jsr_fenda[2];
+                string where = "";
+                if (!string.IsNullOrEmpty(cx_zhpf))
+                {
+                    where += "and grade >= " + cx_zhpf;
+                }
+                string cx_zhpf2 = jsr_fenda[3];
+                if (!string.IsNullOrEmpty(cx_zhpf2))
+                {
+                    where += "and grade <= " + cx_zhpf2;
+                }
+                string cx_pjs = jsr_fenda[4];
+                string pjsWhere = "";
+                if (!string.IsNullOrEmpty(cx_pjs))
+                {
+                    pjsWhere += " and a.num >= " + cx_pjs;
+                }
+                string cx_pjs2 = jsr_fenda[5];
+                if (!string.IsNullOrEmpty(cx_pjs2))
+                {
+                    pjsWhere += " and a.num <= " + cx_pjs2;
+                }
+                string cx_dprs = jsr_fenda[6];
+                string dprsWhere = "";
+                if (!string.IsNullOrEmpty(cx_dprs))
+                {
+                    dprsWhere += " and a.num >= " + cx_dprs;
+                }
+                string cx_dprs2 = jsr_fenda[7];
+                if (!string.IsNullOrEmpty(cx_dprs2))
+                {
+                    dprsWhere += " and a.num <= " + cx_dprs2;
+                }
+                string cx_gmcs = jsr_fenda[8];
+                string gmcsWhere = "";
+                if (!string.IsNullOrEmpty(cx_gmcs))
+                {
+                    gmcsWhere += " and a.num >= " + cx_gmcs;
+                }
+                string cx_gmcs2 = jsr_fenda[9];
+                if (!string.IsNullOrEmpty(cx_gmcs2))
+                {
+                    gmcsWhere += " and a.num <= " + cx_gmcs2;
+                }
+                string cx_gmrs = jsr_fenda[10];
+                string gmrsWhere = "";
+                if (!string.IsNullOrEmpty(cx_gmrs))
+                {
+                    gmrsWhere += " and a.num >= " + cx_gmrs;
+                }
+                string cx_gmrs2 = jsr_fenda[11];
+                if (!string.IsNullOrEmpty(cx_gmrs2))
+                {
+                    gmrsWhere += " and a.num <= " + cx_gmrs2;
+                }
+                string cx_zfbcs = jsr_fenda[12];
+                string zfbcsWhere = "";
+                if (!string.IsNullOrEmpty(cx_zfbcs))
+                {
+                    zfbcsWhere += " and a.num >= " + cx_zfbcs;
+                }
+                string cx_zfbcs2 = jsr_fenda[13];
+                if (!string.IsNullOrEmpty(cx_zfbcs2))
+                {
+                    zfbcsWhere += " and a.num <= " + cx_zfbcs2;
+                }
+                string cx_city = jsr_fenda[14];
+                if (!string.IsNullOrEmpty(cx_city))
+                {
+                    where += " and DqBm = " + dbc.ToSqlValue(cx_city);
+                }
+                string cx_isSq = jsr_fenda[15];
+                if (!string.IsNullOrEmpty(cx_isSq))
+                {
+                    where += " and authorizestatus = " + cx_isSq;
+                }
+                string cx_isRz = jsr_fenda[16];
+                if (!string.IsNullOrEmpty(cx_isRz))
+                {
+                    where += " and isidentification = " + cx_isRz;
+                }
+                string cx_tkl = jsr_fenda[17];
+                string tklWhere = "";
+                if (!string.IsNullOrEmpty(cx_tkl))
+                {
+                    tklWhere += " and Convert(decimal(18,4),CAST(num1 AS FLOAT)/num*100) > " + cx_tkl;
+                }
+                string cx_tkl2 = jsr_fenda[18];
+                if (!string.IsNullOrEmpty(cx_tkl2))
+                {
+                    tklWhere += " and Convert(decimal(18,4),CAST(num1 AS FLOAT)/num*100) < " + cx_tkl2;
+                }
+                #endregion
+
+                string str = @"select UserName,UserXM from tb_b_user 
+                                where ClientKind = 1 " + where + @"
+                                and UserID in (
+                                    select userid from (
+                                       select GZUserID userid from (
+                                            select count(distinct userid) num,GZUserID from tb_b_user_gz group by GZUserID
+                                       ) a where 1=1 " + gzsWhere + @" 
+                                       intersect
+                                       select assesseeuserid userid from (
+                                            select count(1) num,assesseeuserid from tb_b_grade group by assesseeuserid
+                                       ) a where 1=1 " + pjsWhere + @"
+                                       intersect
+                                       select assesseeuserid userid from (
+                                            select count(distinct gradeuserid) num,assesseeuserid from tb_b_grade group by assesseeuserid
+                                       ) a where 1=1 " + dprsWhere + @"
+                                       intersect
+                                       select SaleUserID userid from (
+                                            select count(1) num,SaleUserID from tb_b_order where ZhiFuZT = 1 and Status = 0 group by SaleUserID
+                                       ) a where 1=1 " + gmcsWhere + @"
+                                       intersect
+                                       select SaleUserID userid from (
+                                            select count(distinct BuyUserID) num,SaleUserID from tb_b_order where ZhiFuZT = 1 and Status = 0 group by SaleUserID
+                                       ) a where 1=1 " + gmrsWhere + @"
+                                       intersect
+                                       select SaleRecordUserID userid from (
+                                            select count(1) num,SaleRecordUserID from tb_b_salerecord where SaleRecordLX >= 1 and SaleRecordLX <= 3 and Status = 0 and SaleRecordVerifyType = 1 group by SaleRecordUserID
+                                       ) a where 1=1 " + zfbcsWhere + @"
+                                       intersect
+                                       select CardUserID userid from (
+                                           select a.num,a.CardUserID,case when b.num1 is not null then b.num1 else 0 end num1 from (
+                                                select count(1) num,CardUserID from tb_b_mycard group by CardUserID
+                                           ) a left join (
+                                                select count(1) num1,CardUserID from tb_b_mycard where status = 3 group by CardUserID
+                                           ) b on a.CardUserID = b.CardUserID
+                                       ) a where 1=1 " + tklWhere + @"
+                                    ) a
+                                )";
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("GetZxzfbTjToFile", 2)]
+    public byte[] GetZxzfbTjToFile(JSReader jsr)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("账号");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("名称");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+
+                #region 参数
+                JSReader[] jsr_fenda = jsr.ToArray();
+                string cx_gzs = jsr_fenda[0];
+                string gzsWhere = "";
+                if (!string.IsNullOrEmpty(cx_gzs))
+                {
+                    gzsWhere += " and a.num >=" + cx_gzs;
+                }
+                string cx_gzs2 = jsr_fenda[1];
+                if (!string.IsNullOrEmpty(cx_gzs2))
+                {
+                    gzsWhere += " and a.num <=" + cx_gzs2;
+                }
+                string cx_zhpf = jsr_fenda[2];
+                string where = "";
+                if (!string.IsNullOrEmpty(cx_zhpf))
+                {
+                    where += "and grade >= " + cx_zhpf;
+                }
+                string cx_zhpf2 = jsr_fenda[3];
+                if (!string.IsNullOrEmpty(cx_zhpf2))
+                {
+                    where += "and grade <= " + cx_zhpf2;
+                }
+                string cx_pjs = jsr_fenda[4];
+                string pjsWhere = "";
+                if (!string.IsNullOrEmpty(cx_pjs))
+                {
+                    pjsWhere += " and a.num >= " + cx_pjs;
+                }
+                string cx_pjs2 = jsr_fenda[5];
+                if (!string.IsNullOrEmpty(cx_pjs2))
+                {
+                    pjsWhere += " and a.num <= " + cx_pjs2;
+                }
+                string cx_dprs = jsr_fenda[6];
+                string dprsWhere = "";
+                if (!string.IsNullOrEmpty(cx_dprs))
+                {
+                    dprsWhere += " and a.num >= " + cx_dprs;
+                }
+                string cx_dprs2 = jsr_fenda[7];
+                if (!string.IsNullOrEmpty(cx_dprs2))
+                {
+                    dprsWhere += " and a.num <= " + cx_dprs2;
+                }
+                string cx_gmcs = jsr_fenda[8];
+                string gmcsWhere = "";
+                if (!string.IsNullOrEmpty(cx_gmcs))
+                {
+                    gmcsWhere += " and a.num >= " + cx_gmcs;
+                }
+                string cx_gmcs2 = jsr_fenda[9];
+                if (!string.IsNullOrEmpty(cx_gmcs2))
+                {
+                    gmcsWhere += " and a.num <= " + cx_gmcs2;
+                }
+                string cx_gmrs = jsr_fenda[10];
+                string gmrsWhere = "";
+                if (!string.IsNullOrEmpty(cx_gmrs))
+                {
+                    gmrsWhere += " and a.num >= " + cx_gmrs;
+                }
+                string cx_gmrs2 = jsr_fenda[11];
+                if (!string.IsNullOrEmpty(cx_gmrs2))
+                {
+                    gmrsWhere += " and a.num <= " + cx_gmrs2;
+                }
+                string cx_zfbcs = jsr_fenda[12];
+                string zfbcsWhere = "";
+                if (!string.IsNullOrEmpty(cx_zfbcs))
+                {
+                    zfbcsWhere += " and a.num >= " + cx_zfbcs;
+                }
+                string cx_zfbcs2 = jsr_fenda[13];
+                if (!string.IsNullOrEmpty(cx_zfbcs2))
+                {
+                    zfbcsWhere += " and a.num <= " + cx_zfbcs2;
+                }
+                string cx_city = jsr_fenda[14];
+                if (!string.IsNullOrEmpty(cx_city))
+                {
+                    where += " and DqBm = " + dbc.ToSqlValue(cx_city);
+                }
+                string cx_isSq = jsr_fenda[15];
+                if (!string.IsNullOrEmpty(cx_isSq))
+                {
+                    where += " and authorizestatus = " + cx_isSq;
+                }
+                string cx_isRz = jsr_fenda[16];
+                if (!string.IsNullOrEmpty(cx_isRz))
+                {
+                    where += " and isidentification = " + cx_isRz;
+                }
+                string cx_tkl = jsr_fenda[17];
+                string tklWhere = "";
+                if (!string.IsNullOrEmpty(cx_tkl))
+                {
+                    tklWhere += " and Convert(decimal(18,4),CAST(num1 AS FLOAT)/num*100) > " + cx_tkl;
+                }
+                string cx_tkl2 = jsr_fenda[18];
+                if (!string.IsNullOrEmpty(cx_tkl2))
+                {
+                    tklWhere += " and Convert(decimal(18,4),CAST(num1 AS FLOAT)/num*100) < " + cx_tkl2;
+                }
+                #endregion
+
+                string str = @"select UserName,UserXM from tb_b_user 
+                                where ClientKind = 1 " + where + @"
+                                and UserID in (
+                                    select userid from (
+                                       select GZUserID userid from (
+                                            select count(distinct userid) num,GZUserID from tb_b_user_gz group by GZUserID
+                                       ) a where 1=1 " + gzsWhere + @" 
+                                       intersect
+                                       select assesseeuserid userid from (
+                                            select count(1) num,assesseeuserid from tb_b_grade group by assesseeuserid
+                                       ) a where 1=1 " + pjsWhere + @"
+                                       intersect
+                                       select assesseeuserid userid from (
+                                            select count(distinct gradeuserid) num,assesseeuserid from tb_b_grade group by assesseeuserid
+                                       ) a where 1=1 " + dprsWhere + @"
+                                       intersect
+                                       select SaleUserID userid from (
+                                            select count(1) num,SaleUserID from tb_b_order where ZhiFuZT = 1 and Status = 0 group by SaleUserID
+                                       ) a where 1=1 " + gmcsWhere + @"
+                                       intersect
+                                       select SaleUserID userid from (
+                                            select count(distinct BuyUserID) num,SaleUserID from tb_b_order where ZhiFuZT = 1 and Status = 0 group by SaleUserID
+                                       ) a where 1=1 " + gmrsWhere + @"
+                                       intersect
+                                       select SaleRecordUserID userid from (
+                                            select count(1) num,SaleRecordUserID from tb_b_salerecord where SaleRecordLX >= 1 and SaleRecordLX <= 3 and Status = 0 and SaleRecordVerifyType = 1 group by SaleRecordUserID
+                                       ) a where 1=1 " + zfbcsWhere + @"
+                                       intersect
+                                       select CardUserID userid from (
+                                           select a.num,a.CardUserID,case when b.num1 is not null then b.num1 else 0 end num1 from (
+                                                select count(1) num,CardUserID from tb_b_mycard group by CardUserID
+                                           ) a left join (
+                                                select count(1) num1,CardUserID from tb_b_mycard where status = 3 group by CardUserID
+                                           ) b on a.CardUserID = b.CardUserID
+                                       ) a where 1=1 " + tklWhere + @"
+                                    ) a
+                                )";
+
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+
+
+                    if (!string.IsNullOrEmpty(dt.Rows[i]["UserName"].ToString()))
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    else
+                    {
+                        cells[i + 1, 0].PutValue("");
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+
+                    cells[i + 1, 1].PutValue(dt.Rows[i]["UserXM"]);
                     cells[i + 1, 1].SetStyle(style4);
                 }
 
