@@ -216,7 +216,7 @@ public class CarMag
       {
           try
           {
-              WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL + "uploadMultipleFiles");
+              WebRequest request = (HttpWebRequest)WebRequest.Create(ServiceURL + "uploadAdver");
               MsMultiPartFormData form = new MsMultiPartFormData();
               form.AddFormField("devilField", "中国人");
               form.AddStreamFile("fileUpload", fds[0].FileName, fds[0].FileBytes);
