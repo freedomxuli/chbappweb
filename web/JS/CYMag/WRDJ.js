@@ -295,7 +295,6 @@ Ext.define('tswrWin', {
                     {
                         text: '支付明细模板下载',
                         handler: function () {
-                            alert(1111);
                             DownloadFile("CZCLZ.CYMag.DealPayLine", "支付明细模板.doc","");
                         }
                     },

@@ -2037,7 +2037,7 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
                 var byteData1 = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(new
                 {
                     goods_no = carriageid,//(合作方货源编号)
-                    goods_price = string.IsNullOrEmpty(dr1["carriagepoints"].ToString()) ? 0m : Convert.ToDecimal(dr1["carriagepoints"]) / 30000, //(运输单价(单位：分))
+                    goods_price = string.IsNullOrEmpty(dr1["carriagepoints"].ToString()) ? 0m : Convert.ToDecimal(dr1["carriagepoints"]) * 100 / 30000, //(运输单价(单位：分))
                     goods_type = "999",// (货物类型)
                     goods_name = "百货",//(货物名称)
                     goods_num = 30000,// (货量(单位：KG))
@@ -2111,9 +2111,9 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
                 {
                     goods_no = carriageid,//（合作方货源编号）
                     order_no = dr2["carriagecode"].ToString(),//tb_b_carriage.carriagecode（合作方唯一业务单号）
-                    waybill_amount = carriageoilmoney + carriagemoney + carriagemoneynew,//(tb_b_carriage.carriageoilmoney+carriagemoney+carriagemoneynew) (合同金额(司机的劳务费+油费+过路费、单位：分)）
-                    invoice_amount = (carriagemoney + carriagemoneynew) * 1.03m,//(tb_b_carriage.carriagemoney+carriagemoneynew) *1.03（开票金额(含税、司机的劳务费*(1+0.03)、单位：分、开票金额计算公式以商务合同约定为准)）
-                    labour_amount = carriagemoney + carriagemoneynew,//(tb_b_carriage.carriagemoney+carriagemoneynew) （运输劳务费用(不含税、单位：分)）
+                    waybill_amount = (carriageoilmoney + carriagemoney + carriagemoneynew) * 100,//(tb_b_carriage.carriageoilmoney+carriagemoney+carriagemoneynew) (合同金额(司机的劳务费+油费+过路费、单位：分)）
+                    invoice_amount = (carriageoilmoney + carriagemoney + carriagemoneynew) * 100 * 1.03m,//(tb_b_carriage.carriagemoney+carriagemoneynew) *1.03（开票金额(含税、司机的劳务费*(1+0.03)、单位：分、开票金额计算公式以商务合同约定为准)）
+                    labour_amount = (carriageoilmoney + carriagemoney + carriagemoneynew) * 100,//(tb_b_carriage.carriagemoney+carriagemoneynew) （运输劳务费用(不含税、单位：分)）
                     contract_time = ConvertDateTimeInt(addtime),//（合同签订日期(时间戳)）
                     carrier_mobile = dr2["UserName"].ToString(),//（承运人手机号(个体承运人为司机手机号)）
                     transport_mobile = dr2["UserName"].ToString(),//（司机手机号）
@@ -2227,9 +2227,10 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
             Worksheet sheet = workbook.Worksheets[0]; //工作表
             Cells cells = sheet.Cells;//单元格
 
-            string sqlstr = @"select c.UserXM,d.addtime,a.carriagefromprovince,a.carriagefromcity,a.carriagetoprovince,a.carriagetocity,b.driverxm,b.caruser,a.carriagemoney,a.carriagemoneynew from tb_b_carriage a
+            string sqlstr = @"select c.UserXM,d.addtime,a.carriagefromprovince,a.carriagefromcity,a.carriagetoprovince,a.carriagetocity,a.carriageaddress,
+                              b.driverxm,b.caruser,a.carriagemoney,a.carriagemoneynew,a.carriageoilmoney from tb_b_carriage a
                             left join tb_b_car b on a.carid=b.id
-                            left join tb_b_user c on b.caruser=c.UserName
+                            left join tb_b_user c on a.userid=c.userid
                             left join tb_b_carriage_flow d on a.carriageid=d.carriageid and d.carriagestatus=90
                             where a.carriageid=" + dbc.ToSqlValue(carriageid);
             DataTable dt = dbc.ExecuteDataTable(sqlstr);
@@ -2238,12 +2239,13 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
                 cells[1, 1].PutValue(dt.Rows[0]["UserXM"].ToString());
                 cells[1, 3].PutValue(string.IsNullOrEmpty(dt.Rows[0]["addtime"].ToString()) ? "" : Convert.ToDateTime(dt.Rows[0]["addtime"].ToString()).ToString("yyyy/MM/dd hh:mm:ss"));
                 cells[2, 1].PutValue(dt.Rows[0]["carriagefromprovince"].ToString() + dt.Rows[0]["carriagefromcity"].ToString() + "物流园区");
-                cells[2, 3].PutValue(dt.Rows[0]["carriagetoprovince"].ToString() + dt.Rows[0]["carriagetocity"].ToString());
+                cells[2, 3].PutValue(dt.Rows[0]["carriagetoprovince"].ToString() + dt.Rows[0]["carriagetocity"].ToString() + dt.Rows[0]["carriageaddress"].ToString());
                 cells[4, 1].PutValue(dt.Rows[0]["driverxm"].ToString());
                 cells[4, 3].PutValue(dt.Rows[0]["caruser"].ToString());
                 decimal money1 = string.IsNullOrEmpty(dt.Rows[0]["carriagemoney"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriagemoney"].ToString());
                 decimal money2 = string.IsNullOrEmpty(dt.Rows[0]["carriagemoneynew"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriagemoneynew"].ToString());
-                cells[5, 1].PutValue(money1 + money2);
+                decimal money3 = string.IsNullOrEmpty(dt.Rows[0]["carriageoilmoney"].ToString()) ? 0m : Convert.ToDecimal(dt.Rows[0]["carriageoilmoney"].ToString());
+                cells[5, 1].PutValue(money1 + money2 + money3);
             }
 
             MemoryStream ms = workbook.SaveToStream();
