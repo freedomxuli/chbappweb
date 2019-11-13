@@ -125,7 +125,7 @@ public class CarMag
                       var sj = "";
                       if (!jsr["drivername"].IsNull && !jsr["drivername"].IsEmpty)
                       {
-                          DataTable sjdt = dbc.ExecuteDataTable("select * from tb_b_user where clientkind = 1 and userName=" + dbc.ToSqlValue(jsr["drivername"].ToString()));
+                          DataTable sjdt = dbc.ExecuteDataTable("select * from tb_b_user where (clientkind = 1 or clientkind = 2) and userName=" + dbc.ToSqlValue(jsr["drivername"].ToString()));
                           if (sjdt.Rows.Count > 0)
                           {
                               sj = sjdt.Rows[0]["UserID"].ToString();
