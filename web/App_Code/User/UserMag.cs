@@ -452,21 +452,29 @@ public class UserMag
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=2   " + where1 + @"
                                  union all 
                                 select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND,
-                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
+                               case when f.pointkind=0 then '耗材券' 
+                                when  f.pointkind is null then '耗材券'
+                                when  f.pointkind=4 then '授权券'
+                                when  f.pointkind=1 then '授权券'
+                                when  f.pointkind=2 then '授权券'
+                                when  f.pointkind=3 then  '自发券' end as FLAG  
                                 from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID
                                 left join tb_b_order e on a.OrderCode=e.OrderCode
-                                left join tb_b_salerecord f on e.SaleRecordID=f.SaleRecordID 
+                                left join tb_b_plattosale f on e.PlatToSaleId=f.PlatToSaleId
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=1   " + where3 + @"
                             union all 
 	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND,
-                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
+                                case when f.pointkind=0 then '耗材券' 
+                                when  f.pointkind is null then '耗材券'
+                                when  f.pointkind=4 then '授权券'
+                                when  f.pointkind=1 then '授权券'
+                                when  f.pointkind=2 then '授权券'
+                                when  f.pointkind=3 then  '自发券' end as FLAG  
                             from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                             left join tb_b_user c on a.BuyUserID=c.UserID
-                            left join tb_b_salerecord f on a.SaleRecordID=f.SaleRecordID 
+                            left join tb_b_plattosale f on a.PlatToSaleId=f.PlatToSaleId
                             where a.Status=0 and a.ZhiFuZT=1 " + where2 + @"
                             order by AddTime desc";
                 DataTable dt = db.GetPagedDataTable(str, pagesize, ref cp, out ac);
@@ -1249,21 +1257,29 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=2   " + where1 + @"
                                  union all 
                                 select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'消费' as KIND,
-                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
+                               case when f.pointkind=0 then '耗材券' 
+                                when  f.pointkind is null then '耗材券'
+                                when  f.pointkind=4 then '授权券'
+                                when  f.pointkind=1 then '授权券'
+                                when  f.pointkind=2 then '授权券'
+                                when  f.pointkind=3 then  '自发券' end as FLAG  
                                 from tb_b_pay a left join tb_b_user b on a.CardUserID=b.UserID
                                 left join tb_b_user c on a.PayUserID=c.UserID 
                                 left join tb_b_user d on a.ReceiveUserID=d.UserID
                                 left join tb_b_order e on a.OrderCode=e.OrderCode
-                                left join tb_b_salerecord f on e.SaleRecordID=f.SaleRecordID 
+                                left join tb_b_plattosale f on e.PlatToSaleId=f.PlatToSaleId
                                 where 1=1 and  c.ClientKind=2 and  d.ClientKind=1   " + where3 + @"
                             union all 
 	                        select b.UserXM,c.UserName,a.AddTime,a.Points as MONEY,'购买' as KIND,
-                                case when f.SaleRecordLX=0 then '耗材券' when  f.SaleRecordLX is null then '耗材券'
-                                when  f.SaleRecordLX<>0 then  '自发券' end as FLAG  
+                                case when f.pointkind=0 then '耗材券' 
+                                when  f.pointkind is null then '耗材券'
+                                when  f.pointkind=4 then '授权券'
+                                when  f.pointkind=1 then '授权券'
+                                when  f.pointkind=2 then '授权券'
+                                when  f.pointkind=3 then  '自发券' end as FLAG  
                             from tb_b_order a left join tb_b_user b on a.SaleUserID=b.UserID
                             left join tb_b_user c on a.BuyUserID=c.UserID
-                            left join tb_b_salerecord f on a.SaleRecordID=f.SaleRecordID 
+                            left join tb_b_plattosale f on a.PlatToSaleId=f.PlatToSaleId
                             where a.Status=0 and a.ZhiFuZT=1 " + where2 + @"
                             order by AddTime desc";
                 DataTable dt = dbc.ExecuteDataTable(str);
