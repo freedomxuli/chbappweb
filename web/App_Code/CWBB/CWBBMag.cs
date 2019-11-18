@@ -3300,11 +3300,11 @@ public class CWBBMag
                                 when  e.pointkind = 2 then  '自发券'
                                 when  e.pointkind = 3 then  '自发券' end as KIND
                                 from tb_b_order a
-                                left join tb_b_pay b on a.OrderCode = b.OrderCode
+                                inner join tb_b_pay b on a.OrderCode = b.OrderCode
                                 left join tb_b_user c on a.BuyUserID =c.UserID
                                 left join tb_b_user d on a.SaleUserID=d.UserID
                                 left join tb_b_plattosale e on a.PlatToSaleId=e.PlatToSaleId
-                                where a.status=0 and a.ZhiFuZT=1  " + where + where1 + @"
+                                where a.status=0 and a.ZhiFuZT=1 " + where + where1 + @"
                                 union all
                                 select c.UserName,a.AddTime as jysj,null as xfsj,d.UserXM,a.OrderCode,a.Money,'购买' as flag,a.redenvelopeid,a.redenvelopemoney as redmoney,
                                 case when e.pointkind=0 then '耗材券' when  e.pointkind is null then '耗材券'
@@ -3456,7 +3456,7 @@ public class CWBBMag
                                 when  e.pointkind = 2 then  '自发券'
                                 when  e.pointkind = 3 then  '自发券' end as KIND
                                 from tb_b_order a
-                                left join tb_b_pay b on a.OrderCode = b.OrderCode
+                                inner join tb_b_pay b on a.OrderCode = b.OrderCode
                                 left join tb_b_user c on a.BuyUserID =c.UserID
                                 left join tb_b_user d on a.SaleUserID=d.UserID
                                 left join tb_b_plattosale e on a.PlatToSaleId=e.PlatToSaleId
