@@ -124,6 +124,7 @@ public class MenuControl
                 sb.Append("collapsed: false,");
                 sb.Append("iconCls: 'cf',");
                 sb.Append("title: '" + title + "',");
+                sb.Append("overflowY: 'auto',");
                 sb.Append("html: '<ul class=\"MenuHolder\">'");
                 sb.Append(lis);
                 sb.Append("+ '</ul>'");

@@ -7090,4 +7090,797 @@ left join tb_b_user d on b.sanfanguserid = d.UserID  )  a where 1=1
         }
     }
     #endregion
+
+    #region 红包统计**需求20191111**
+    #region 抽奖红包统计
+    [CSMethod("GetCjhbTjLine")]
+    public object GetCjhbTjLine(int pagnum, int pagesize, string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string timeWhere = "";
+                string dqBmWhere = "";
+
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+
+                string str = @"select * from (
+                                    select d.UserName,a.addtime,a.money,
+                                    case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                    a.updatetime,c.OrderCode
+                                    from tb_b_redenvelope a
+                                    left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                    left join tb_b_order c on b.orderid = c.OrderID
+                                    left join tb_b_user d on a.userid = d.UserID
+                                    where 1=1 " + timeWhere + @" and type = 4 and a.userid in (
+                                        select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @") and ZhiFuZT = 1 and status = 0
+                                    )
+                                    union
+                                    select d.UserName,a.addtime,a.money,
+                                    case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                    a.updatetime,c.OrderCode
+                                    from tb_b_redenvelope a
+                                    left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                    left join tb_b_order c on b.orderid = c.OrderID
+                                    left join tb_b_user d on a.userid = d.UserID
+                                    where 1=1 " + timeWhere + @" and type = 4 and a.userid in (
+                                        select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                    )
+                                ) a order by a.addtime desc";
+
+                DataTable dtPage = new DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetCjhbTj")]
+    public object GetCjhbTj(string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string timeWhere = "";
+                string timeWhere2 = "";
+                string dqBmWhere = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                    timeWhere2 += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                    timeWhere2 += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+                string str = @"select a.ordernum,b.gradenum,c.usernum,d.rafflenum,d.rafflemoney,e.zero, five, twenty, fifty, twohundred, fivehundred from (
+                                select count(1) ordernum,0 type from tb_b_order
+                                where ZhiFuZT = 1 and Status = 0 and SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + ") " + timeWhere + @"
+                            ) a
+                            left join (
+                                select count(1) gradenum,0 type from tb_b_grade
+                                where Status = 0 and assesseeuserid in (select userid from tb_b_user where 1=1 " + dqBmWhere + ") " + timeWhere + @"
+                            ) b on a.type = b.type
+                            left join (
+                                select count(distinct BuyUserID) usernum,0 type from tb_b_order
+                                where ZhiFuZT = 1 and Status = 0 and SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + ") " + timeWhere + @"
+                            ) c on a.type = c.type
+                            left join (
+                                select count(a.id) rafflenum,sum(a.rafflemoney) rafflemoney,0 type from tb_b_raffle a
+                                left join tb_b_pay b on a.payid = b.PayID
+                                where Status = 0 and CardUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + ") " + timeWhere2 + @"
+                            ) d on a.type = d.type
+                            left join (
+                                select type,
+                                max(case rafflemoney when 0 then rafflenum else 0 end) zero,
+                                max(case rafflemoney when 5 then rafflenum else 0 end) five,
+                                max(case rafflemoney when 20 then rafflenum else 0 end) twenty,
+                                max(case rafflemoney when 50 then rafflenum else 0 end) fifty,
+                                max(case rafflemoney when 200 then rafflenum else 0 end) twohundred,
+                                max(case rafflemoney when 200 then rafflenum else 0 end) fivehundred
+                            from (
+                                select count(a.id) rafflenum,CONVERT(decimal(18,0),rafflemoney) rafflemoney,0 type from tb_b_raffle a
+                                left join tb_b_pay b on a.payid = b.PayID
+                                where Status = 0 and CardUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + ") " + timeWhere2 + @"
+                                group by rafflemoney
+                            ) a group by a.type
+                            ) e on a.type = e.type";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetCjhbTjLineToFile", 2)]
+    public byte[] GetCjhbTjLineToFile(string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("账号");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("获取时间");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 30);
+                cells[0, 2].PutValue("红包金额");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("红包状态");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("更新时间");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 30);
+                cells[0, 5].PutValue("对应使用订单号");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 30);
+
+                string timeWhere = "";
+                string dqBmWhere = "";
+
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+
+                string str = @"select * from (
+                                    select d.UserName,a.addtime,a.money,
+                                    case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                    a.updatetime,c.OrderCode
+                                    from tb_b_redenvelope a
+                                    left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                    left join tb_b_order c on b.orderid = c.OrderID
+                                    left join tb_b_user d on a.userid = d.UserID
+                                    where 1=1 " + timeWhere + @" and type = 4 and a.userid in (
+                                        select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @") and ZhiFuZT = 1 and status = 0
+                                    )
+                                    union
+                                    select d.UserName,a.addtime,a.money,
+                                    case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                    a.updatetime,c.OrderCode
+                                    from tb_b_redenvelope a
+                                    left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                    left join tb_b_order c on b.orderid = c.OrderID
+                                    left join tb_b_user d on a.userid = d.UserID
+                                    where 1=1 " + timeWhere + @" and type = 4 and a.userid in (
+                                        select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                    )
+                                ) a order by a.addtime desc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["UserName"] != null && dt.Rows[i]["UserName"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["money"] != null && dt.Rows[i]["money"].ToString() != "")
+                    {
+                        cells[i + 1, 2].PutValue(dt.Rows[i]["money"]);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
+                    if (dt.Rows[i]["isuse"] != null && dt.Rows[i]["isuse"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(dt.Rows[i]["isuse"]);
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
+                    if (dt.Rows[i]["updatetime"] != null && dt.Rows[i]["updatetime"].ToString() != "")
+                    {
+                        cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["updatetime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 4].SetStyle(style4);
+                    if (dt.Rows[i]["OrderCode"] != null && dt.Rows[i]["OrderCode"].ToString() != "")
+                    {
+                        cells[i + 1, 5].PutValue(dt.Rows[i]["OrderCode"]);
+                    }
+                    cells[i + 1, 5].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
+
+    #region 新人红包统计
+    [CSMethod("GetXrhbTjLine")]
+    public object GetXrhbTjLine(int pagnum, int pagesize, string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string timeWhere = "";
+                string dqBmWhere = "";
+
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+
+                string str = @"select * from (
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where 1=1 " + timeWhere + @" and type = 0 and a.userid in (
+                                    select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @") and ZhiFuZT = 1 and status = 0
+                                )
+                                union
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where  1=1 " + timeWhere + @" and type = 0 and a.userid in (
+                                    select userid from tb_b_user where  1=1 " + dqBmWhere + @" and ClientKind = 2
+                                )
+                            ) a order by a.addtime desc";
+
+                DataTable dtPage = new DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetXrhbTjLineToFile", 2)]
+    public byte[] GetXrhbTjLineToFile(string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("账号");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("获取时间");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 30);
+                cells[0, 2].PutValue("红包金额");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("红包状态");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("更新时间");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 30);
+                cells[0, 5].PutValue("对应使用订单号");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 30);
+
+                string timeWhere = "";
+                string dqBmWhere = "";
+
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+
+                string str = @"select * from (
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where 1=1 " + timeWhere + @" and type = 0 and a.userid in (
+                                    select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @") and ZhiFuZT = 1 and status = 0
+                                )
+                                union
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where  1=1 " + timeWhere + @" and type = 0 and a.userid in (
+                                    select userid from tb_b_user where  1=1 " + dqBmWhere + @" and ClientKind = 2
+                                )
+                            ) a order by a.addtime desc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["UserName"] != null && dt.Rows[i]["UserName"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["money"] != null && dt.Rows[i]["money"].ToString() != "")
+                    {
+                        cells[i + 1, 2].PutValue(dt.Rows[i]["money"]);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
+                    if (dt.Rows[i]["isuse"] != null && dt.Rows[i]["isuse"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(dt.Rows[i]["isuse"]);
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
+                    if (dt.Rows[i]["updatetime"] != null && dt.Rows[i]["updatetime"].ToString() != "")
+                    {
+                        cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["updatetime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 4].SetStyle(style4);
+                    if (dt.Rows[i]["OrderCode"] != null && dt.Rows[i]["OrderCode"].ToString() != "")
+                    {
+                        cells[i + 1, 5].PutValue(dt.Rows[i]["OrderCode"]);
+                    }
+                    cells[i + 1, 5].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
+
+    #region 订单分享红包统计
+    [CSMethod("GetDdfxhbTjLine")]
+    public object GetDdfxhbTjLine(int pagnum, int pagesize, string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+                string timeWhere = "";
+                string dqBmWhere = "";
+
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+
+                string str = @"select * from (
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where 1=1 " + timeWhere + @" and type = 2 and a.userid in (
+                                    select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @") and ZhiFuZT = 1 and status = 0
+                                )
+                                union
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where 1=1 " + timeWhere + @" and type = 2 and a.userid in (
+                                    select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                )
+                            ) a order by a.addtime desc";
+
+                DataTable dtPage = new DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetDdfxhbTj")]
+    public object GetDdfxhbTj(string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                string timeWhere = "";
+                string dqBmWhere = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+                string str = @"select a.sharenum,b.orderredenvelopenum,b.orderredenvelopemoney,
+                                c.firstordernum,c.orderordernum,d.useredenvelopenum,d.useredenvelopemoney,
+                                e.ordernum,e.ordernum,e.orderpoints,e.avgpoints,
+                                f.newordernum,f.newordernum,f.neworderpoints,f.newavgpoints,g.newsharenum
+                                from (
+                                    select count(1) sharenum,0 type from tb_b_share a where 1=1 " + timeWhere + @" and userid in (
+                                        select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                        union
+                                        select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                    )
+                                ) a
+                                left join
+                                (
+                                    select count(1) orderredenvelopenum,sum(money) orderredenvelopemoney,0 type from tb_b_redenvelope a where 1=1 " + timeWhere + @" and type = 2 and userid in (
+                                        select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                        union
+                                        select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                    )
+                                ) b on a.type = b.type
+                                left join
+                                (
+                                    select a.type,
+                                           max(case a.money when 50 then a.num end) firstordernum,
+                                           max(case a.money when 10 then a.num end) orderordernum
+                                    from (
+                                        select count(1) num, money,0 type from tb_b_redenvelope a where 1=1 " + timeWhere + @" and type = 2 and userid in (
+                                            select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                            union
+                                            select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                        ) group by money,type
+                                    ) a group by a.type
+                                ) c on a.type = c.type
+                                left join
+                                (
+                                    select count(1) useredenvelopenum,sum(money) useredenvelopemoney,0 type from tb_b_redenvelope a where 1=1 " + timeWhere + @" and type = 2 and isuse = 9 and userid in (
+                                        select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                        union
+                                        select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                    )
+                                ) d on a.type = d.type
+                                left join
+                                (
+                                    select count(1) ordernum,count(distinct SaleUserID) zxordernum,sum(a.Points) orderpoints,CONVERT(decimal(18,2),sum(a.Points)/count(1)) avgpoints,0 type from tb_b_order a
+                                    left join tb_b_order_redenvelope b on a.OrderID = b.orderid
+                                    where a.ZhiFuZT = 1 and a.Status = 0 and b.redenvelopeid in (
+                                       select redenvelopeid from tb_b_redenvelope a where 1=1 " + timeWhere + @" and type = 2 and isuse = 9 and userid in (
+                                            select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                            union
+                                            select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                       )
+                                    )
+                                ) e on a.type = e.type
+                                left join (
+                                    select count(1) newordernum,count(distinct SaleUserID) newzxordernum,sum(Points) neworderpoints,CONVERT(decimal(18,2),sum(Points)/count(1)) newavgpoints,0 type from tb_b_order
+                                    where ZhiFuZT = 1 and Status = 0 and BuyUserID in (
+                                        select b.UserID from tb_b_share a
+                                        inner join tb_b_user b on a.tel = b.username
+                                        where a.userid in (
+                                           select userid from tb_b_redenvelope a where 1=1 " + timeWhere + @" and type = 2 and isuse = 9 and userid in (
+                                                select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                                union
+                                                select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                            )
+                                        )
+                                    )
+                                ) f on a.type = f.type
+                                left join (
+                                    select count(1) newsharenum,0 type from tb_b_share
+                                    where userid in (
+                                        select b.UserID from tb_b_share a
+                                        inner join tb_b_user b on a.tel = b.username
+                                        where a.userid in (
+                                           select userid from tb_b_redenvelope a where 1=1 " + timeWhere + @" and type = 2 and isuse = 9 and userid in (
+                                                select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                                union
+                                                select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 1) and ZhiFuZT = 1 and Status = 0
+                                           )
+                                        )
+                                    )
+                                ) g on a.type = g.type
+                                ";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("GetDdfxhbTjLineToFile", 2)]
+    public byte[] GetDdfxhbTjLineToFile(string beg, string end, string dqbm)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("账号");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("获取时间");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 30);
+                cells[0, 2].PutValue("红包金额");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 20);
+                cells[0, 3].PutValue("红包状态");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("更新时间");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 30);
+                cells[0, 5].PutValue("对应使用订单号");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 30);
+
+                string timeWhere = "";
+                string dqBmWhere = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    timeWhere += " and  a.AddTime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    timeWhere += " and a.AddTime<'" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(dqbm))
+                {
+                    dqBmWhere += " and " + dbc.C_EQ("DqBm", dqbm);
+                }
+
+                string str = @"select * from (
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where 1=1 " + timeWhere + @" and type = 2 and a.userid in (
+                                    select distinct BuyUserID from tb_b_order where SaleUserID in (select userid from tb_b_user where 1=1 " + dqBmWhere + @") and ZhiFuZT = 1 and status = 0
+                                )
+                                union
+                                select d.UserName,a.addtime,a.money,
+                                case a.isuse when 0 then '未使用' when 1 then '待支付' when 2 then '已过期' when 3 then '已废弃' when 9 then '已支付' end isuse,
+                                a.updatetime,c.OrderCode
+                                from tb_b_redenvelope a
+                                left join tb_b_order_redenvelope b on a.redenvelopeid = b.redenvelopeid and b.status = 9
+                                left join tb_b_order c on b.orderid = c.OrderID
+                                left join tb_b_user d on a.userid = d.UserID
+                                where 1=1 " + timeWhere + @" and type = 2 and a.userid in (
+                                    select userid from tb_b_user where 1=1 " + dqBmWhere + @" and ClientKind = 2
+                                )
+                            ) a order by a.addtime desc";
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["UserName"] != null && dt.Rows[i]["UserName"].ToString() != "")
+                    {
+                        cells[i + 1, 0].PutValue(dt.Rows[i]["UserName"]);
+                    }
+                    cells[i + 1, 0].SetStyle(style4);
+                    if (dt.Rows[i]["addtime"] != null && dt.Rows[i]["addtime"].ToString() != "")
+                    {
+                        cells[i + 1, 1].PutValue(Convert.ToDateTime(dt.Rows[i]["addtime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 1].SetStyle(style4);
+                    if (dt.Rows[i]["money"] != null && dt.Rows[i]["money"].ToString() != "")
+                    {
+                        cells[i + 1, 2].PutValue(dt.Rows[i]["money"]);
+                    }
+                    cells[i + 1, 2].SetStyle(style4);
+                    if (dt.Rows[i]["isuse"] != null && dt.Rows[i]["isuse"].ToString() != "")
+                    {
+                        cells[i + 1, 3].PutValue(dt.Rows[i]["isuse"]);
+                    }
+                    cells[i + 1, 3].SetStyle(style4);
+                    if (dt.Rows[i]["updatetime"] != null && dt.Rows[i]["updatetime"].ToString() != "")
+                    {
+                        cells[i + 1, 4].PutValue(Convert.ToDateTime(dt.Rows[i]["updatetime"]).ToString("yyyy-MM-dd hh:mm:ss"));
+                    }
+                    cells[i + 1, 4].SetStyle(style4);
+                    if (dt.Rows[i]["OrderCode"] != null && dt.Rows[i]["OrderCode"].ToString() != "")
+                    {
+                        cells[i + 1, 5].PutValue(dt.Rows[i]["OrderCode"]);
+                    }
+                    cells[i + 1, 5].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+    #endregion
+    #endregion
 }
