@@ -42,6 +42,21 @@ function getList(nPage) {
     });
 }
 
+
+function getListEXCELOUT(nPage) {
+
+
+    DownloadFile("CZCLZ.XJMag.GetTkshListOutList", "退款审核数据下载.xls", {
+        'cx_beg': Ext.getCmp("cx_beg").getValue(),
+        'cx_end': Ext.getCmp("cx_end").getValue(),
+        'cx_fhrzh': Ext.getCmp("cx_fhrzh").getValue(),
+        'cx_zxmc': Ext.getCmp("cx_zxmc").getValue(),
+        'cx_istk': Ext.getCmp("cx_istk").getValue()
+    });
+
+ 
+}
+
 //审核退款
 function shtk(id) {
     var win = new iWin({ mycardId: id });
@@ -294,6 +309,22 @@ Ext.define('iView', {
                                         handler: function () {
                                             if (privilege("运费券下架_退款审核_查看")) {
                                                 getList(1);
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'buttongroup',
+                                title: '',
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        iconCls: 'search',
+                                        text: 'EXCEL导出',
+                                        handler: function () {
+                                            if (privilege("运费券下架_退款审核_查看")) {
+                                                getListEXCELOUT(1);
                                             }
                                         }
                                     }
