@@ -2254,6 +2254,93 @@ g.addtime flowaddtime2,h.Full_Url Full_Url1,i.Full_Url Full_Url2,j.Full_Url Full
         }
     }
     #endregion
+
+    #region 在线查单专线设置
+    [CSMethod("getZxcdList")]
+    public object getZxcdList(int pagnum, int pagesize, string beg, string end, string cx_zxmc, string cx_fhrmc)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and a.AddTime>='" + Convert.ToDateTime(beg).ToString() + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
+                }
+                if (!string.IsNullOrEmpty(cx_zxmc))
+                {
+                    where += " and " + dbc.C_Like("d.UserXM", cx_zxmc, LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(cx_fhrmc))
+                {
+                    where += " and " + dbc.C_Like("c.fhrmc", cx_fhrmc, LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @"select a.OrderCode,c.UserName fhrmc,d.UserXM,b.carnumber,b.servicecode,b.networkName,b.memo,b.servicestatus,a.AddTime,b.person,b.id serviceid,a.PayID from tb_b_pay a
+                                inner join(
+	                                select t1.*,t2.networkName from tb_b_pay_service t1
+	                                left join tb_b_network t2 on t1.networkid=t2.networkId
+                                )b on a.PayID=b.payid
+                                inner join tb_b_user c on a.PayUserID=c.UserID
+                                left join tb_b_user d on a.CardUserID=d.UserID" + where + " order by AddTime desc";
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("Qrdd")]
+    public void Qrdd(string id, string payid)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                dbc.BeginTransaction();
+                string sqlstr = "update tb_b_pay_service set servicestatus=20 where id=" + dbc.ToSqlValue(id);
+                dbc.ExecuteNonQuery(sqlstr);
+
+                string userid = SystemUser.CurrentUser.UserID;
+                DateTime ti = DateTime.Now;
+                var dt = dbc.GetEmptyDataTable("tb_b_pay_flow");
+                var dr = dt.NewRow();
+                dr["id"] = Guid.NewGuid().ToString();
+                dr["payid"] = payid;
+                dr["servicestatus"] = 20;
+                dr["status"] = 0;
+                dr["adduser"] = userid;
+                dr["addtime"] = ti;
+                dr["updateuser"] = userid;
+                dr["updatetime"] = ti;
+                dt.Rows.Add(dr);
+                dbc.InsertTable(dt);
+                dbc.CommitTransaction();
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+    #endregion
 }
 
 public class resultWr

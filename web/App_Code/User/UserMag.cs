@@ -918,7 +918,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetClientList")]
-    public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm, string beg, string end,string isdonate)
+    public object GetClientList(int pagnum, int pagesize, string roleId, string yhm, string xm, string beg, string end, string isdonate)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1322,7 +1322,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetZXUSERToFile", 2)]
-    public byte[] GetZXUSERToFile(string beg, string end,string isdonate)
+    public byte[] GetZXUSERToFile(string beg, string end, string isdonate)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1519,7 +1519,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetSFUSERToFile", 2)]
-    public byte[] GetSFUSERToFile(string beg, string end)
+    public byte[] GetSFUSERToFile(string beg, string end, string cx_isclose)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -1604,6 +1604,10 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 {
                     where += " and a.AddTime<='" + Convert.ToDateTime(end).AddDays(1).ToString() + "'";
                 }
+                if (!string.IsNullOrEmpty(cx_isclose))
+                {
+                    where += " and a.isclose = " + dbc.ToSqlValue(cx_isclose);
+                }
                 string str = @"select a.*,c.roleName,b.roleId from tb_b_user a left join tb_b_user_role b on a.UserID=b.UserID
                                left join tb_b_roledb c on b.roleId=c.roleId
                                where 1=1 and a.ClientKind = 2";
@@ -1643,7 +1647,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
 
     [CSMethod("GetSFYFQToFile", 2)]
-    public byte[] GetSFYFQToFile(string roleId, string yhm, string xm)
+    public byte[] GetSFYFQToFile(string roleId, string yhm, string xm, string cx_isclose)
     {
         using (DBConnection dbc = new DBConnection())
         {
@@ -2535,6 +2539,57 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         }
     }
 
+    /// <summary>
+    /// 黑名单设置
+    /// </summary>
+    /// <param name="userid"></param>
+    /// <param name="isclose"></param>
+    /// <param name="closeday"></param>
+    /// <returns></returns>
+    [CSMethod("EditHmd")]
+    public bool EditHmd(string userid, int isclose, int closeday)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                dbc.BeginTransaction();
+                string sqlstr = "select * from tb_b_user where UserID=" + dbc.ToSqlValue(userid);
+                DataTable dt = dbc.ExecuteDataTable(sqlstr);
+                string userName = "";
+                if (dt.Rows.Count > 0)
+                {
+                    userName = dt.Rows[0]["UserName"].ToString();
+                }
+
+                DateTime nowti = DateTime.Now;
+                //更新用户表
+                if (isclose == 0)
+                {
+                    sqlstr = "update tb_b_user set isclose=" + isclose + ",closeday=" + closeday + " where UserID=" + dbc.ToSqlValue(userid);
+                    dbc.ExecuteNonQuery(sqlstr);
+                }
+                else
+                {
+                    sqlstr = "update tb_b_user set isclose=" + isclose + ",closeday='' where UserID=" + dbc.ToSqlValue(userid);
+                    dbc.ExecuteNonQuery(sqlstr);
+                }
+
+                //操作日志
+                string cz = isclose == 0 ? "设置了【" + userName + "】黑名单（" + (closeday == 10000 ? "永久" : closeday + "天") + "）" : "关闭了【" + userName + "】黑名单";
+                string nr = SystemUser.CurrentUser.UserName + "在" + nowti.ToString() + "时间" + cz;
+                recordlog(dbc, userid, DateTime.Now, 5, nr);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
     //[CSMethod("SaveUser")]
     //public bool SaveUser(JSReader jsr, JSReader yhjs,JSReader yhjsdw,JSReader qxids)
     //{
@@ -3286,6 +3341,230 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
     }
     #endregion
 
+    #region 分流点管理
+    [CSMethod("getNetWorkList")]
+    public object getNetWorkList(int pagnum, int pagesize, string cx_zxmc)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(cx_zxmc))
+                {
+                    where += " and " + dbc.C_Like("b.UserXM", cx_zxmc, LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @" select a.*,b.UserXM as zxmc from tb_b_network a 
+                                left join tb_b_user b on a.userid=b.UserID
+                                where status=0 " + where + " order by a.networkAddtime desc";
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str, pagesize, ref cp, out ac);
+
+                return new { dt = dtPage, cp = cp, ac = ac };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("SaveNetWork")]
+    public bool SaveNetWork(JSReader jsr)
+    {
+        if (jsr["jd"].IsNull || jsr["jd"].IsEmpty)
+        {
+            throw new Exception("经度不能为空");
+        }
+        if (jsr["wd"].IsNull || jsr["wd"].IsEmpty)
+        {
+            throw new Exception("纬度不能为空");
+        }
+        if (jsr["networkAddress"].IsNull || jsr["networkAddress"].IsEmpty)
+        {
+            throw new Exception("地址不能为空");
+        }
+
+        using (DBConnection dbc = new DBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                var networkId = jsr["networkId"].ToString();
+
+                var dt = dbc.GetEmptyDataTable("tb_b_network");
+                var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                var dr = dt.NewRow();
+                dr["networkId"] = new Guid(networkId);
+                dr["networkName"] = jsr["networkName"].ToString();
+                dr["networkAddress"] = jsr["networkAddress"].ToString();
+                dr["networkPerson"] = jsr["networkPerson"].ToString();
+                dr["networkTel"] = jsr["networkTel"].ToString();
+                dr["networkType"] = jsr["networkType"].ToString();
+                //dr["networkAddtime"] = jsr["networkAddtime"].ToString();
+                dr["status"] = 0;
+                dr["userid"] = jsr["userid"].ToString();
+                dr["jd"] = jsr["jd"].ToString();
+                dr["wd"] = jsr["wd"].ToString();
+                dt.Rows.Add(dr);
+                dbc.UpdateTable(dt, dtt);
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+
+    }
+
+    [CSMethod("getNetWorkListToFile", 2)]
+    public byte[] getNetWorkListToFile(string cx_zxmc)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                Workbook workbook = new Workbook(); //工作簿
+                Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Cells cells = sheet.Cells;//单元格
+
+                //为标题设置样式  
+                Style styleTitle = workbook.Styles[workbook.Styles.Add()];
+                styleTitle.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                styleTitle.Font.Name = "宋体";//文字字体
+                styleTitle.Font.Size = 18;//文字大小
+                styleTitle.Font.IsBold = true;//粗体
+
+                //样式1
+                Style style1 = workbook.Styles[workbook.Styles.Add()];
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.Font.IsBold = true;//粗体
+
+                //样式2
+                Style style2 = workbook.Styles[workbook.Styles.Add()];
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 14;//文字大小
+                style2.Font.IsBold = true;//粗体
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin; //应用边界线 左边界线
+                style2.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin; //应用边界线 右边界线
+                style2.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin; //应用边界线 上边界线
+                style2.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin; //应用边界线 下边界线
+                style2.IsLocked = true;
+
+                //样式3
+                Style style4 = workbook.Styles[workbook.Styles.Add()];
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居中
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 11;//文字大小
+                style4.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style4.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+
+                cells.SetRowHeight(0, 20);
+                cells[0, 0].PutValue("专线名称");
+                cells[0, 0].SetStyle(style2);
+                cells.SetColumnWidth(0, 20);
+                cells[0, 1].PutValue("网点类型");
+                cells[0, 1].SetStyle(style2);
+                cells.SetColumnWidth(1, 20);
+                cells[0, 2].PutValue("分流点/网点名称");
+                cells[0, 2].SetStyle(style2);
+                cells.SetColumnWidth(2, 30);
+                cells[0, 3].PutValue("联系人");
+                cells[0, 3].SetStyle(style2);
+                cells.SetColumnWidth(3, 20);
+                cells[0, 4].PutValue("联系电话");
+                cells[0, 4].SetStyle(style2);
+                cells.SetColumnWidth(4, 20);
+                cells[0, 5].PutValue("经度");
+                cells[0, 5].SetStyle(style2);
+                cells.SetColumnWidth(5, 20);
+                cells[0, 6].PutValue("纬度");
+                cells[0, 6].SetStyle(style2);
+                cells.SetColumnWidth(6, 20);
+                cells[0, 7].PutValue("地址");
+                cells[0, 7].SetStyle(style2);
+                cells.SetColumnWidth(7, 20);
+
+                string where = "";
+
+                if (!string.IsNullOrEmpty(cx_zxmc))
+                {
+                    where += " and " + dbc.C_Like("b.UserXM", cx_zxmc, LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @" select a.*,b.UserXM as zxmc from tb_b_network a 
+                                left join tb_b_user b on a.userid=b.UserID
+                                where status=0 " + where + " order by a.networkAddtime desc";
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    cells[i + 1, 0].PutValue(dt.Rows[i]["zxmc"]);
+                    cells[i + 1, 0].SetStyle(style4);
+                    string typeName = "";
+                    if (dt.Rows[i]["networkType"] != null && dt.Rows[i]["networkType"].ToString() != "")
+                    {
+
+                        if (Convert.ToInt32(dt.Rows[i]["networkType"]) == 0)
+                        {
+                            typeName = "网点";
+                        }
+                        else if (Convert.ToInt32(dt.Rows[i]["networkType"]) == 1)
+                        {
+                            typeName = "分流点";
+                        }
+                    }
+                    cells[i + 1, 1].PutValue(typeName);
+                    cells[i + 1, 1].SetStyle(style4);
+                    cells[i + 1, 2].PutValue(dt.Rows[i]["networkName"]);
+                    cells[i + 1, 2].SetStyle(style4);
+                    cells[i + 1, 3].PutValue(dt.Rows[i]["networkPerson"]);
+                    cells[i + 1, 3].SetStyle(style4);
+                    cells[i + 1, 4].PutValue(dt.Rows[i]["networkTel"]);
+                    cells[i + 1, 4].SetStyle(style4);
+                    cells[i + 1, 5].PutValue(dt.Rows[i]["jd"]);
+                    cells[i + 1, 5].SetStyle(style4);
+                    cells[i + 1, 6].PutValue(dt.Rows[i]["wd"]);
+                    cells[i + 1, 6].SetStyle(style4);
+                    cells[i + 1, 7].PutValue(dt.Rows[i]["networkAddress"]);
+                    cells[i + 1, 7].SetStyle(style4);
+                }
+
+                MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+    #endregion
+
     [CSMethod("JudgeUser")]
     public object JudgeUser()
     {
@@ -3456,6 +3735,9 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 break;
             case 4:
                 leixing = "下单红包额度";
+                break;
+            case 5:
+                leixing = "黑名单设置";
                 break;
         }
 

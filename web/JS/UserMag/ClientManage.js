@@ -55,7 +55,9 @@ var store = createSFW4Store({
         { name: 'isshowsource' },
         { name: 'redenvelopequota' },
         { name: 'iscost' },
-        { name: 'ischbmember' }
+        { name: 'ischbmember' },
+        { name: 'isclose' },
+        { name: 'closeday' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -540,6 +542,32 @@ function buyRedNum(uid, num) {
         } else {
             Ext.getCmp('redenvelopequota').setValue(num)
         }
+    })
+}
+
+//黑名单设置
+function HMDSZ(uid, isc, cday) {
+    var win = new hmdWin({ UserID: uid });
+    win.show(null, function () {
+        if (isc == null || isc == 'null' || isc == "" || isc == 'undefined') {
+            Ext.getCmp('isclose').setValue(parseInt(1));
+        } else {
+            Ext.getCmp('isclose').setValue(parseInt(isc));
+        }
+
+        if (cday == null || cday == 'null' || cday == "" || cday == 'undefined') {
+            Ext.getCmp('closeday').setValue(parseInt(7));
+        } else {
+            Ext.getCmp('closeday').setValue(parseInt(cday));
+        }
+
+        if (isc == null || isc == 'null' || isc == "" || isc == 'undefined' || isc == 1) {
+            Ext.getCmp("closeday").hide();
+        } else {
+            Ext.getCmp("closeday").show();
+        }
+
+        
     })
 }
 //************************************页面方法***************************************
@@ -1868,6 +1896,105 @@ Ext.define('upRedNumWin', {
         me.callParent(arguments);
     }
 });
+
+Ext.define('hmdWin', {
+    extend: 'Ext.window.Window',
+    height: 200,
+    width: 350,
+    modal: true,
+    layout: {
+        type: 'fit'
+    },
+    title: '黑名单设置',
+    initComponent: function () {
+        var me = this;
+        var userid = me.UserID
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'form',
+                    bodyPadding: 10,
+                    items: [
+                        {
+                            xtype: 'combobox',
+                            id: 'isclose',
+                            anchor: '100%',
+                            fieldLabel: '是否拉入黑名单',
+                            editable: false,
+                            labelWidth: 110,
+                            store: Ext.create('Ext.data.Store', {
+                                fields: ['VALUE', 'TEXT'],
+                                data: [
+                                    { 'VALUE': 0, 'TEXT': '是' },
+                                    { 'VALUE': 1, 'TEXT': '否' }
+                                ]
+                            }),
+                            queryMode: 'local',
+                            displayField: 'TEXT',
+                            valueField: 'VALUE',
+                            value: 7,
+                            listeners: {
+                                'select': function (o) {
+                                    if (o.value == 1) {
+                                        Ext.getCmp("closeday").hide();
+                                    } else {
+                                        Ext.getCmp("closeday").show();
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'combobox',
+                            id: 'closeday',
+                            anchor: '100%',
+                            fieldLabel: '拉黑天数',
+                            editable: false,
+                            labelWidth: 110,
+                            store: Ext.create('Ext.data.Store', {
+                                fields: ['VALUE', 'TEXT'],
+                                data: [
+                                    { 'VALUE': 7, 'TEXT': '7天' },
+                                    { 'VALUE': 15, 'TEXT': '15天' },
+                                    { 'VALUE': 30, 'TEXT': '30天' },
+                                    { 'VALUE': 10000, 'TEXT': '永久' }
+                                ]
+                            }),
+                            queryMode: 'local',
+                            displayField: 'TEXT',
+                            valueField: 'VALUE',
+                            value: 7
+                        }
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '确认',
+                            iconCls: 'dropyes',
+                            handler: function () {
+                                CS('CZCLZ.YHGLClass.EditHmd', function (retVal) {
+                                    if (retVal) {
+                                        getUser(1);
+                                        Ext.MessageBox.alert('提示', "设置成功！");
+                                    }
+                                }, CS.onError, userid, Ext.getCmp("isclose").getValue(), Ext.getCmp("closeday").getValue());
+                                this.up('window').close();
+                            }
+                        },
+                        {
+                            text: '取消',
+                            iconCls: 'close',
+                            handler: function () {
+                                this.up('window').close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+});
 //************************************弹出界面***************************************
 
 //************************************主界面*****************************************
@@ -2049,7 +2176,7 @@ Ext.onReady(function () {
                             if (record.data.ClientKind == 1) {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>  <a onclick='AddPhoto1(\"" + value + "\");'>添加认证照片</a>  <a onclick='buyRedNum(\"" + value + "\",\"" + record.data.redenvelopequota + "\");'>下单购买红包上限</a>";
                             } else if (record.data.ClientKind == 2) {
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a> <a onclick='HMDSZ(\"" + value + "\",\"" + record.data.isclose + "\",\"" + record.data.closeday + "\");'>黑名单设置</a>";
                             }
                             if (record.data.IsSHPass == 1) {
                                 str += " <a onclick='shpass(\"" + value + "\",\"0\");'>下架</a>";
@@ -2125,6 +2252,25 @@ Ext.onReady(function () {
                                     value: ''
                                 },
                                 {
+                                    xtype: 'combobox',
+                                    id: 'cx_isclose',
+                                    width: 220,
+                                    fieldLabel: '是否拉入黑名单',
+                                    editable: false,
+                                    labelWidth: 100,
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: ['VALUE', 'TEXT'],
+                                        data: [
+                                            { 'VALUE': '', 'TEXT': '全部' },
+                                            { 'VALUE': '0', 'TEXT': '是' },
+                                            { 'VALUE': '1', 'TEXT': '否' }
+                                        ]
+                                    }),
+                                    queryMode: 'local',
+                                    displayField: 'TEXT',
+                                    valueField: 'VALUE'
+                                },
+                                {
                                     xtype: 'buttongroup',
                                     title: '',
                                     items: [
@@ -2187,7 +2333,7 @@ Ext.onReady(function () {
                                             iconCls: 'view',
                                             text: '导出三方用户统计表',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.YHGLClass.GetSFUSERToFile", "三方用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue());
+                                                DownloadFile("CZCLZ.YHGLClass.GetSFUSERToFile", "三方用户统计表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_isclose").getValue());
                                             }
                                         },
                                         {
@@ -2195,7 +2341,7 @@ Ext.onReady(function () {
                                             iconCls: 'view',
                                             text: '导出三方用户剩余运费券',
                                             handler: function () {
-                                                DownloadFile("CZCLZ.YHGLClass.GetSFYFQToFile", "三方用户剩余运费券.xls", Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue());
+                                                DownloadFile("CZCLZ.YHGLClass.GetSFYFQToFile", "三方用户剩余运费券.xls", Ext.getCmp("cx_role").getValue(), Ext.getCmp("cx_yhm").getValue(), Ext.getCmp("cx_xm").getValue(), Ext.getCmp("cx_isclose").getValue());
                                             }
                                         }
                                     ]
