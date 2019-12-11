@@ -57,7 +57,9 @@ var store = createSFW4Store({
         { name: 'iscost' },
         { name: 'ischbmember' },
         { name: 'isclose' },
-        { name: 'closeday' }
+        { name: 'closeday' },
+        { name: 'jd' },
+        { name: 'wd' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -240,18 +242,25 @@ function EditUser(id) {
             Ext.getCmp('iscost').show();//是否收取佣金； 显示
             Ext.getCmp('ischbmember').show();//是否查货宝会员 显示
 
-
+            Ext.getCmp('jd').show();//经度 显示
+            Ext.getCmp('wd').show();//纬度 显示
         } else if (r.ClientKind == 2) {
             Ext.getCmp('modetype').hide();
             Ext.getCmp('modetype').setValue(2);
             Ext.getCmp('modecoefficient').show();
             Ext.getCmp('carriagemaxmoney').show();
             Ext.getCmp('mirrornumber').show();
+
+            Ext.getCmp('jd').hide();//经度 显示
+            Ext.getCmp('wd').hide();//纬度 显示
         } else {
             Ext.getCmp('modetype').hide();
             Ext.getCmp('modecoefficient').hide();
             Ext.getCmp('carriagemaxmoney').hide();
             Ext.getCmp('mirrornumber').hide();
+
+            Ext.getCmp('jd').hide();//经度 显示
+            Ext.getCmp('wd').hide();//纬度 显示
         }
         if (r.carriagegetmode == 1) {
             Ext.getCmp('modecoefficient').decimalPrecision = 3;
@@ -570,7 +579,53 @@ function HMDSZ(uid, isc, cday) {
         
     })
 }
+function getmap() {
+    winmap = new bd_map();
+    winmap.show(null, function () {
+        mapopen = true;
+        var jd = Ext.getCmp("jd").getValue();
+        var wd = Ext.getCmp("wd").getValue();
+        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/baiduMap.aspx?jd=" + jd + "&wd=" + wd + "&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
+    });
+
+}
 //************************************页面方法***************************************
+
+//************************************弹出地图界面***************************************
+Ext.define('bd_map', {
+    extend: 'Ext.window.Window',
+    id: 'glwin',
+    height: 500,
+    width: 900,
+    modal: true,
+    layout: {
+        type: 'fit'
+    },
+    title: '坐标地图',
+    listeners: {
+        close: function () {
+            mapopen = false;
+        }
+    },
+
+    initComponent: function () {
+        var me = this;
+
+        Ext.applyIf(me, {
+            items: [
+                {
+                    xtype: 'panel',
+                    id: 'bd_map',
+                    html: ''
+                }
+            ]
+        });
+
+        me.callParent(arguments);
+    }
+
+});
+
 
 //************************************弹出界面***************************************
 Ext.define('YGLSJList', {
@@ -1562,6 +1617,42 @@ Ext.define('addWin', {
                         valueField: 'VALUE',
                         value: 1,
                         hidden: true
+                    },
+                    {
+                        xtype: 'numberfield',
+                        fieldLabel: '经度',
+                        id: 'jd',
+                        name: 'jd',
+                        labelWidth: 80,
+                        anchor: '75%',
+                        allowBlank: false,
+                    },
+                    {
+                        xtype: 'panel',
+                        id: 'mypanel',
+                        anchor: '100%',
+                        border: false,
+                        layout: 'column',
+                        items: [
+                            {
+                                xtype: 'numberfield',
+                                fieldLabel: '纬度',
+                                id: 'wd',
+                                name: 'wd',
+                                labelWidth: 80,
+                                allowBlank: false,
+                                columnWidth: 0.75
+                            },
+                            {
+                                xtype: 'button',
+                                text: '抓取坐标',
+                                columnWidth: 0.25,
+                                margin: '0 0 10 10',
+                                handler: function () {
+                                    getmap();
+                                }
+                            }
+                        ]
                     }
                 ],
                 buttonAlign: 'center',

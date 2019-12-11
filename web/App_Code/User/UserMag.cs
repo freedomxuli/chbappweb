@@ -2271,6 +2271,22 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                         dr["ischbmember"] = DBNull.Value;
                     }
 
+                    if (!string.IsNullOrEmpty(jsr["jd"].ToString()))
+                    {
+                        dr["jd"] = jsr["jd"].ToString();
+                    }
+                    else
+                    {
+                        dr["jd"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["wd"].ToString()))
+                    {
+                        dr["wd"] = jsr["wd"].ToString();
+                    }
+                    else
+                    {
+                        dr["wd"] = DBNull.Value;
+                    }
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2442,6 +2458,23 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     else
                     {
                         dr["ischbmember"] = DBNull.Value;
+                    }
+
+                    if (!string.IsNullOrEmpty(jsr["jd"].ToString()))
+                    {
+                        dr["jd"] = jsr["jd"].ToString();
+                    }
+                    else
+                    {
+                        dr["jd"] = DBNull.Value;
+                    }
+                    if (!string.IsNullOrEmpty(jsr["wd"].ToString()))
+                    {
+                        dr["wd"] = jsr["wd"].ToString();
+                    }
+                    else
+                    {
+                        dr["wd"] = DBNull.Value;
                     }
 
                     dt.Rows.Add(dr);
