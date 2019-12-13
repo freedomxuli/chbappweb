@@ -65,7 +65,8 @@ function getmap() {
         mapopen = true;
         var jd = Ext.getCmp("jd").getValue();
         var wd = Ext.getCmp("wd").getValue();
-        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/baiduMap.aspx?jd=" + jd + "&wd=" + wd + "&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
+        var title = Ext.getCmp("zxmc").getValue();
+        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/gaodeMap.aspx?jd=" + jd + "&wd=" + wd + "&title=" + title + "&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
     });
 
 }
@@ -195,6 +196,7 @@ Ext.define('addWin', {
                         labelWidth: 70,
                         anchor: '75%',
                         allowBlank: false,
+                        decimalPrecision: 6
                     },
                     {
                         xtype: 'panel',
@@ -210,7 +212,8 @@ Ext.define('addWin', {
                                 name: 'wd',
                                 labelWidth: 70,
                                 allowBlank: false,
-                                columnWidth: 0.75
+                                columnWidth: 0.75,
+                                decimalPrecision: 6
                             },
                             {
                                 xtype: 'button',

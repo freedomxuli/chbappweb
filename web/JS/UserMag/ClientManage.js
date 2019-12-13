@@ -585,7 +585,7 @@ function getmap() {
         mapopen = true;
         var jd = Ext.getCmp("jd").getValue();
         var wd = Ext.getCmp("wd").getValue();
-        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/baiduMap.aspx?jd=" + jd + "&wd=" + wd + "&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
+        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/gaodeMap.aspx?jd=" + jd + "&wd=" + wd + "&title=&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
     });
 
 }
