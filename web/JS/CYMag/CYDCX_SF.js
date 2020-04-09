@@ -66,7 +66,7 @@ function QR(carriageid, carriagestatus, userid) {
     CS('CZCLZ.CYMagSf.QR', function (retVal) {
         if (retVal) {
             $.ajax({
-                url: "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure115",
+                url: "http://jeremyda.fun:8010/api/zhaoyou/payAndInsure115",
                 type: 'post',
                 dataType: 'json',
                 headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,6 @@
 ﻿var pageSize = 15;
 var cx_zxmc;
-var mapopen = false;
+
 var id = "";
 //************************************数据源*****************************************
 var fldStore = createSFW4Store({
@@ -58,57 +58,12 @@ function Edit(id, type) {
         }
     });
 }
-
-function getmap() {
-    winmap = new bd_map();
-    winmap.show(null, function () {
-        mapopen = true;
-        var jd = Ext.getCmp("jd").getValue();
-        var wd = Ext.getCmp("wd").getValue();
-        var title = Ext.getCmp("zxmc").getValue();
-        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/gaodeMap.aspx?jd=" + jd + "&wd=" + wd + "&title=" + title + "&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
-    });
-
-}
 //************************************页面方法***************************************
-Ext.define('bd_map', {
-    extend: 'Ext.window.Window',
-    id: 'glwin',
-    height: 500,
-    width: 900,
-    modal: true,
-    layout: {
-        type: 'fit'
-    },
-    title: '坐标地图',
-    listeners: {
-        close: function () {
-            mapopen = false;
-        }
-    },
-
-    initComponent: function () {
-        var me = this;
-
-        Ext.applyIf(me, {
-            items: [
-                {
-                    xtype: 'panel',
-                    id: 'bd_map',
-                    html: ''
-                }
-            ]
-        });
-
-        me.callParent(arguments);
-    }
-
-});
 
 Ext.define('addWin', {
     extend: 'Ext.window.Window',
 
-    height: 400,
+    height: 300,
     width: 400,
     layout: {
         type: 'fit'
@@ -194,37 +149,17 @@ Ext.define('addWin', {
                         id: 'jd',
                         name: 'jd',
                         labelWidth: 70,
-                        anchor: '75%',
+                        anchor: '100%',
                         allowBlank: false,
-                        decimalPrecision: 6
                     },
                     {
-                        xtype: 'panel',
-                        id: 'mypanel',
+                        xtype: 'numberfield',
+                        fieldLabel: '纬度',
+                        id: 'wd',
+                        name: 'wd',
+                        labelWidth: 70,
                         anchor: '100%',
-                        border: false,
-                        layout: 'column',
-                        items: [
-                            {
-                                xtype: 'numberfield',
-                                fieldLabel: '纬度',
-                                id: 'wd',
-                                name: 'wd',
-                                labelWidth: 70,
-                                allowBlank: false,
-                                columnWidth: 0.75,
-                                decimalPrecision: 6
-                            },
-                            {
-                                xtype: 'button',
-                                text: '抓取坐标',
-                                columnWidth: 0.25,
-                                margin: '0 0 10 10',
-                                handler: function () {
-                                    getmap();
-                                }
-                            }
-                        ]
+                        allowBlank: false,
                     },
                     {
                         xtype: 'textareafield',

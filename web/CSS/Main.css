@@ -246,6 +246,16 @@ a:visited
 .x-grid-record-yellow .x-grid-cell{  
      background-color: #FFDE88;  
  }
+
+.x-grid-record-pink .x-grid-cell {
+    background-color: pink;
+}
+.x-grid-record-lightpink .x-grid-cell {
+    background-color: lightpink;
+}
+.x-grid-record-green .x-grid-cell {
+    background-color: #00DD00;
+}
 .tbyc .STYLE1 {
 	font-family: "宋体";
 	font-size: 20px;

@@ -57,9 +57,9 @@ var store = createSFW4Store({
         { name: 'iscost' },
         { name: 'ischbmember' },
         { name: 'isclose' },
-        { name: 'closeday' },
-        { name: 'jd' },
-        { name: 'wd' }
+        { name: 'acceptwx' },
+        
+        { name: 'closeday' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         getUser(nPage);
@@ -207,6 +207,7 @@ var kpstore = Ext.create('Ext.data.Store', {
 
 //************************************页面方法***************************************
 function getUser(nPage) {
+     
     CS('CZCLZ.YHGLClass.GetClientList', function (retVal) {
         store.setData({
             data: retVal.dt,
@@ -225,6 +226,34 @@ function GetKP() {
 
 }
 
+
+function ISWX(userid,UserName, OpenID, acceptwx)
+{
+    if (OpenID != null && OpenID != "" && OpenID != undefined) {
+        CS('CZCLZ.YHGLClass.UpdateAcceptWX', function (retVal) {
+            if (retVal)
+            {
+                Ext.Msg.show({
+                    title: '提示',
+                    msg: '设置成功',
+                    buttons: Ext.MessageBox.OK,
+                    icon: Ext.MessageBox.INFO
+                    
+                });
+                getUser(1);
+            }
+        }, CS.onError, userid, UserName,acceptwx);
+    } else {
+        Ext.Msg.show({
+            title: '提示',
+            msg: '当前帐号未绑定微信号',
+            buttons: Ext.MessageBox.OK,
+            icon: Ext.MessageBox.INFO
+        });
+    }
+}
+
+
 function EditUser(id) {
     GetKP();
     var r = store.findRecord("UserID", id).data;
@@ -242,25 +271,18 @@ function EditUser(id) {
             Ext.getCmp('iscost').show();//是否收取佣金； 显示
             Ext.getCmp('ischbmember').show();//是否查货宝会员 显示
 
-            Ext.getCmp('jd').show();//经度 显示
-            Ext.getCmp('wd').show();//纬度 显示
+
         } else if (r.ClientKind == 2) {
             Ext.getCmp('modetype').hide();
             Ext.getCmp('modetype').setValue(2);
             Ext.getCmp('modecoefficient').show();
             Ext.getCmp('carriagemaxmoney').show();
             Ext.getCmp('mirrornumber').show();
-
-            Ext.getCmp('jd').hide();//经度 显示
-            Ext.getCmp('wd').hide();//纬度 显示
         } else {
             Ext.getCmp('modetype').hide();
             Ext.getCmp('modecoefficient').hide();
             Ext.getCmp('carriagemaxmoney').hide();
             Ext.getCmp('mirrornumber').hide();
-
-            Ext.getCmp('jd').hide();//经度 显示
-            Ext.getCmp('wd').hide();//纬度 显示
         }
         if (r.carriagegetmode == 1) {
             Ext.getCmp('modecoefficient').decimalPrecision = 3;
@@ -579,53 +601,7 @@ function HMDSZ(uid, isc, cday) {
         
     })
 }
-function getmap() {
-    winmap = new bd_map();
-    winmap.show(null, function () {
-        mapopen = true;
-        var jd = Ext.getCmp("jd").getValue();
-        var wd = Ext.getCmp("wd").getValue();
-        Ext.getCmp("bd_map").update("<iframe src=\"approot/r/js/gaodeMap.aspx?jd=" + jd + "&wd=" + wd + "&title=&full\" style=\"width:100%;height:100%\" frameborder=\"0\"/>");
-    });
-
-}
 //************************************页面方法***************************************
-
-//************************************弹出地图界面***************************************
-Ext.define('bd_map', {
-    extend: 'Ext.window.Window',
-    id: 'glwin',
-    height: 500,
-    width: 900,
-    modal: true,
-    layout: {
-        type: 'fit'
-    },
-    title: '坐标地图',
-    listeners: {
-        close: function () {
-            mapopen = false;
-        }
-    },
-
-    initComponent: function () {
-        var me = this;
-
-        Ext.applyIf(me, {
-            items: [
-                {
-                    xtype: 'panel',
-                    id: 'bd_map',
-                    html: ''
-                }
-            ]
-        });
-
-        me.callParent(arguments);
-    }
-
-});
-
 
 //************************************弹出界面***************************************
 Ext.define('YGLSJList', {
@@ -1617,42 +1593,6 @@ Ext.define('addWin', {
                         valueField: 'VALUE',
                         value: 1,
                         hidden: true
-                    },
-                    {
-                        xtype: 'numberfield',
-                        fieldLabel: '经度',
-                        id: 'jd',
-                        name: 'jd',
-                        labelWidth: 80,
-                        anchor: '75%',
-                        allowBlank: false,
-                    },
-                    {
-                        xtype: 'panel',
-                        id: 'mypanel',
-                        anchor: '100%',
-                        border: false,
-                        layout: 'column',
-                        items: [
-                            {
-                                xtype: 'numberfield',
-                                fieldLabel: '纬度',
-                                id: 'wd',
-                                name: 'wd',
-                                labelWidth: 80,
-                                allowBlank: false,
-                                columnWidth: 0.75
-                            },
-                            {
-                                xtype: 'button',
-                                text: '抓取坐标',
-                                columnWidth: 0.25,
-                                margin: '0 0 10 10',
-                                handler: function () {
-                                    getmap();
-                                }
-                            }
-                        ]
                     }
                 ],
                 buttonAlign: 'center',
@@ -2257,6 +2197,23 @@ Ext.onReady(function () {
                         text: "承运最大限额"
                     },
                     {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'acceptwx',
+                        sortable: false,
+                        menuDisabled: true,
+                        width: 90,
+                        text: "微信状态",
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                            var str;
+                            if (value == "0") {
+                                str = "<a onclick='ISWX(\"" + record.data.UserID + "\",\"" + record.data.UserName + "\",\"" + record.data.OpenID + "\",1);'>是</a>";
+                            } else {
+                                str = "<a onclick='ISWX(\"" + record.data.UserID + "\",\"" + record.data.UserName + "\",\"" + record.data.OpenID + "\",0);'>否</a>";
+                            }
+                            return str;
+                        }
+                    },
+                    {
                         text: '操作',
                         dataIndex: 'UserID',
                         width: 700,
@@ -2267,7 +2224,10 @@ Ext.onReady(function () {
                             if (record.data.ClientKind == 1) {
                                 str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>  <a onclick='AddPhoto1(\"" + value + "\");'>添加认证照片</a>  <a onclick='buyRedNum(\"" + value + "\",\"" + record.data.redenvelopequota + "\");'>下单购买红包上限</a>";
                             } else if (record.data.ClientKind == 2) {
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a> <a onclick='HMDSZ(\"" + value + "\",\"" + record.data.isclose + "\",\"" + record.data.closeday + "\");'>黑名单设置</a>";
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='IsBdBf(\"" + record.data.UserName + "\");'>查看是否绑定宝付账号</a> <a onclick='LookLists(\"" + value + "\");'>查看记录</a> <a onclick='LookEWM(\"" + record.data.ewmbs + "\");'>查看二维码</a> <a onclick='AddPhoto(\"" + value + "\");'>添加照片</a> <a onclick='LookEWM1(\"" + record.data.UserID + "\");'>查看绑定二维码</a> <a onclick='GLSJ(\"" + value + "\");'>关联司机</a>";
+                                if (privilege("系统维护中心_用户管理_黑名单管理")) {
+                                    str += " <a onclick='HMDSZ(\"" + value + "\",\"" + record.data.isclose + "\",\"" + record.data.closeday + "\");'>黑名单设置</a>";
+                                }
                             }
                             if (record.data.IsSHPass == 1) {
                                 str += " <a onclick='shpass(\"" + value + "\",\"0\");'>下架</a>";

@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using SmartFramework4v2.Data.SqlServer;
 using System.Text;
 using SmartFramework4v2.Web.WebExecutor;
+using SmartFramework4v2.Data.MySql;
 
 /// <summary>
 ///UserClass 的摘要说明
@@ -14,7 +15,7 @@ using SmartFramework4v2.Web.WebExecutor;
 [CSClass("SystemUser")]
 public class SystemUser
 {
-    
+
 
     private DataRow m_data;
 
@@ -23,10 +24,19 @@ public class SystemUser
         get { return m_data["Password"].ToString(); }
     }
 
-    public string UserID {
+    public string UserID
+    {
         get { return m_data["YH_ID"].ToString(); }
     }
-    public string LoginName {
+    /// <summary>
+    /// 对应MYSQL用户
+    /// </summary>
+    public string MQUserID
+    {
+        get { return m_data["MY_SQL_YH_ID"].ToString(); }
+    }
+    public string LoginName
+    {
         get { return m_data["YH_DLM"].ToString(); }
     }
     public string UserName
@@ -62,7 +72,7 @@ public class SystemUser
     {
         using (DBConnection dbc = new DBConnection())
         {
-            string sqlStr = "select a.UserID YH_ID, a.UserName YH_DLM,a.UserXM YH_XM,a.Password,b.roleId,b.companyId from tb_b_user a left join tb_b_user_role b on a.UserID = b.userId where a.UserName=@LoginName and a.Password=@Password and (a.ClientKind = 0 or a.ClientKind = 99)";
+            string sqlStr = "select a.UserID YH_ID, a.UserName YH_DLM,a.UserXM YH_XM,a.Password,b.roleId,b.companyId,'' MY_SQL_YH_ID from tb_b_user a left join tb_b_user_role b on a.UserID = b.userId where a.UserName=@LoginName and a.Password=@Password and (a.ClientKind = 0 or a.ClientKind = 99)";
             SqlCommand cmd = new SqlCommand(sqlStr);
             cmd.Parameters.AddWithValue("@LoginName", username);
             cmd.Parameters.AddWithValue("@Password", password);
@@ -70,9 +80,18 @@ public class SystemUser
             SystemUser su = new SystemUser();
             if (dtUser.Rows.Count > 0)
             {
+                using (MySqlDbConnection db = MySqlConnstr.GetDBConnection())
+                {
+                    sqlStr = "select userid from tb_b_user where correlationid=" + dbc.ToSqlValue(dtUser.Rows[0]["YH_ID"].ToString());
+                    DataTable mySqlqDt = db.ExecuteDataTable(sqlStr);
+                    if (mySqlqDt.Rows.Count > 0)
+                    {
+                        dtUser.Rows[0]["MY_SQL_YH_ID"] = mySqlqDt.Rows[0]["userid"].ToString();
+                    }
+                }
                 su.m_data = dtUser.Rows[0];
-            
-                HttpContext.Current.Response.Cookies.Add(new HttpCookie("userid", dtUser.Rows[0]["YH_ID"].ToString()) { HttpOnly = true});
+
+                HttpContext.Current.Response.Cookies.Add(new HttpCookie("userid", dtUser.Rows[0]["YH_ID"].ToString()) { HttpOnly = true });
                 return su;
             }
             return null;
@@ -139,7 +158,7 @@ public class SystemUser
 
     public static SystemUser GetUserByID(string userid)
     {
-        string sqlStr = "select a.UserID YH_ID, a.UserName YH_DLM,a.UserXM YH_XM,a.Password,b.roleId,b.companyId from tb_b_user a left join tb_b_user_role b on a.UserID = b.userId where a.UserID = @yh_id";
+        string sqlStr = "select a.UserID YH_ID, a.UserName YH_DLM,a.UserXM YH_XM,a.Password,b.roleId,b.companyId,'' MY_SQL_YH_ID from tb_b_user a left join tb_b_user_role b on a.UserID = b.userId where a.UserID = @yh_id";
         SqlCommand cmd = new SqlCommand(sqlStr);
         cmd.Parameters.AddWithValue("@yh_id", userid);
         using (DBConnection dbc = new DBConnection())
@@ -148,6 +167,15 @@ public class SystemUser
             if (dtb.Rows.Count == 0)
             {
                 throw new Exception("无效的用户ID");
+            }
+            using (MySqlDbConnection db = MySqlConnstr.GetDBConnection())
+            {
+                sqlStr = "select userid from tb_b_user where correlationid=" + dbc.ToSqlValue(dtb.Rows[0]["YH_ID"].ToString());
+                DataTable mySqlqDt = db.ExecuteDataTable(sqlStr);
+                if (mySqlqDt.Rows.Count > 0)
+                {
+                    dtb.Rows[0]["MY_SQL_YH_ID"] = mySqlqDt.Rows[0]["userid"].ToString();
+                }
             }
             SystemUser su = new SystemUser();
             su.m_data = dtb.Rows[0];
@@ -178,13 +206,13 @@ public class SystemUser
     /// <param name="password">密码</param>
     /// <param name="dwid">所属单位ID</param>
     /// <returns>是否创建成功</returns>
-    public static bool CreateUser(string 登陆名, string 姓名, string 密码, string 部门ID, string 电话, string 职务, string 手机,string 电子邮件,string 地址)
+    public static bool CreateUser(string 登陆名, string 姓名, string 密码, string 部门ID, string 电话, string 职务, string 手机, string 电子邮件, string 地址)
     {
         string sqlStr = "insert into TZJGJC_T_YH (User_ID,LoginName,Password,User_XM,User_ZW,User_DH,User_SJ,User_Email,User_DZ,User_Enable,User_DelFlag,addtime,updatetime,updateuser) " +
                 "values (@User_ID,@LoginName,@Password,@User_XM,@User_ZW,@User_DH,@User_SJ,@User_Email,@User_DZ,@User_Enable,@User_DelFlag,@addtime,@updatetime,@updateuser)";
         var YHID = Guid.NewGuid().ToString();
         var EditUser = SystemUser.CurrentUser;
-        SqlCommand  cmd = new SqlCommand(sqlStr);
+        SqlCommand cmd = new SqlCommand(sqlStr);
         cmd.Parameters.AddWithValue("@User_ID", YHID);
         cmd.Parameters.AddWithValue("@LoginName", 登陆名);
         cmd.Parameters.AddWithValue("@Password", 密码);
@@ -219,7 +247,7 @@ public class SystemUser
         StringBuilder sqlCmd = new StringBuilder();
         SqlCommand cmd = new SqlCommand();
         sqlCmd.Append("SELECT count(*) FROM tb_b_YH_YHQX WHERE UserID=@UserID ");
-        cmd.Parameters.Add("@UserID",SqlDbType.UniqueIdentifier).Value = new Guid(UserID);
+        cmd.Parameters.Add("@UserID", SqlDbType.UniqueIdentifier).Value = new Guid(UserID);
         if (pids != null)
         {
             sqlCmd.Append(" AND (");
@@ -365,7 +393,7 @@ public class SystemUser
     public void RemovePriviledge(Guid Priviledge)
     {
         DBConnection conn = new DBConnection();
-        SqlCommand cmd = new SqlCommand ();
+        SqlCommand cmd = new SqlCommand();
         cmd.CommandText = "delete from tb_b_YH_YHQX where PrivilegeCode = @PrivilegeCode and UserID=@UserID";
         cmd.Parameters.Add("@PrivilegeCode", SqlDbType.UniqueIdentifier).Value = Priviledge;
         cmd.Parameters.Add("@UserID", SqlDbType.UniqueIdentifier).Value = new Guid(UserID);

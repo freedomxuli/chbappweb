@@ -70,9 +70,9 @@ function QR(carriageid, carriagestatus, userid, model) {
 
     CS('CZCLZ.CYMag.QR', function (retVal) {
         if (retVal) {
-            var newUrl = "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure";
+            var newUrl = "http://jeremyda.fun:8010/api/zhaoyou/payAndInsure";
             if (model == 1) {
-                newUrl = "http://jeremyda.cn:8010/api/zhaoyou/payAndInsure115"
+                newUrl = "http://jeremyda.fun:8010/api/zhaoyou/payAndInsure115"
             }
             $.ajax({
                 url: newUrl,

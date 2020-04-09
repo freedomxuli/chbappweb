@@ -3,6 +3,9 @@ inline_include("approot/r/weixin/js/qrcode/jquery.qrcode.js");
 inline_include("approot/r/weixin/js/qrcode/qrcode.js");
 inline_include("approot/r/weixin/js/qrcode/utf.js");
 
+var suertype = queryString.suertype;
+
+ 
 var pageSize = 15;
 var cx_role;
 var cx_yhm;
@@ -52,7 +55,6 @@ var roleStore1 = Ext.create('Ext.data.Store', {
 
 //************************************页面方法***************************************
 function getUser(nPage) {
-    console.log(Ext.getCmp("cx_role").getValue());
     CS('CZCLZ.YHGLClass.GetUserList', function (retVal) {
         store.setData({
             data: retVal.dt,
@@ -332,6 +334,7 @@ Ext.define('addWin', {
                          allowBlank: false,
                          editable: false,
                          labelWidth: 70,
+                         hidden:true,
                          store: roleStore1,
                          queryMode: 'local',
                          displayField: 'roleName',
@@ -357,7 +360,7 @@ Ext.define('addWin', {
                             if (form.form.isValid()) {
                                 var values = form.form.getValues(false);
                                 var me = this;
-                                CS('CZCLZ.YHGLClass.SaveUser', function (retVal) {
+                                CS('CZCLZ.UserMagByMySqlClass.SaveUser', function (retVal) {
                                     if (retVal) {
                                         me.up('window').close();
                                         getUser(1);
@@ -482,12 +485,12 @@ Ext.onReady(function() {
                         {
                             text: '操作',
                             dataIndex: 'UserID',
-                            width:150,
+                            width:60,
                             sortable: false,
                             menuDisabled: true,
                             renderer: function(value, cellmeta, record, rowIndex, columnIndex, store) {
                                 var str;
-                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a> <a onclick='LookEWM1(\"" + value + "\");'>查看绑定二维码</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
+                                str = "<a onclick='EditUser(\"" + value + "\");'>修改</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
                                 return str;
                             }
                         }
@@ -504,6 +507,7 @@ Ext.onReady(function() {
                                     xtype: 'combobox',
                                     id: 'cx_role',
                                     width: 160,
+                                    hidden:true,
                                     fieldLabel: '角色',
                                     editable: false,
                                     labelWidth: 40,
@@ -555,6 +559,16 @@ Ext.onReady(function() {
                                                         roleStore1.loadData(retVal, false);
                                                         var win = new addWin();
                                                         win.show(null, function () {
+
+                                                            
+
+                                                            if(suertype==1)
+                                                            {
+                                                                 Ext.getCmp("roleId").setValue('0c11bf4b-d1ca-4e91-b384-504c29991076');
+                                                            }else{
+                                                                Ext.getCmp("roleId").setValue('4b43e3b3-6033-469d-941e-d0c5be48f19c');
+
+                                                            }
                                                         });
                                                     }
                                                 }, CS.onError);
@@ -593,7 +607,7 @@ Ext.onReady(function() {
                                                             idlist.push(rd.get("UserID"));
                                                         }
 
-                                                        CS('CZCLZ.YHGLClass.DelUser', function (retVal) {
+                                                        CS('CZCLZ.UserMagByMySqlClass.DelUser', function (retVal) {
                                                         if (retVal) {
                                                                 getUser(1);
                                                             }
@@ -630,17 +644,27 @@ Ext.onReady(function() {
 
     CS('CZCLZ.YHGLClass.GetRole', function (retVal) {
         if (retVal) {
-            roleStore.add([{ 'roleId': '', 'roleName': '全部角色' }]);
-            roleStore.loadData(retVal, false);
-            Ext.getCmp("cx_role").setValue('');
+            if (suertype == 1) {//一键包发操作员
+                roleStore.add([{ 'roleId': '0c11bf4b-d1ca-4e91-b384-504c29991076', 'roleName': '一键包发操作员' }]);
+                // roleStore.loadData(retVal, false);
+                Ext.getCmp("cx_role").setValue('0c11bf4b-d1ca-4e91-b384-504c29991076');
+            } else {//一键包发业务员
+                roleStore.add([{ 'roleId': '4b43e3b3-6033-469d-941e-d0c5be48f19c', 'roleName': '一键包发业务员' }]);
+                // roleStore.loadData(retVal, false);
+                Ext.getCmp("cx_role").setValue('4b43e3b3-6033-469d-941e-d0c5be48f19c');
+
+            }
+            cx_role = Ext.getCmp("cx_role").getValue();
+            cx_yhm = Ext.getCmp("cx_yhm").getValue();
+            cx_xm = Ext.getCmp("cx_xm").getValue();
+
+            getUser(1);
+
+            
         }
     }, CS.onError, "");
 
-    cx_role = Ext.getCmp("cx_role").getValue();
-    cx_yhm = Ext.getCmp("cx_yhm").getValue();
-    cx_xm = Ext.getCmp("cx_xm").getValue();
-
-    getUser(1);
+   
 
 })
 //************************************主界面*****************************************

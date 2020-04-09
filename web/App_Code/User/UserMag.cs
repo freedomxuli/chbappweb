@@ -567,6 +567,146 @@ public class UserMag
 
     }
 
+
+    [CSMethod("GetUserListYJFB")]
+    public object GetUserListYJFB(int pagnum, int pagesize, string roleId, string yhm, string xm)
+    {
+        if (!string.IsNullOrEmpty(roleId))
+        {
+            try
+            {
+                Guid guid = new Guid(roleId);
+            }
+            catch
+            {
+                throw new Exception("角色ID出错！");
+            }
+        }
+
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+                if (!string.IsNullOrEmpty(roleId))
+                {
+                    where += " and a.UserID in (SELECT userId FROM tb_b_user_role where roleId='" + roleId + "' or roleId='5336f820-a352-4f1b-832f-8d1e1119a2a2' or roleId='7649971c-90c7-4294-b7a8-5add0d0ea15b')";
+                }
+
+                if (!string.IsNullOrEmpty(yhm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserName", yhm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(xm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @"select a.*,c.roleName,b.roleId from tb_b_user a left join tb_b_user_role b on a.UserID=b.UserID
+                                left join tb_b_roledb c on b.roleId=c.roleId where 1=1 and ClientKind = 0 ";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.UserName,a.UserXM", pagesize, ref cp, out ac);
+
+                var privilege = new SystemUser().GetPrivilegeList(SystemUser.CurrentUser.RoleID);
+
+                var mmck = false;
+                for (int i = 0; i < privilege.Rows.Count; i++)
+                {
+                    if (privilege.Rows[i]["privilegeName"] != null && privilege.Rows[i]["privilegeName"].ToString() != "")
+                    {
+                        if (privilege.Rows[i]["privilegeName"].ToString() == "系统维护中心_人员管理_密码查看")
+                        {
+                            mmck = true;
+                        }
+                    }
+                }
+
+                return new { dt = dtPage, cp = cp, ac = ac, mmck = mmck };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+
+    [CSMethod("GetUserListOnlyCZY")]
+    public object GetUserListOnlyCZY(int pagnum, int pagesize, string roleId, string yhm, string xm)
+    {
+        if (!string.IsNullOrEmpty(roleId))
+        {
+            try
+            {
+                Guid guid = new Guid(roleId);
+            }
+            catch
+            {
+                throw new Exception("角色ID出错！");
+            }
+        }
+
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                int cp = pagnum;
+                int ac = 0;
+
+                string where = "";
+                where += " and a.UserID in (SELECT userId FROM tb_b_user_role where    roleId='5336f820-a352-4f1b-832f-8d1e1119a2a2' or roleid in (select roleid from tb_b_roledb where rolename like '一键包发操作%'))";
+                 if (!string.IsNullOrEmpty(yhm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserName", yhm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (!string.IsNullOrEmpty(xm.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.UserXM", xm.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @"select a.*,c.roleName,b.roleId from tb_b_user a left join tb_b_user_role b on a.UserID=b.UserID
+                                left join tb_b_roledb c on b.roleId=c.roleId where 1=1 and ClientKind = 0 ";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.GetPagedDataTable(str + " order by a.UserName,a.UserXM", pagesize, ref cp, out ac);
+
+                var privilege = new SystemUser().GetPrivilegeList(SystemUser.CurrentUser.RoleID);
+
+                var mmck = false;
+                for (int i = 0; i < privilege.Rows.Count; i++)
+                {
+                    if (privilege.Rows[i]["privilegeName"] != null && privilege.Rows[i]["privilegeName"].ToString() != "")
+                    {
+                        if (privilege.Rows[i]["privilegeName"].ToString() == "系统维护中心_人员管理_密码查看")
+                        {
+                            mmck = true;
+                        }
+                    }
+                }
+
+                return new { dt = dtPage, cp = cp, ac = ac, mmck = mmck };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+
+
     [CSMethod("GetClientByOpen")]
     public object GetClientByOpen(int pagnum, int pagesize, string UserXM, string opentype)
     {
@@ -993,6 +1133,34 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         }
 
     }
+
+
+
+    [CSMethod("UpdateAcceptWX")]
+    public object UpdateAcceptWX(string UserID, string UserName, string acceptwx)
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            try
+            {
+                var cmd = dbc.CreateCommand();
+                cmd.CommandText = "update tb_b_user set acceptwx=" + acceptwx + " where UserID=" + dbc.ToSqlValue(UserID);
+                dbc.ExecuteNonQuery(cmd);
+
+                recordlog(dbc, SystemUser.CurrentUser.UserID, DateTime.Now, 3, "操作内容：更新用户ID：" + UserID + ";用户名:"+ UserName +"的acceptwx状态为" + acceptwx);
+
+
+
+                return true ;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+
 
     [CSMethod("GetZXXFToFile", 2)]
     public byte[] GetZXXFToFile(string kind, string btime, string etime, string mc)
@@ -1984,8 +2152,120 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         }
     }
 
+    //[CSMethod("SaveUser")]
+    //public bool SaveUser(JSReader jsr)
+    //{
+    //    if (jsr["UserName"].IsNull || jsr["UserName"].IsEmpty)
+    //    {
+    //        throw new Exception("用户名不能为空");
+    //    }
+    //    if (jsr["Password"].IsNull || jsr["Password"].IsEmpty)
+    //    {
+    //        throw new Exception("密码不能为空");
+    //    }
+
+    //    var companyId = SystemUser.CurrentUser.CompanyID;
+    //    using (DBConnection dbc = new DBConnection())
+    //    {
+    //        dbc.BeginTransaction();
+    //        try
+    //        {
+    //            if (jsr["UserID"].ToString() == "")
+    //            {
+    //                DataTable dt_user = dbc.ExecuteDataTable("select * from tb_b_user where UserName='" + jsr["UserName"].ToString() + "'");
+    //                if (dt_user.Rows.Count > 0)
+    //                {
+    //                    throw new Exception("该用户名已存在！");
+    //                }
+    //                //用户表
+    //                var YHID = Guid.NewGuid().ToString();
+    //                var dt = dbc.GetEmptyDataTable("tb_b_user");
+    //                var dr = dt.NewRow();
+    //                dr["UserID"] = new Guid(YHID);
+    //                dr["UserName"] = jsr["UserName"].ToString();
+    //                dr["Password"] = jsr["Password"].ToString();
+    //                dr["AddTime"] = DateTime.Now;
+    //                dr["IsSHPass"] = 1;
+    //                dr["Points"] = 0;
+    //                dr["ClientKind"] = 0;
+    //                //dr["Discount"] = ;
+    //                dr["UserXM"] = jsr["UserXM"].ToString();
+    //                dr["UserTel"] = jsr["UserTel"].ToString();
+    //                //dr["FromRoute"] = ;
+    //                //dr["ToRoute"] = ;
+    //                dr["companyId"] = companyId;
+    //                //dr["PayPassword"] = ;
+    //                dr["Address"] = jsr["Address"].ToString();
+    //                dt.Rows.Add(dr);
+    //                dbc.InsertTable(dt);
+
+    //                //角色用户关联表
+    //                var rdt = dbc.GetEmptyDataTable("tb_b_user_role");
+    //                var rdr = rdt.NewRow();
+    //                rdr["userroleId"] = Guid.NewGuid().ToString();
+    //                rdr["userId"] = new Guid(YHID);
+    //                rdr["roleId"] = jsr["roleId"].ToString();
+    //                rdr["companyId"] = companyId;
+    //                rdt.Rows.Add(rdr);
+    //                dbc.InsertTable(rdt);
+
+    //            }
+    //            else
+    //            {
+    //                var YHID = jsr["UserID"].ToString();
+    //                var oldname = dbc.ExecuteScalar("select UserName from tb_b_user where UserID='" + YHID + "'");
+    //                if (!jsr["UserName"].ToString().Equals(oldname.ToString()))
+    //                {
+    //                    DataTable dt_user = dbc.ExecuteDataTable("select * from tb_b_user where UserName='" + jsr["UserName"].ToString() + "'");
+    //                    if (dt_user.Rows.Count > 0)
+    //                    {
+    //                        throw new Exception("该用户名已存在！");
+    //                    }
+    //                }
+    //                var dt = dbc.GetEmptyDataTable("tb_b_user");
+    //                var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+    //                var dr = dt.NewRow();
+    //                dr["UserID"] = new Guid(YHID);
+    //                dr["UserName"] = jsr["UserName"].ToString();
+    //                dr["Password"] = jsr["Password"].ToString();
+    //                dr["UserXM"] = jsr["UserXM"].ToString();
+    //                dr["UserTel"] = jsr["UserTel"].ToString();
+    //                dr["Address"] = jsr["Address"].ToString();
+    //                dt.Rows.Add(dr);
+    //                dbc.UpdateTable(dt, dtt);
+
+    //                //删除用户的角色关联
+    //                string del_js = "delete from tb_b_user_role where userId=@userId";
+    //                SqlCommand cmd = new SqlCommand(del_js);
+    //                cmd.Parameters.AddWithValue("@userId", YHID);
+    //                dbc.ExecuteNonQuery(cmd);
+
+    //                //建立用户角色关联
+    //                var rdt = dbc.GetEmptyDataTable("tb_b_user_role");
+    //                var rdr = rdt.NewRow();
+    //                rdr["userroleId"] = Guid.NewGuid().ToString();
+    //                rdr["userId"] = new Guid(YHID);
+    //                rdr["roleId"] = jsr["roleId"].ToString();
+    //                rdr["companyId"] = companyId;
+    //                rdt.Rows.Add(rdr);
+    //                dbc.InsertTable(rdt);
+    //            }
+    //            dbc.CommitTransaction();
+    //            return true;
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            dbc.RoolbackTransaction();
+    //            throw ex;
+    //        }
+    //    }
+
+    //}
+
+
+
     [CSMethod("SaveUser")]
-    public bool SaveUser(JSReader jsr)
+    public static bool SaveUser(JSReader jsr)
     {
         if (jsr["UserName"].IsNull || jsr["UserName"].IsEmpty)
         {
@@ -1997,6 +2277,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         }
 
         var companyId = SystemUser.CurrentUser.CompanyID;
+        var YHID = Guid.NewGuid().ToString();
         using (DBConnection dbc = new DBConnection())
         {
             dbc.BeginTransaction();
@@ -2010,7 +2291,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                         throw new Exception("该用户名已存在！");
                     }
                     //用户表
-                    var YHID = Guid.NewGuid().ToString();
+
                     var dt = dbc.GetEmptyDataTable("tb_b_user");
                     var dr = dt.NewRow();
                     dr["UserID"] = new Guid(YHID);
@@ -2044,7 +2325,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                 }
                 else
                 {
-                    var YHID = jsr["UserID"].ToString();
+                    YHID = jsr["UserID"].ToString();
                     var oldname = dbc.ExecuteScalar("select UserName from tb_b_user where UserID='" + YHID + "'");
                     if (!jsr["UserName"].ToString().Equals(oldname.ToString()))
                     {
@@ -2083,7 +2364,7 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     dbc.InsertTable(rdt);
                 }
                 dbc.CommitTransaction();
-                return true;
+
             }
             catch (Exception ex)
             {
@@ -2092,7 +2373,122 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
             }
         }
 
+
+        using (SmartFramework4v2.Data.MySql.MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                if (jsr["UserID"].ToString() == "")
+                {
+                    DataTable dt_user = dbc.ExecuteDataTable("select * from tb_b_user where UserName='" + jsr["UserName"].ToString() + "'");
+                    if (dt_user.Rows.Count > 0)
+                    {
+                        throw new Exception("该用户名已存在！");
+                    }
+                    //用户表
+                    var dt = dbc.GetEmptyDataTable("tb_b_user");
+                    var dr = dt.NewRow();
+                    dr["userid"] = new Guid(YHID);
+                    dr["correlationid"] = new Guid(YHID);
+                    dr["account"] = jsr["UserName"].ToString();
+                    dr["password"] = jsr["Password"].ToString();
+                    dr["usertype"] = 0;
+                    dr["status"] = 0;
+                    dr["addtime"] = DateTime.Now;
+                    dr["username"] = jsr["UserXM"].ToString();
+                    dr["usertel"] = jsr["UserTel"].ToString();
+
+                    dr["registerationdatetime"] = DateTime.Now;
+                    dr["updatetimedatetime"] = DateTime.Now;
+                    dr["isdeleteflag"] = 0;
+
+
+
+
+                    dt.Rows.Add(dr);
+                    dbc.InsertTable(dt);
+
+
+                }
+                else
+                {
+                    YHID = jsr["UserID"].ToString();
+                    var oldname = dbc.ExecuteScalar("select account from tb_b_user where userid='" + YHID + "'");
+                    if (oldname != null && oldname != "")
+                    {
+                        if (!jsr["UserName"].ToString().Equals(oldname.ToString()))
+                        {
+                            DataTable dt_user = dbc.ExecuteDataTable("select * from tb_b_user where account='" + jsr["UserName"].ToString() + "'");
+                            if (dt_user.Rows.Count > 0)
+                            {
+                                throw new Exception("该用户名已存在！");
+                            }
+                        }
+                        var dt = dbc.GetEmptyDataTable("tb_b_user");
+                        var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                        var dr = dt.NewRow();
+                        dr["UserID"] = new Guid(YHID);
+                        dr["correlationid"] = new Guid(YHID);
+                        dr["account"] = jsr["UserName"].ToString();
+                        dr["password"] = jsr["Password"].ToString();
+                        dr["username"] = jsr["UserXM"].ToString();
+                        dr["usertel"] = jsr["UserTel"].ToString();
+
+                        dr["updatetimedatetime"] = DateTime.Now;
+
+                        dt.Rows.Add(dr);
+                        dbc.UpdateTable(dt, dtt);
+                    }
+                    else {
+                        DataTable dt_user = dbc.ExecuteDataTable("select * from tb_b_user where UserName='" + jsr["UserName"].ToString() + "'");
+                        if (dt_user.Rows.Count > 0)
+                        {
+                            throw new Exception("该用户名已存在！");
+                        }
+                        //用户表
+                        var dt = dbc.GetEmptyDataTable("tb_b_user");
+                        var dr = dt.NewRow();
+                        dr["userid"] = new Guid(YHID);
+                        dr["correlationid"] = new Guid(YHID);
+                        dr["account"] = jsr["UserName"].ToString();
+                        dr["password"] = jsr["Password"].ToString();
+                        dr["usertype"] = 0;
+                        dr["status"] = 0;
+                        dr["addtime"] = DateTime.Now;
+                        dr["username"] = jsr["UserXM"].ToString();
+                        dr["usertel"] = jsr["UserTel"].ToString();
+
+                        dr["registerationdatetime"] = DateTime.Now;
+                        dr["updatetimedatetime"] = DateTime.Now;
+                        dr["isdeleteflag"] = 0;
+
+
+
+
+                        dt.Rows.Add(dr);
+                        dbc.InsertTable(dt);
+                    
+                    
+                    }
+
+
+                }
+                dbc.CommitTransaction();
+
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+        return true;
+
+
+
     }
+
 
     [CSMethod("SaveClient")]
     public bool SaveClient(JSReader jsr, string nr)
@@ -2105,6 +2501,20 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         {
             throw new Exception("密码不能为空");
         }
+
+
+
+        if (jsr["FromRoute"].ToString().Length > 12)
+        {
+            throw new Exception("线路起点字符长度不能超过12位");
+        }
+        if (jsr["ToRoute"].ToString().Length > 12)
+        {
+            throw new Exception("线路终点字符长度不能超过12位");
+        }
+       
+
+
 
         var companyId = SystemUser.CurrentUser.CompanyID;
         using (DBConnection dbc = new DBConnection())
@@ -2271,22 +2681,6 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                         dr["ischbmember"] = DBNull.Value;
                     }
 
-                    if (!string.IsNullOrEmpty(jsr["jd"].ToString()))
-                    {
-                        dr["jd"] = jsr["jd"].ToString();
-                    }
-                    else
-                    {
-                        dr["jd"] = DBNull.Value;
-                    }
-                    if (!string.IsNullOrEmpty(jsr["wd"].ToString()))
-                    {
-                        dr["wd"] = jsr["wd"].ToString();
-                    }
-                    else
-                    {
-                        dr["wd"] = DBNull.Value;
-                    }
                     dt.Rows.Add(dr);
                     dbc.InsertTable(dt);
 
@@ -2458,23 +2852,6 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
                     else
                     {
                         dr["ischbmember"] = DBNull.Value;
-                    }
-
-                    if (!string.IsNullOrEmpty(jsr["jd"].ToString()))
-                    {
-                        dr["jd"] = jsr["jd"].ToString();
-                    }
-                    else
-                    {
-                        dr["jd"] = DBNull.Value;
-                    }
-                    if (!string.IsNullOrEmpty(jsr["wd"].ToString()))
-                    {
-                        dr["wd"] = jsr["wd"].ToString();
-                    }
-                    else
-                    {
-                        dr["wd"] = DBNull.Value;
                     }
 
                     dt.Rows.Add(dr);

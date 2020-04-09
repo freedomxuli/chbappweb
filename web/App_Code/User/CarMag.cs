@@ -109,14 +109,15 @@ public class CarMag
                       if (czdt.Rows.Count > 0)
                       {
 
-                          if (!IsBdBf(userName).success)
-                          {
-                              throw new Exception("车主未绑定宝付账号!");
-                          }
-                          else
-                          {
+                         // if (!IsBdBf(userName).success)
+                         // {
+                         //     throw new Exception("车主未绑定宝付账号!");
+                         // }
+                         // else
+                        //  {
                               cz = czdt.Rows[0]["UserID"].ToString();
-                          }
+                         // }
+
                       }
                       else
                       {
