@@ -593,7 +593,7 @@ public class UserMag
                 string where = "";
                 if (!string.IsNullOrEmpty(roleId))
                 {
-                    where += " and a.UserID in (SELECT userId FROM tb_b_user_role where roleId='" + roleId + "' or roleId='5336f820-a352-4f1b-832f-8d1e1119a2a2' or roleId='7649971c-90c7-4294-b7a8-5add0d0ea15b')";
+                    //where += " and a.UserID in (SELECT userId FROM tb_b_user_role where roleId='" + roleId + "' or roleId='5336f820-a352-4f1b-832f-8d1e1119a2a2' or roleId='7649971c-90c7-4294-b7a8-5add0d0ea15b' or roleId = '00e298ea-8f24-46c3-9f77-df4a491cdab5')";
                 }
 
                 if (!string.IsNullOrEmpty(yhm.Trim()))
@@ -3436,6 +3436,17 @@ and b.userpcid in (select userpcid from tb_b_user_pc where userid = " + dbc.ToSq
         using (DBConnection dbc = new DBConnection())
         {
             string str = "select dq_mc,dq_bm from tb_b_dq where dq_sj='000000' and status=0 order by dq_bm";
+            DataTable dt = dbc.ExecuteDataTable(str);
+            return dt;
+        }
+    }
+
+    [CSMethod("GetAllDQ")]
+    public DataTable GetAllDQ()
+    {
+        using (DBConnection dbc = new DBConnection())
+        {
+            string str = "select dq_mc,dq_bm from tb_b_dq where status=0 order by dq_bm";
             DataTable dt = dbc.ExecuteDataTable(str);
             return dt;
         }

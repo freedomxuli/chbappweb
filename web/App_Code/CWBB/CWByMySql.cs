@@ -230,7 +230,7 @@ d.invoicestatus=1 AND c.shippingnotestatuscode = 90
                 var dr = dt.NewRow();
                 dr["billingid"] = new Guid(billingid);
                 dr["totalamount"] = jsr["totalamount"].ToString();
-                dr["totalvaloremtax"] = jsr["totalvaloremtax"].ToString();
+              //  dr["totalvaloremtax"] = jsr["totalvaloremtax"].ToString();
                 dr["rate"] = jsr["rate"].ToString();
                 dr["billingtime"] = jsr["billingtime"].ToString();
 
@@ -444,7 +444,7 @@ where b.shippingnotenumber=" + dbc.ToSqlValue(shippingnotenumber);
 
                 string str = @"
 select * from (
-SELECT c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE shippingnoteid=c.shippingnoteid) AS verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
+SELECT c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE shippingnoteid=c.shippingnoteid) AS verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber,e.goodsfromroute,e.goodstoroute,e.goodsreceiptplace FROM
  tb_b_shippingnoteinfo c LEFT JOIN  
 (SELECT a.shippingnoteid,b.totalvaloremtax,b.rate,b.billingtime,b.invoicecode,b.invoicenumber,b.totalamount 
 	FROM tb_b_invoicedetail a LEFT JOIN tb_b_invoice b ON a.billingid=b.billingid
@@ -452,10 +452,10 @@ SELECT c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHER
 LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
 LEFT JOIN tb_b_user f ON e.shipperid=f.userid 
 WHERE 
-c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode = 30
-ORDER BY c.consignmentdatetime
+c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode >= 30
+
  ";
-                str += where + ")  AS tab ";
+                str += where + " ORDER BY c.consignmentdatetime)  AS tab ";
 
 
                 if (ishx != null && ishx != "")

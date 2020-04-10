@@ -1,5 +1,6 @@
-﻿//-----------------------------------------------------------全局变量-----------------------------------------------------------------
+//-----------------------------------------------------------全局变量-----------------------------------------------------------------
 var pageSize = 15;
+var pages = 1;
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
 var carriageStore = createSFW4Store({
@@ -53,6 +54,7 @@ var carriageStore = createSFW4Store({
         { name: 'fjurl2' }
     ],
     onPageChange: function (sto, nPage, sorters) {
+		pages = nPage;
         DataBind(nPage);
     }
 });
@@ -224,7 +226,7 @@ Ext.define('tswrWin', {
                         buttonAlign: 'center',
                         buttons: [
                             {
-                                text: '合同上传',
+                                text: '银行支付凭证上传',
                                 handler: function () {
                                     tp(id, 0);
                                 }
@@ -246,7 +248,7 @@ Ext.define('tswrWin', {
                         buttonAlign: 'center',
                         buttons: [
                             {
-                                text: '支付明细上传',
+                                text: '回单上传',
                                 handler: function () {
                                     tp(id, 2);
                                 }
@@ -268,7 +270,7 @@ Ext.define('tswrWin', {
                         buttonAlign: 'center',
                         buttons: [
                             {
-                                text: '回单上传',
+                                text: '合同上传',
                                 handler: function () {
                                     tp(id, 1);
                                 }
@@ -311,11 +313,32 @@ Ext.define('tswrWin', {
                                 if (obj == "yes") {
                                     CS('CZCLZ.CYMag.PushWr', function (retVal) {
                                         Ext.Msg.alert('提醒', retVal);
-                                        DataBind(1);
+                                        DataBind(pages);
                                         Ext.getCmp("tswrWin").close();
                                     }, CS.onError, id);
                                 }
                             });
+                        }
+                    },
+                    {
+                        text: '修改地址',
+                        handler: function () {
+                           
+                            SetStartAdd(id);
+                        }
+                    },
+                    {
+                        text: '修改推送',
+                        handler: function () {
+							Ext.MessageBox.confirm("提示", "是否推送？", function (obj) {
+							    if (obj == "yes") {
+							        CS('CZCLZ.CYMag.ChangeTS', function (retVal) {
+							            Ext.Msg.alert('提醒', retVal);
+							            DataBind(pages);
+							            Ext.getCmp("tswrWin").close();
+							        }, CS.onError, id);
+							    }
+							});
                         }
                     }
                 ]
@@ -756,3 +779,91 @@ Ext.onReady(function () {
     new CYDView();
     DataBind(1);
 });
+
+
+
+
+
+function SetStartAdd(carriageid) {
+
+
+     var f_window = new Ext.Window({
+        extend: 'Ext.window.Window',
+        viewModel: {
+            type: 'mywindow'
+        },
+        autoShow: true,
+        height: 250,
+        id: "StartDQ",
+        width: 500,
+        layout: 'fit',
+        title: "修改地址",
+        modal: true,
+        items: [
+           {
+               xtype: 'form',
+               id: 'StartDQfrom',
+               bodyPadding: 10,
+               items: [
+                    
+                   {
+                       xtype: 'textfield',
+                       fieldLabel: '收货地址',
+                       id: 'wrshd',
+                       name: 'wrshd',
+                       labelWidth: 70,
+                        anchor: '100%'
+                   },
+                   {
+                       xtype: 'textfield',
+                       fieldLabel: '起始地址',
+                       id: 'wrqsd',
+                       name: 'wrqsd',
+                       labelWidth: 70,
+                        anchor: '100%'
+                   }
+
+               ],
+               buttonAlign: 'center',
+               buttons: [
+
+                   {
+                       text: '保存',
+                       iconCls: 'dropyes',
+                       handler: function () {
+ 
+                           CS('CZCLZ.CYMag.Savecarriage', function (retVal) {
+                               if (retVal) {
+                                   
+                                   Ext.getCmp("StartDQ").close();
+
+                               }
+                           }, CS.onError, Ext.getCmp("wrqsd").getValue(), Ext.getCmp("wrshd").getValue(), carriageid);
+                       }
+                   },
+                    {
+                        text: '取消',
+                        iconCls: 'back',
+                        handler: function () {
+                            Ext.getCmp("StartDQ").close();
+
+                        }
+                    }
+               ]
+           }
+        ]
+    });
+     f_window.show();
+
+ 
+     CS('CZCLZ.CYMag.Getcarriage', function (retVal) {
+         if (retVal) {
+             Ext.getCmp("wrqsd").setValue(retVal.wrqsd);
+             Ext.getCmp("wrshd").setValue(retVal.wrshd);
+         }
+     }, CS.onError, carriageid);
+
+
+
+
+}

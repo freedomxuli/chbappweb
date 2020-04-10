@@ -29,9 +29,13 @@ var storeAdd = Ext.create('Ext.data.Store', {
         { name: 'carriername' },
         { name: 'actualwaymoney' },
         { name: 'drivername' },
-                        { name: 'price' },
+        { name: 'price' },
 
-        { name: 'actualdrivermoney' }
+        { name: 'actualdrivermoney' },
+        { name: 'consignmentdatetime' },
+        { name: 'goodstoroutename' },
+        { name: 'paysummoney' },
+        { name: 'id' }
     ]
 });
 //-------------------------------------------------------页面方法----------------------------------------------------------
@@ -50,7 +54,7 @@ function GetDriverPay(nPage) {
 
 var myWin;
 //新增选择
-function SelOrder(orderid, yfje,price) {
+function SelOrder(orderid, yfje, price, id) {
     if (privilege("一键发包模块_订单管理-司机付款列表_新增")) {
         myWin = new Ext.Window({
             extend: 'Ext.window.Window',
@@ -79,11 +83,11 @@ function SelOrder(orderid, yfje,price) {
 
                             anchor: '100%'
                         },
-                         {
-                             xtype: 'label',
-                             text: '申请金额不能大于：' + price
-                     
-                         },
+                        {
+                            xtype: 'label',
+                            text: '申请金额不能大于：' + price
+
+                        },
                         {
                             xtype: 'textareafield',
                             name: 'paymemo',
@@ -113,7 +117,7 @@ function SelOrder(orderid, yfje,price) {
                                             Ext.MessageBox.alert('提示', "申请金额超出应付款，申请失败！");
                                             myWin.close();
                                         }
-                                    }, CS.onError, orderid, values, yfje == 'null' ? 0 : yfje);
+                                    }, CS.onError, orderid, values, yfje == 'null' ? 0 : yfje, id);
                                 }
                             }
                         }
@@ -194,6 +198,23 @@ Ext.define('addDriverOrderPayWin', {
                                 flex: 1
                             },
                             {
+                                xtype: 'datecolumn',
+                                dataIndex: 'consignmentdatetime',
+                                sortable: false,
+                                menuDisabled: true,
+                                format: 'Y-m-d H:i:s',
+                                text: "订单时间",
+                                flex: 1
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'goodstoroutename',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "收货地址",
+                                flex: 1
+                            },
+                            {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'shippingnotenumber',
                                 sortable: false,
@@ -202,7 +223,7 @@ Ext.define('addDriverOrderPayWin', {
                                 width: 180,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
 
-                                    return "<input value='"+ value +"' style='border:0px;BACKGROUND-COLOR: transparent;'>";
+                                    return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
                                 }
                             },
                             /*{
@@ -238,6 +259,14 @@ Ext.define('addDriverOrderPayWin', {
                                 width: 100
                             },
                             {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'paysummoney',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "已申请金额",
+                                flex: 1
+                            },
+                            {
                                 text: '操作',
                                 dataIndex: 'shippingnoteid',
                                 width: 80,
@@ -245,7 +274,7 @@ Ext.define('addDriverOrderPayWin', {
                                 menuDisabled: true,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
-                                    str = "<a onclick='SelOrder(\"" + value + "\",\"" + record.data.actualdrivermoney + "\",\"" + record.data.price + "\");'>选择</a>";
+                                    str = "<a onclick='SelOrder(\"" + value + "\",\"" + record.data.actualdrivermoney + "\",\"" + record.data.price + "\",\"" + record.data.id + "\");'>选择</a>";
                                     return str;
                                 }
                             }
@@ -273,6 +302,29 @@ Ext.define('addDriverOrderPayWin', {
                                             fieldLabel: '厂家'
                                         },
                                         {
+                                            id: 'addsearch_beg',
+                                            xtype: 'datefield',
+                                            fieldLabel: '订单时间',
+                                            format: 'Y-m-d',
+                                            labelWidth: 80,
+                                            width: 200
+                                        },
+                                        {
+                                            id: 'addsearch_end',
+                                            xtype: 'datefield',
+                                            format: 'Y-m-d',
+                                            fieldLabel: '至',
+                                            labelWidth: 20,
+                                            width: 150
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            id: 'addsearch_are',
+                                            labelWidth: 80,
+                                            width: 200,
+                                            fieldLabel: '收货地址'
+                                        },
+                                        {
                                             xtype: 'buttongroup',
                                             title: '',
                                             items: [
@@ -284,8 +336,8 @@ Ext.define('addDriverOrderPayWin', {
                                                         CS('CZCLZ.Order.GetAddOrderList2', function (retVal) {
                                                             if (retVal) {
                                                                 storeAdd.loadData(retVal);
-                                                            }
-                                                        }, CS.onError, Ext.getCmp("cx_addshippingnotenumber").getValue(), Ext.getCmp("cx_addchangjia").getValue());
+                                                            } //
+                                                        }, CS.onError, Ext.getCmp("cx_addshippingnotenumber").getValue(), Ext.getCmp("cx_addchangjia").getValue(), Ext.getCmp("addsearch_beg").getValue(), Ext.getCmp("addsearch_end").getValue(), Ext.getCmp("addsearch_are").getValue());
                                                     }
                                                 }
                                             ]
@@ -348,7 +400,7 @@ Ext.define('DriverPayView', {
                         width: 180,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
 
-                            return "<input value='"+ value +"' style='border:0px;BACKGROUND-COLOR: transparent;'>";
+                            return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
                         }
                     },
                     {
@@ -535,7 +587,7 @@ Ext.define('DriverPayView', {
                                             if (privilege("一键发包模块_订单管理-司机付款列表_批量提交财务")) {
                                                 var grid = Ext.getCmp("orderPayGrid");
                                                 var rds = grid.getSelectionModel().getSelection();
-                                                
+
                                                 let lis = [];
                                                 for (var i = 0; i < rds.length; i++) {
                                                     if (rds[i].get("paystatus") == 10) {
@@ -578,7 +630,7 @@ Ext.define('DriverPayView', {
                                             if (privilege("一键发包模块_订单管理-司机付款列表_批量财务确认")) {
                                                 var grid = Ext.getCmp("orderPayGrid");
                                                 var rds = grid.getSelectionModel().getSelection();
-                                                
+
                                                 let lis = [];
                                                 for (var i = 0; i < rds.length; i++) {
                                                     if (rds[i].get("paystatus") == 20) {

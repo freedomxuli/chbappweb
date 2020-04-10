@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------全局变量-----------------------------------------------------------------
+//-----------------------------------------------------------全局变量-----------------------------------------------------------------
 var pageSize = 15;
 
 //-----------------------------------------------------------数据源-------------------------------------------------------------------
@@ -24,6 +24,7 @@ var storeSourceGoods = createSFW4Store({
         { name: 'totalnumberofpackages' },//数量
         { name: 'itemgrossweight' },//重量
         { name: 'cube' },//体积
+		{ name: 'vehicleamount' },//运输车辆
         { name: 'vehicletyperequirement' },//车型
         { name: 'vehiclelengthrequirement' },//车长
         { name: 'vehiclelengthrequirementname' },//车长
@@ -64,6 +65,78 @@ function getSourceGoodsListByPage(nPage) {
         });
 
     }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_offerstatus").getValue(), Ext.getCmp("cx_flowstatus").getValue());
+}
+
+//修改
+function EditSource(offerid) {
+    let edit_win = new Ext.Window({
+        extend: 'Ext.window.Window',
+        viewModel: {
+            type: 'mywindow'
+        },
+        autoShow: true,
+        height: 300,
+        width: 350,
+        layout: 'fit',
+        title: "修改",
+        modal: true,
+        items: [
+            {
+                xtype: 'form',
+                id: 'editform',
+                bodyPadding: 10,
+                items: [
+                    {
+                        xtype: 'numberfield',
+                        fieldLabel: '预估下游成本',
+                        name: 'estimatemoney',
+                        labelWidth: 120,
+                        anchor: '100%'
+                    },
+                    {
+                        xtype: 'numberfield',
+                        fieldLabel: '预估企业报价',
+                        name: 'totalmonetaryamount',
+                        labelWidth: 120,
+                        anchor: '100%'
+                    }
+                ],
+                buttonAlign: 'center',
+                buttons: [
+                    {
+                        text: '保存',
+                        iconCls: 'dropyes',
+                        handler: function () {
+                            var form = Ext.getCmp('editform');
+                            if (form.form.isValid()) {
+                                var values = form.form.getValues(false);
+                                var me = this;
+                                CS('CZCLZ.SourceGoods.UpdateSourceGoods', function (retVal) {
+                                    if (retVal) {
+                                        getSourceGoodsListByPage(storeSourceGoods.currentPage);
+                                        me.up('window').close();
+
+                                    }
+                                }, CS.onError, offerid , values);
+
+                            }
+                        }
+                    },
+                    {
+                        text: '取消',
+                        iconCls: 'back',
+                        handler: function () {
+                            this.up('window').close();
+                        }
+                    }
+                ]
+            }
+        ]
+    });
+    edit_win.show();
+    let r = storeSourceGoods.findRecord("offerid", offerid).data;
+    let form = Ext.getCmp('editform');
+    form.form.setValues(r);
 }
 
 //转操作部填报价格
@@ -482,13 +555,24 @@ Ext.define('monetaryAmountWinNew', {
                     },
                     {
                         xtype: 'numberfield',
-                        name: 'estimatenooilmoney',
+                        name: 'estimateoilmoney',
+                        id: 'estimateoilmoney',
                         labelWidth: 90,
-                        fieldLabel: '未用油金额',
+                        fieldLabel: '用油金额',
                         allowBlank: false,
                         minValue: 0,
                         anchor: '100%'
-                    }
+                    },
+                    {
+                        xtype: 'numberfield',
+                        name: 'estimatevotemoney',
+                        id: 'estimatevotemoney',
+                        labelWidth: 90,
+                        fieldLabel: '开票金额',
+                        allowBlank: false,
+                        minValue: 0,
+                        anchor: '100%'
+                    },
                 ],
                 buttonAlign: 'center',
                 buttons: [
@@ -760,6 +844,11 @@ Ext.define('SourceGoodsView', {
                         menuDisabled: true,
                         renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                             var str = '';
+
+                            if (record.data.flowstatus >= 20) {
+                                str += "<a onclick='EditSource(\"" + value + "\");'>修改</a> || ";
+                            }
+
                             if (record.data.flowstatus == 0) {
                                 if (record.data.offerstatus == 0) {
                                     str += "<a onclick='ToWritePrice(\"" + value + "\");'>转操作部填报价格</a>";
@@ -774,6 +863,13 @@ Ext.define('SourceGoodsView', {
                             }
                             return str;
                         }
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'memo',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "备注"
                     },
                      {
                          xtype: 'gridcolumn',
@@ -796,6 +892,13 @@ Ext.define('SourceGoodsView', {
                         menuDisabled: true,
                         text: "数量"
                     },
+					{
+					    xtype: 'gridcolumn',
+					    dataIndex: 'vehicleamount',
+					    sortable: false,
+					    menuDisabled: true,
+					    text: "运输车辆数量"
+					},
                     {
                         xtype: 'gridcolumn',
                         dataIndex: 'itemgrossweight',
@@ -1006,10 +1109,17 @@ Ext.define('SourceGoodsView', {
                     },
                     {
                         xtype: 'gridcolumn',
-                        dataIndex: 'memo',
+                        dataIndex: 'estimateoilmoney',
                         sortable: false,
                         menuDisabled: true,
-                        text: "备注"
+                        text: "预估用油金额"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'estimatevotemoney',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "预估用票金额"
                     }
                 ],
                 viewConfig: {

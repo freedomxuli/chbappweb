@@ -46,7 +46,13 @@ var store = createSFW4Store({
                                  { name: 'nooilmoney' },
                                    { name: 'isneededit' },
 
+                            { name: 'advancerate' },
+                            { name: 'operaterate' },
+                            { name: 'grossrate' },
+                            { name: 'oilmoneyrate' },
+                    { name: 'invoicerate' },
 
+                            
               
        { name: 'invoicebanknumber' }
 
@@ -633,9 +639,10 @@ Ext.define('addWin', {
                         xtype: 'numberfield',
                         fieldLabel: '帐期财务汇率（1-1.5）',
                         id: 'accountrate',
+                        hidden:true,
                         name: 'accountrate',
                         labelWidth: 70,
-                        allowBlank: false,
+                      //  allowBlank: false,
                         allowDecimals: true,    //是否允许小数
                         allowNegative: false,    //是否允许负数
                         maxValue: 1.5,
@@ -665,7 +672,9 @@ Ext.define('addWin', {
                         id: 'cashrate',
                         name: 'cashrate',
                         labelWidth: 70,
-                        allowBlank: false,
+                        hidden: true,
+
+                       // allowBlank: false,
                         allowDecimals: true,    //是否允许小数
                         allowNegative: false,    //是否允许负数
                 
@@ -674,13 +683,92 @@ Ext.define('addWin', {
                         anchor: '100%'
                     },
                  
+                 {
+                     xtype: 'numberfield',
+                     fieldLabel: '垫资比例',
+                     id: 'advancerate',
+                     name: 'advancerate',
+                     labelWidth: 70,
+                     allowBlank: false,
+                     allowDecimals: true,    //是否允许小数
+                     allowNegative: false,    //是否允许负数
+                     maxValue: 1,
+                     minValue: 0,
+                     decimalPrecision: 4,    // 精确的位数
+                     value:0.0007,
+                     anchor: '100%'
+                 },
+                 {
+                     xtype: 'numberfield',
+                     fieldLabel: '运营费比例',
+                     id: 'operaterate',
+                     name: 'operaterate',
+                     labelWidth: 70,
+                     allowBlank: false,
+                     allowDecimals: true,    //是否允许小数
+                     allowNegative: false,    //是否允许负数
+                     maxValue: 1,
+                     minValue: 0,
+                     decimalPrecision: 2,    // 精确的位数
+                     value: 0.05,
+                     anchor: '100%'
+                 },
+                 {
+                     xtype: 'numberfield',
+                     fieldLabel: '开票比例',
+                     id: 'invoicerate',
+                     name: 'invoicerate',
+                     labelWidth: 70,
+                     allowBlank: false,
+                     allowDecimals: true,    //是否允许小数
+                     allowNegative: false,    //是否允许负数
+                     maxValue: 1,
+                     minValue: 0,
+                     decimalPrecision: 2,    // 精确的位数
+                     value: 0.05,
+                     anchor: '100%'
+                 },
+                    {
+                        xtype: 'numberfield',
+                        fieldLabel: '毛利比例',
+                        id: 'grossrate',
+                        name: 'grossrate',
+                        labelWidth: 70,
+                        allowBlank: false,
+                        allowDecimals: true,    //是否允许小数
+                        allowNegative: false,    //是否允许负数
+                        maxValue: 1,
+                        minValue: 0,
+                        decimalPrecision: 2,    // 精确的位数
+                        value: 0.08,
+                        anchor: '100%'
+                    },
+                    {
+                        xtype: 'numberfield',
+                        fieldLabel: '用油比例',
+                        id: 'oilmoneyrate',
+                        name: 'oilmoneyrate',
+                        labelWidth: 70,
+                        allowBlank: false,
+                        allowDecimals: true,    //是否允许小数
+                        allowNegative: false,    //是否允许负数
+                        maxValue: 1,
+                        minValue: 0,
+                        decimalPrecision: 2,    // 精确的位数
+                        value: 0.08,
+                        anchor: '100%'
+                    },
+
+
                     {
                         xtype: 'numberfield',
                         fieldLabel: '未用油汇率（0-1）',
                         id: 'nooilmoney',
                         name: 'nooilmoney',
                         labelWidth: 70,
-                        allowBlank: false,
+                        hidden: true,
+
+                       // allowBlank: false,
                         allowDecimals: true,    //是否允许小数
                         allowNegative: false,    //是否允许负数
                         maxValue: 1,

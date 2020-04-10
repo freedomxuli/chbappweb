@@ -1,4 +1,4 @@
-//-------------------------------------------------------全局变量----------------------------------------------------------
+﻿//-------------------------------------------------------全局变量----------------------------------------------------------
 var pageSize = 15;
 var opersUserPageSize = 15;
 var carrierPageSize = 15;
@@ -12,12 +12,24 @@ var storeOrder = createSFW4Store({
     fields: [
         { name: 'usernamea' },//操作员
         { name: 'userCZY' },//操作员
-                { name: 'hzcount' },//操作员
-                  { name: 'userGYS' },//操作员
-                    { name: 'actualoilmoney' },//操作员
-        
-                  { name: 'actualvotemoney' },//操作员
+                { name: 'userGYS' },//操作员
         { name: 'userZCSJ' },//操作员
+
+
+        { name: 'userGYS_username' },
+        { name: 'userGYS_vehiclenumber' },
+        { name: 'userGYS_identitydocumentnumber' },
+
+        { name: 'userZCSJ_username' },
+        { name: 'userZCSJ_vehiclenumber' },
+        { name: 'userZCSJ_identitydocumentnumber' },
+        { name: 'userZCSJ_usertel' },
+
+         { name: 'vehicletype' },
+          { name: 'vehiclelength' },
+
+
+ 
 
         { name: 'operatorid' },//订单ID
         { name: 'shippingnoteid' },//订单ID
@@ -31,12 +43,11 @@ var storeOrder = createSFW4Store({
         { name: 'goodsreceiptplace' },//收货地址
         { name: 'consignee' },//收货方
         { name: 'consicontactname' },//收货联系人
-        //{ name: 'consitelephonenumber' },//收货联系方式
+        { name: 'consitelephonenumber' },//收货联系方式
         { name: 'descriptionofgoods' },//货物
         { name: 'totalnumberofpackages' },//数量
         { name: 'itemgrossweight' },//重量
         { name: 'cube' },//体积
-		{ name: 'vehicleamount' },//运输车辆
         { name: 'vehicletyperequirement' },//车型
         { name: 'vehiclelengthrequirement' },//车长
         { name: 'vehiclelengthrequirementname' },//车长
@@ -77,16 +88,7 @@ var storeOrder = createSFW4Store({
 
 
         { name: 'actualmoneystatus' },
-        { name: 'tuoyunorder' },
-
-        { name:'consignmentdatetime'},//--------------------明细需要
-        { name:'goodsfromroutecode'},
-        { name:'goodstoroutecode'},
-        { name:'consignee'},
-        { name:'consicontactname'},
-        { name:'consitelephonenumber'},
-        { name:'placeofloading'},
-        { name:'goodsreceiptplace'}
+        { name: 'tuoyunorder' }
     ],
     onPageChange: function (sto, nPage, sorters) {
         GetOrder(nPage);
@@ -172,258 +174,7 @@ var OrderUsersStore = createSFW4Store({
         GetUserByPage(nPage);
     }
 });
-
-var dqfromstore = Ext.create('Ext.data.Store', {
-    fields: [
-        { name: 'dq_mc' },
-        { name: 'dq_bm' }
-    ]
-});
-var dqtostore = Ext.create('Ext.data.Store', {
-    fields: [
-        { name: 'dq_mc' },
-        { name: 'dq_bm' }
-    ]
-});
-
-
 //-------------------------------------------------------页面方法----------------------------------------------------------
-function GetOrderModel(orderid) {
-    let r = storeOrder.findRecord("shippingnoteid", orderid).data;
-    let form = Ext.getCmp('orderForm');
-    form.form.setValues(r);
-}
-function EditOrder(orderid) {
-    let editOrderWin = new Ext.Window({
-        extend: 'Ext.window.Window',
-        viewModel: {
-            type: 'mywindow'
-        },
-        autoShow: true,
-        height: 600,
-        id: "orderWin",
-        width: 500,
-        layout: 'fit',
-        title: "订单编辑",
-        modal: true,
-        items: [
-            {
-                xtype: 'form',
-                id: 'orderForm',
-                bodyPadding: 10,
-                items: [
-                    {
-                        xtype: 'datefield',
-                        name: 'consignmentdatetime',
-                        fieldLabel: '订单时间',
-                        format: 'Y-m-d',
-                        labelWidth: 80,
-                        anchor: '100%',
-                        readOnly:true
-                    },
-                    /*{
-                        xtype: 'combobox',
-                        name: 'goodsfromroutecode',
-                        fieldLabel: '起始地地址',
-                        editable: false,
-                        store: dqfromstore,
-                        queryMode: 'local',
-                        displayField: 'dq_mc',
-                        valueField: 'dq_bm',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },*/
-                    {
-                        xtype: 'textfield',
-                        name: 'placeofloading',
-                        fieldLabel: '起始地地址',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'goodsfromroute',
-                        fieldLabel: '起始地省市区',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    /*{
-                        xtype: 'combobox',
-                        name: 'goodstoroutecode',
-                        fieldLabel: '收货地址',
-                        editable: false,
-                        store: dqtostore,
-                        queryMode: 'local',
-                        displayField: 'dq_mc',
-                        valueField: 'dq_bm',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },*/
-                    {
-                        xtype: 'textfield',
-                        name: 'goodsreceiptplace',
-                        fieldLabel: '收货地址',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'goodstoroute',
-                        fieldLabel: '收货地省市区',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'descriptionofgoods',
-                        fieldLabel: '货物名称',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'numberfield',
-                        name: 'totalnumberofpackages',
-                        fieldLabel: '货物数量',
-                        labelWidth: 80,
-                        allowDecimals: true,
-                        allowNegative: false,
-                        minValue: 0,
-                        //allowBlank: false,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'numberfield',
-                        name: 'itemgrossweight',
-                        fieldLabel: '货物重量',
-                        labelWidth: 80,
-                        allowDecimals: true,
-                        allowNegative: false,
-                        minValue: 0,
-                        //allowBlank: false,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'numberfield',
-                        name: 'cube',
-                        fieldLabel: '货物体积',
-                        labelWidth: 80,
-                        allowDecimals: true,
-                        allowNegative: false,
-                        minValue: 0,
-                        //allowBlank: false,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'combobox',
-                        name: 'istakegoods',
-                        fieldLabel: '是否提货',
-                        labelWidth: 80,
-                        anchor: '100%',
-                        editable: false,
-                        store: Ext.create('Ext.data.Store', {
-                            fields: [
-                                { name: 'value' },
-                                { name: 'name' }
-                            ],
-                            data: [
-                                { 'value': 0, 'name': '提货' },
-                                { 'value': 1, 'name': '不提' }
-                            ]
-                        }),
-                        queryMode: 'local',
-                        displayField: 'name',
-                        valueField: 'value'
-                    },
-                    {
-                        xtype: 'combobox',
-                        name: 'isdelivergoods',
-                        fieldLabel: '是否送货',
-                        labelWidth: 80,
-                        anchor: '100%',
-                        editable: false,
-                        store: Ext.create('Ext.data.Store', {
-                            fields: [
-                                { name: 'value' },
-                                { name: 'name' }
-                            ],
-                            data: [
-                                { 'value': 0, 'name': '送货' },
-                                { 'value': 1, 'name': '不送' }
-                            ]
-                        }),
-                        queryMode: 'local',
-                        displayField: 'name',
-                        valueField: 'value'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'consignee',
-                        fieldLabel: '收货人',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'consicontactname',
-                        fieldLabel: '收货联系人',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'consitelephonenumber',
-                        fieldLabel: '收货联系电话',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textareafield',
-                        name: 'memo',
-                        labelWidth: 80,
-                        fieldLabel: '备注',
-                        anchor: '100%',
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'tuoyunorder',
-                        fieldLabel: '托运单编号',
-                        labelWidth: 80,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        name: 'offerid',
-                        hidden: true
-                    },
-                ],
-                buttonAlign: 'center',
-                buttons: [
-                    {
-                        text: '保存',
-                        iconCls: 'dropyes',
-                        id: 'errorSaveBtn',
-                        handler: function () {
-                            var form = Ext.getCmp('orderForm');
-                            if (form.form.isValid()) {
-                                var values = form.form.getValues(false);
-                                CS('CZCLZ.Order.UpdateOrder', function (retVal) {
-                                    if (retVal) {
-                                        GetOrder(purPage);
-                                        Ext.MessageBox.alert('提示', "保存成功！");
-                                    }
-                                }, CS.onError, orderid, values);
-                            }
-                            this.up('window').close();
-                        }
-                    }
-                ]
-            }
-        ]
-    });
-    editOrderWin.show();
-    GetOrderModel(orderid);
-}
-
 //获取订单列表
 function GetOrder(nPage) {
     purPage = nPage;
@@ -1850,14 +1601,6 @@ Ext.define('addLocationInfoWin', {
     initComponent: function () {
         var me = this;
         var shippingnoteid = me.shippingnoteid;
-
- 
-        var vehiclenumber = me.vehiclenumber;
-
-        var username = me.username;
-
-        var usertel = me.usertel;
-
         me.items = [
             {
                 xtype: 'form',
@@ -1878,8 +1621,7 @@ Ext.define('addLocationInfoWin', {
                         name: 'drivername',
                         labelWidth: 70,
                         allowBlank: false,
-                        anchor: '100%',
-                        value:username
+                        anchor: '100%'
                     },
                     {
                         xtype: 'textfield',
@@ -1887,8 +1629,7 @@ Ext.define('addLocationInfoWin', {
                         name: 'drivertel',
                         labelWidth: 70,
                         allowBlank: false,
-                        anchor: '100%',
-                        value:usertel
+                        anchor: '100%'
                     },
                     {
                         xtype: 'textfield',
@@ -1896,8 +1637,7 @@ Ext.define('addLocationInfoWin', {
                         name: 'vehiclenumber',
                         labelWidth: 70,
                         allowBlank: false,
-                        anchor: '100%',
-                        value:vehiclenumber
+                        anchor: '100%'
                     },
                     {
                         xtype: 'datefield',
@@ -2064,42 +1804,9 @@ Ext.define('locationInfoWin', {
                                                     iconCls: 'add',
                                                     text: '新增',
                                                     handler: function () {
-
-                                                       
- 
-                                                        CS('CZCLZ.Order.GetBYcostList', function (retVal) {
-                                                             if (retVal) {
-
-                                                                Rel_store.loadData(retVal, false);
-                                                                if(Rel_store.getCount>0)
-                                                                {
-                                                                    var vehiclenumber=   Rel_store.getAt(0).get("vehiclenumber");
-
-                                                                    var username=   Rel_store.getAt(0).get("username");
-
-                                                                    var usertel=   Rel_store.getAt(0).get("usertel");
-                                                                    var win = new addLocationInfoWin({ shippingnoteid: id,vehiclenumber: vehiclenumber,username: username,usertel: usertel });
-                                                                    win.show(null, function () {
-                                                                    });
-                                                                }else{
-                                                                    var win = new addLocationInfoWin({ shippingnoteid: id,vehiclenumber: "",username: "",usertel: "" });
-                                                                    win.show(null, function () {
-                                                                    });
-                                                                }
-
-                                                            }else{
-                                                            
-                                                                var win = new addLocationInfoWin({ shippingnoteid: id,vehiclenumber: "",username: "",usertel: "" });
-                                                                win.show(null, function () {
-                                                                });
-                                                            
-                                                            }
-                                                        }, CS.onError, id, 0);
-
-                                                     
-
-
-                                                       
+                                                        var win = new addLocationInfoWin({ shippingnoteid: id });
+                                                        win.show(null, function () {
+                                                        });
                                                     }
                                                 }
                                             ]
@@ -2419,80 +2126,10 @@ Ext.define('orderView', {
                 store: storeOrder,
                 columnLines: true,
                 viewConfig: {
-                    enableTextSelection: true,
-                     getRowClass: function (record, rowIndex, rowParams, store) {
-                         if (record.data.actualmoneystatus  == 1) {
-                             return "x-grid-record-pink";
-                         }  
-                    }
+                    enableTextSelection: true
                 },
                 columns: [Ext.create('Ext.grid.RowNumberer'),
-                {
-                    text: '操作',
-                    dataIndex: 'shippingnoteid',
-                    width: 850,
-                    sortable: false,
-                    menuDisabled: true,
-                    renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                        var str = "";
-                        str += "<a onclick='EditOrder(\"" + value + "\");'>修改</a> || ";
-                        str += "<a onclick='EditOperatorUser(\"" + value + "\");'>指定操作员</a> || ";
-
-                        //if (record.data.shippingnotestatuscode == 0) {
-
-                        //    //if (record.data.operatorid != null && record.data.operatorid != "") {
-                        //    //    str += "<a onclick='EditOperatorUser(\"" + value + "\");'>更改操作员</a> || ";
-                        //    //} else {
-                        //    //    str += "<a onclick='EditOperatorUser(\"" + value + "\");'>指定操作员</a> || ";
-
-                        //    //}
-                        //}
-                        if (record.data.shippingnotestatuscode != 90) {
-                            str += "<a onclick='EditAbnormal(\"" + value + "\",\"" + record.data.isabnormal + "\");'>" + (record.data.isabnormal == null ? "填写异常" : (record.data.isabnormal == 0 ? "查看异常" : "处理异常")) + "</a> || ";
-                        }
-                        if (record.data.shippingnotestatuscode == 20 || record.data.shippingnotestatuscode == 30) {
-                            str += "<a onclick='EditGPS(\"" + value + "\");'>填写gps信息</a> || ";
-                        }
-                        if (record.data.shippingnotestatuscode == 30 || record.data.shippingnotestatuscode == 40) {
-                            str += "<a onclick='SearchGJ(\"" + value + "\");'>查看轨迹</a> || ";
-                            //str += "<a href='approot/r/JS/MySql/OrderManagement/LocusMap.aspx?shippingnoteid=" + value + "' target='_blank'>查看轨迹</a> || ";
-                        }
-                        if (record.data.doublepaynum > 0) {
-                            str += "<a onclick='ShowDoublePay(\"" + value + "\");'>查看补单情况</a> || ";
-                        }
-                        if (record.data.shippingnotestatuscode == 30) {
-                            str += "<a onclick='EditLocationInfoLine(\"" + value + "\");'>填写定位信息</a> || <a onclick='ConfirmBtn(\"" + value + "\");'>确认送达</a> || ";
-                        }
-                        if (record.data.shippingnotestatuscode == 40) {
-                            str += "<a onclick='UploadingHZD(\"" + value + "\");'>上传回执单（"+ record.data.hzcount +"）</a> || ";
-                        }
-                        str += "<a onclick='ShowOrderStatus(\"" + value + "\");'>订单进度</a> || ";
-                        //str += "<a onclick='SelSupplier(\"" + value + "\",\"" + record.data.carrierid + "\");'>选择供应商</a> || ";
-                        //if (record.data.shippingnotestatuscode == 30) {
-                        //    str += "<a onclick='SelCarriageUser(\"" + value + "\",\"" + record.data.driverid + "\");'>选择承运司机</a> || ";
-                        //}
-                        //str += "<a onclick='SelTakeGoodsDriver(\"" + value + "\",\"" + record.data.takegoodsdriver + "\");'>选择装车司机</a> || ";
-
-
-                        //if (record.data.actualmoneystatus == 1) {
-                        //    if (record.data.isabnormal == 2) {
-                        //        str += "<a onclick='UpdateDoublePrice(\"" + value + "\",\"" + record.data.offerid + "\");'>补单价格变更</a> || ";
-                        //    } else {
-                        //        str += "<a onclick='UpdatePrice(\"" + value + "\",\"" + record.data.offerid + "\");'>实际价格变更</a> || ";
-                        //    }
-                        //} else if (record.data.actualmoneystatus == 2) {
-                        //    str += "<a onclick='ConfirmPrice(\"" + value + "\",\"" + record.data.offerid + "\");'>实际价格确认</a> || ";
-                        //}
-
-
-                        str += "<a onclick='ShowAddLXR(\"" + record.data.offerid + "\",\"" + record.data.totalmonetaryamount + "\",\"" + record.data.actualnooilmoney + "\",\"" + record.data.actualmoney + "\",\"" + record.data.shippingnoteid + "\");'>实际运费组成</a> || ";
-                        
-                        return str.substring(0, str.lastIndexOf('||'));
-                        //return str;
-                    }
-                },
-                
-
+               
                 {
                     xtype: 'gridcolumn',
                     dataIndex: 'username',
@@ -2571,32 +2208,29 @@ Ext.define('orderView', {
                     menuDisabled: true,
                     text: "备注"
                 },
-				{
-				    xtype: 'gridcolumn',
-				    dataIndex: 'vehicleamount',
-				    sortable: false,
-				    menuDisabled: true,
-				    text: "运输车辆数量"
-				},
-                 {
-                     xtype: 'gridcolumn',
-                     dataIndex: 'userGYS',
-                     sortable: false,
-                     menuDisabled: true,
-                     text: "供应商"
-                 },
                 {
                     xtype: 'gridcolumn',
-                    dataIndex: 'shippingnoteid',
+                    dataIndex: 'userGYS_username',
                     sortable: false,
                     menuDisabled: true,
-                    text: "供应商",
-                    renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                        var str;
-                        str = "<a onclick='ShowCZY(\"" + value + "\",0);'>查看</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
-                        return str;
-                    }
+                    text: "供应商"
                 },
+                {
+                    xtype: 'gridcolumn',
+                    dataIndex: 'userGYS_vehiclenumber',
+                    sortable: false,
+                    menuDisabled: true,
+                    text: "车牌"
+                },
+                {
+                    xtype: 'gridcolumn',
+                    dataIndex: 'userGYS_identitydocumentnumber',
+                    sortable: false,
+                    menuDisabled: true,
+                    text: "身份证"
+                },
+ 
+
 
                 {
                     xtype: 'gridcolumn',
@@ -2606,26 +2240,42 @@ Ext.define('orderView', {
                     menuDisabled: true,
                     text: "承运司机"
                 },
-                
                 {
                     xtype: 'gridcolumn',
-                    dataIndex: 'userZCSJ',
+                    dataIndex: 'userZCSJ_username',
                     sortable: false,
                     menuDisabled: true,
                     text: "装车司机"
                 },
-                {
-                    xtype: 'gridcolumn',
-                    dataIndex: 'shippingnoteid',
-                    sortable: false,
-                    menuDisabled: true,
-                    text: "装车司机",
-                    renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                        var str;
-                        str = "<a onclick='ShowCZY(\"" + value + "\",1);'>查看</a>";//　<a onclick='AddPhoto(\"" + value + "\");'>添加照片</a>
-                        return str;
-                    }
-                },
+                   {
+                       xtype: 'gridcolumn',
+                       dataIndex: 'userZCSJ_vehiclenumber',
+                       sortable: false,
+                       menuDisabled: true,
+                       text: "车牌"
+                   },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'userZCSJ_identitydocumentnumber',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "身份证"
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        dataIndex: 'userZCSJ_usertel',
+                        sortable: false,
+                        menuDisabled: true,
+                        text: "司机电话"
+                    },
+
+
+
+
+                
+ 
+
+
                 {
                     xtype: 'gridcolumn',
                     dataIndex: 'shippingnotestatusname',
@@ -2692,29 +2342,14 @@ Ext.define('orderView', {
                 },
                 {
                     xtype: 'gridcolumn',
-                    dataIndex: 'vehicletyperequirement',
+                    dataIndex: 'vehicletype',
                     sortable: false,
                     menuDisabled: true,
-                    text: "车型",
-                    renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                        var str = "";//车型（1：栏板车；2：厢车；）
-                        switch (value) {
-                            case "1":
-                                str = "栏板车";
-                                break;
-                            case "2":
-                                str = "厢车";
-                                break;
-                            default:
-                                str = "";
-                        }
-
-                        return str;
-                    }
+                    text: "车型"
                 },
                 {
                     xtype: 'gridcolumn',
-                    dataIndex: 'vehiclelengthrequirementname',
+                    dataIndex: 'vehiclelength',
                     sortable: false,
                     menuDisabled: true,
                     text: "车长"
@@ -2745,7 +2380,7 @@ Ext.define('orderView', {
                     dataIndex: 'actualnooilmoney',
                     sortable: false,
                     menuDisabled: true,
-                    text: "实际未用油"
+                    text: "实际未用票"
                 },
                 {
                     xtype: 'gridcolumn',
@@ -2761,20 +2396,7 @@ Ext.define('orderView', {
                     menuDisabled: true,
                     text: "企业实际运费"
                 },
-                {
-                    xtype: 'gridcolumn',
-                    dataIndex: 'actualoilmoney',
-                    sortable: false,
-                    menuDisabled: true,
-                    text: "实际用油金额"
-                },
-                {
-                    xtype: 'gridcolumn',
-                    dataIndex: 'actualvotemoney',
-                    sortable: false,
-                    menuDisabled: true,
-                    text: "实际用票金额列"
-                },
+
                 {
                     xtype: 'gridcolumn',
                     dataIndex: 'userCZY',
@@ -2852,8 +2474,6 @@ Ext.define('orderView', {
 
                                 fieldLabel: '承运司机'
                             },
-                                
-                                     
                             {
                                 xtype: 'buttongroup',
                                 title: '',
@@ -2934,7 +2554,7 @@ function ShowAddLXR(offid, totalmonetaryamount, actualnooilmoney, actualmoney, s
                         value: actualmoney
 
                     },
-                    /*{
+                    {
                         xtype: 'textfield',
                         fieldLabel: '实际未用油金额',
                         id: 'actualnooilmoney',
@@ -2942,55 +2562,35 @@ function ShowAddLXR(offid, totalmonetaryamount, actualnooilmoney, actualmoney, s
                         labelWidth: 120,
                         anchor: '100%',
                         value: actualnooilmoney
-                    },*/
-                    {
+                    }, {
                         xtype: 'textfield',
                         fieldLabel: '企业报价',
                         id: 'actualcompanypay',
                         name: 'actualcompanypay',
                         labelWidth: 120,
                         anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        fieldLabel: '实际用油金额',
-                        id: 'actualoilmoney',
-                        name: 'actualoilmoney',
-                        labelWidth: 120,
-                        anchor: '100%'
-                    },
-                    {
-                        xtype: 'textfield',
-                        fieldLabel: '实际开票金额',
-                        id: 'actualvotemoney',
-                        name: 'actualvotemoney',
-                        labelWidth: 120,
-                        anchor: '100%'
-                    }
-                    /*{
+                    }, {
                         xtype: 'textfield',
                         fieldLabel: '实际综合成本',
                         id: 'actualcompletemoney',
                         name: 'actualcompletemoney',
                         labelWidth: 120,
                         anchor: '100%'
-                    },
-                    {
+                    }, {
                         xtype: 'textfield',
                         fieldLabel: '实际税费成本',
                         id: 'actualtaxmoney',
                         name: 'actualtaxmoney',
                         labelWidth: 120,
                         anchor: '100%'
-                    },
-                    {
+                    }, {
                         xtype: 'textfield',
                         fieldLabel: '实际资金成本',
                         id: 'actualcostmoney',
                         name: 'actualcostmoney',
                         labelWidth: 120,
                         anchor: '100%'
-                    }*/
+                    }
 
                 ],
                 buttonAlign: 'center',
@@ -3005,7 +2605,7 @@ function ShowAddLXR(offid, totalmonetaryamount, actualnooilmoney, actualmoney, s
                                 var me = this;
                                 CS('CZCLZ.Order.SaveOFFER', function (retVal) {
                                     if (retVal) {
-                                        GetOrder(purPage);
+                                        GetOrder(1);
                                         me.up('window').close();
 
                                     }
@@ -3046,9 +2646,7 @@ var Rel_store = Ext.create('Ext.data.Store', {
         { name: 'money' },
         { name: 'vehiclenumber' },
         { name: 'username' },
-                { name: 'identitydocumentnumber' },
 
-        
         { name: 'usertel' }
     ]
 });
@@ -3114,10 +2712,7 @@ function ShowCZY(shippingnoteid, paytype) {
                                 flex: 1,
                                 align: "center",
                                 sortable: false,
-                                menuDisabled: true,
-                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
-                                }
+                                menuDisabled: true
                             },
                             {
                                 dataIndex: 'username',
@@ -3125,40 +2720,21 @@ function ShowCZY(shippingnoteid, paytype) {
                                 text: '账号名称',
                                 align: "center",
                                 sortable: false,
-                                menuDisabled: true,
-                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
-                                }
+                                menuDisabled: true
                             },
                             {
                                 dataIndex: 'usertel',
                                 text: '联系电话',
                                 align: "center",
                                 sortable: false,
-                                menuDisabled: true,
-                                renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
-                                }
+                                menuDisabled: true
                             },
-                               {
-                                   dataIndex: 'identitydocumentnumber',
-                                   text: '身份证',
-                                   align: "center",
-                                   sortable: false,
-                                   menuDisabled: true,
-                                   renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                       return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
-                                   }
-                               },
-
-                            
                             {
                                 dataIndex: 'money',
                                 text: '费用',
                                 align: "center",
                                 sortable: false,
                                 menuDisabled: true
-                               
                             },
                             {
                                 dataIndex: 'id',
@@ -3168,7 +2744,7 @@ function ShowCZY(shippingnoteid, paytype) {
                                 sortable: false,
                                 menuDisabled: true,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                    return "<div style='color:green;cursor:pointer;' onclick='SetEndAdd(\"" + shippingnoteid + "\",\"" + paytype + "\",\"" + record.data.id + "\",\"" + record.data.money + "\")'>修改</div>";
+                                    return "<div style='color:green;cursor:pointer;' onclick='SetEndAdd(\"" + shippingnoteid + "\",\"" + value + "\",\"" + record.data.id + "\",\"" + record.data.money + "\")'>修改</div>";
                                 }
                             }
                         ]

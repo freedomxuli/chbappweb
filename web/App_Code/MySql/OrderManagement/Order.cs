@@ -133,7 +133,7 @@ public class Order
                     where += " and " + dbc.C_Like("h.username", cysj.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
                 }
 
-                string str = @"select e.username as usernamea ,a.operatorid,a.shippingnoteid,d.username,a.shippingnoteadddatetime,a.tuoyunorder,
+                string str = @"select (SELECT COUNT(*) FROM tb_b_receiptinfo WHERE isdeleteflag=0 AND shippingnoteid=a.shippingnoteid) AS hzcount,e.username as usernamea ,a.operatorid,a.shippingnoteid,d.username,a.shippingnoteadddatetime,a.tuoyunorder,
                                 a.shippingnotestatuscode,
                                 CASE a.shippingnotestatuscode
 	                                WHEN 0 THEN '已下单'
@@ -144,8 +144,8 @@ public class Order
 	                                WHEN 90 THEN '订单完成'
 	                                ELSE '差额待确认'
                                 END AS shippingnotestatusname,
-                                a.shippingnotenumber,d.goodsfromroute,d.goodstoroute,d.goodsreceiptplace,d.consignee,d.consicontactname,d.consitelephonenumber,d.descriptionofgoods,d.totalnumberofpackages,d.itemgrossweight,d.cube,
-                                d.vehicletyperequirement,d.vehiclelengthrequirement,d.istakegoods,d.estimatemoney,
+                                a.shippingnotenumber,d.goodsfromroute,d.goodstoroute,d.descriptionofgoods,d.totalnumberofpackages,d.itemgrossweight,d.cube,
+                                d.vehicletyperequirement,d.vehiclelengthrequirement,d.istakegoods,d.estimatemoney,d.vehicletype,d.vehiclelength,d.actualoilmoney,d.actualvotemoney,
  d.actualnooilmoney,
 d.actualcompletemoney,d.actualtaxmoney,d.actualcostmoney,
                                 CASE d.istakegoods
@@ -162,8 +162,8 @@ d.actualcompletemoney,d.actualtaxmoney,d.actualcostmoney,
 		                                '不送'
                                 END AS isdelivergoodsname,
                                 d.actualcompanypay,d.actualmoney,d.totalmonetaryamount,d.memo,a.isabnormal,a.abnormalmemo,a.gpscompany,a.gpsdenno,
-								(select count(*) from tb_b_shippingnoteinfo_doublepay where tb_b_shippingnoteinfo_doublepay.shippingnoteid=a.shippingnoteid) doublepaynum,d.vehiclelengthrequirementname,
-a.carrierid,f.username AS carriername,h.driverid,h.username cysj,a.takegoodsdriver,g.username AS takegoodsdrivername,a.offerid,a.actualmoneystatus
+								(select count(*) from tb_b_shippingnoteinfo_doublepay where tb_b_shippingnoteinfo_doublepay.shippingnoteid=a.shippingnoteid) doublepaynum,d.vehiclelengthrequirementname,d.vehicleamount,
+a.carrierid,f.username AS carriername,h.driverid,h.username cysj,a.takegoodsdriver,g.username AS takegoodsdrivername,a.offerid,a.actualmoneystatus,a.consignmentdatetime,d.goodsfromroutecode,d.goodstoroutecode,d.consignee,d.consicontactname,d.consitelephonenumber,d.placeofloading,d.goodsreceiptplace
                                 from tb_b_shippingnoteinfo a
                                 left join (
 	                                select c.username,c.carriername,b.*,e.name vehiclelengthrequirementname from tb_b_sourcegoodsinfo_offer b
@@ -185,14 +185,23 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
                 dtPage = dbc.GetPagedDataTable(str + " order by a.shippingnoteadddatetime desc", pagesize, ref cp, out ac);
                 dtPage.Columns.Add("userCZY");
                 dtPage.Columns.Add("userGYS");
+                dtPage.Columns.Add("userGYS_username");
+                dtPage.Columns.Add("userGYS_vehiclenumber");
+                dtPage.Columns.Add("userGYS_identitydocumentnumber");
+             
                 dtPage.Columns.Add("userZCSJ");
+
+                dtPage.Columns.Add("userZCSJ_username");
+                dtPage.Columns.Add("userZCSJ_vehiclenumber");
+                dtPage.Columns.Add("userZCSJ_identitydocumentnumber");
+                dtPage.Columns.Add("userZCSJ_usertel");
                 foreach (DataRow dr in dtPage.Rows)
                 {
                     var userCZY = "";
                     var dt = dbc.ExecuteDataTable("SELECT username FROM tb_b_shippingnoteinfo_operator a LEFT JOIN tb_b_user b ON a.userid=b.userid where a.status=0 and shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
                     foreach (DataRow dr2 in dt.Rows)
                     {
-                        userCZY += dr2[0].ToString()+",";
+                        userCZY += dr2[0].ToString() + ",";
                     }
                     dr["userCZY"] = userCZY;
 
@@ -203,20 +212,32 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
                     foreach (DataRow dr2 in dt.Rows)
                     {
                         userGYS += dr2["username"].ToString() + "(" + dr2["vehiclenumber"].ToString() + "," + dr2["identitydocumentnumber"].ToString() + ")" + ",";
+
+                        dr["userGYS_username"] = dr2["username"].ToString();
+                        dr["userGYS_vehiclenumber"] = dr2["vehiclenumber"].ToString();
+                        dr["userGYS_identitydocumentnumber"] = dr2["identitydocumentnumber"].ToString();
+                    
                     }
                     dr["userGYS"] = userGYS;
 
 
                     var userZCSJ = "";
                     dt = dbc.ExecuteDataTable(@"    SELECT b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
- where a.paytype=1 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString())); foreach (DataRow dr2 in dt.Rows)
+ where a.paytype=1 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString())); 
+                    foreach (DataRow dr2 in dt.Rows)
                     {
                         userZCSJ += dr2["username"].ToString() + "(" + dr2["vehiclenumber"].ToString() + "," + dr2["identitydocumentnumber"].ToString() + "," + dr2["usertel"].ToString() + ")" + ",";
+                        dr["userZCSJ_username"] = dr2["username"].ToString();
+                        dr["userZCSJ_vehiclenumber"] = dr2["vehiclenumber"].ToString();
+                        dr["userZCSJ_identitydocumentnumber"] = dr2["identitydocumentnumber"].ToString();
+                        dr["userZCSJ_usertel"] = dr2["usertel"].ToString();
+
+                    
                     }
                     dr["userZCSJ"] = userZCSJ;
 
 
-                
+
                 }
 
                 return new { dt = dtPage, cp = cp, ac = ac };
@@ -225,6 +246,64 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
             {
                 throw ex;
             }
+        }
+    }
+
+    [CSMethod("UpdateOrder")]
+    public bool UpdateOrder(string orderId, JSReader jsr)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                dbc.BeginTransaction();
+                DateTime ti = DateTime.Now;
+
+                //consignmentdatetime//订单时间；tb_b_shippingnoteinfo.consignmentdatetime
+
+                var dt = dbc.GetEmptyDataTable("tb_b_sourcegoodsinfo_offer");
+                var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                var dr = dt.NewRow();
+
+                dr["offerid"] = jsr["offerid"].ToString();
+                dr["placeofloading"] = jsr["placeofloading"];//起始地地址；placeofloading
+                dr["goodsfromroute"] = jsr["goodsfromroute"].ToString();//起始地省市区；tb_b_sourcegoodsinfo_offer.goodsfromroute
+                dr["goodsreceiptplace"] = jsr["goodsreceiptplace"].ToString();//收货地址；tb_b_sourcegoodsinfo_offer.goodsreceiptplace
+                dr["goodstoroute"] = jsr["goodstoroute"].ToString();//收货地省市区；tb_b_sourcegoodsinfo_offer.goodstoroute
+                dr["descriptionofgoods"] = jsr["descriptionofgoods"].ToString();//货物名称；tb_b_sourcegoodsinfo_offer.descriptionofgoods
+                dr["totalnumberofpackages"] = jsr["totalnumberofpackages"].ToString();//货物数量；tb_b_sourcegoodsinfo_offer.totalnumberofpackages
+                dr["itemgrossweight"] = jsr["itemgrossweight"].ToString();//货物重量；tb_b_sourcegoodsinfo_offer.itemgrossweight
+                dr["cube"] = jsr["cube"].ToString();//货物体积；tb_b_sourcegoodsinfo_offer.cube
+                dr["istakegoods"] = jsr["istakegoods"].ToString();//是否提货；tb_b_sourcegoodsinfo_offer.istakegoods
+                dr["isdelivergoods"] = jsr["isdelivergoods"].ToString();//是否送货；tb_b_sourcegoodsinfo_offer.isdelivergoods
+                dr["consignee"] = jsr["consignee"].ToString();//收货人；tb_b_sourcegoodsinfo_offer.consignee
+                dr["consicontactname"] = jsr["consicontactname"].ToString();//收货联系人；tb_b_sourcegoodsinfo_offer.consicontactname
+                dr["consitelephonenumber"] = jsr["consitelephonenumber"].ToString();//收货联系电话；tb_b_sourcegoodsinfo_offer.consitelephonenumber
+                dr["memo"] = jsr["memo"].ToString();//备注；tb_b_sourcegoodsinfo_offer.memo
+                //dr["tuoyunorder"] = jsr["tuoyunorder"].ToString();//托运单编号；tb_b_sourcegoodsinfo_offer.tuoyunorder
+                dr["updateuser"] = SystemUser.CurrentUser.UserID;
+                dr["updatetime"] = DateTime.Now;
+
+                dt.Rows.Add(dr);
+                dbc.UpdateTable(dt, dtt);
+
+				var dt1 = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo");
+                var dtt1 = new SmartFramework4v2.Data.DataTableTracker(dt1);
+				var dr1 = dt1.NewRow();
+				dr1["shippingnoteid"] = orderId;
+				dr1["tuoyunorder"] = jsr["tuoyunorder"].ToString();
+				dt1.Rows.Add(dr1);
+                dbc.UpdateTable(dt1, dtt1);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+
         }
     }
 
@@ -658,7 +737,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                     dr["shippingnotenumber"] = shippingnotenumber;
                     dr["shippingnoteid"] = orderId;
                     dr["vehicleid"] = vehicleid;
-                   // dr["vehiclenumber"] = vehiclenumber;
+                    // dr["vehiclenumber"] = vehiclenumber;
 
                     dr["vehiclenumber"] = jsr["vehiclenumber"].ToString();
                     dr["drivername"] = jsr["drivername"].ToString();
@@ -718,7 +797,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
             dbc.BeginTransaction();
             try
             {
-                if (offid != null && offid!="")
+                if (offid != null && offid != "")
                 {
 
                     YHID = offid;
@@ -731,15 +810,17 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
 
                     dr["estimatemoney"] = jsr["estimatemoney"].ToString();
                     dr["actualmoney"] = jsr["actualmoney"].ToString();
-                    dr["actualnooilmoney"] = jsr["actualnooilmoney"].ToString();
+                    //dr["actualnooilmoney"] = jsr["actualnooilmoney"].ToString();
 
                     dr["actualcompanypay"] = jsr["actualcompanypay"].ToString();
+                    dr["actualoilmoney"] = jsr["actualoilmoney"].ToString();
+                    dr["actualvotemoney"] = jsr["actualvotemoney"].ToString();
 
-                    dr["actualcompletemoney"] = jsr["actualcompletemoney"].ToString();
+                    //dr["actualcompletemoney"] = jsr["actualcompletemoney"].ToString();
 
-                    dr["actualtaxmoney"] = jsr["actualtaxmoney"].ToString();
+                    //dr["actualtaxmoney"] = jsr["actualtaxmoney"].ToString();
 
-                    dr["actualcostmoney"] = jsr["actualcostmoney"].ToString();
+                    //dr["actualcostmoney"] = jsr["actualcostmoney"].ToString();
 
                     dr["updateuser"] = SystemUser.CurrentUser.UserID;
                     dr["updatetime"] = DateTime.Now;
@@ -747,7 +828,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                     dt.Rows.Add(dr);
                     dbc.UpdateTable(dt, dtt);
 
-                    
+
 
 
                 }
@@ -812,10 +893,10 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
-             try
+            try
             {
                 var cmd = dbc.CreateCommand();
-                cmd.CommandText = @"SELECT a.id,a.money,b.vehiclenumber,b.username,b.usertel FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
+                cmd.CommandText = @"SELECT a.id,a.money,b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
  where a.paytype=" + dbc.ToSqlValue(paytype) + " and a.shippingnoteid=" + dbc.ToSqlValue(shippingnoteid);
                 var dt = dbc.ExecuteDataTable(cmd);
 
@@ -824,11 +905,11 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
             }
             catch (Exception ex)
             {
-                
+
                 throw ex;
             }
         }
- 
+
     }
 
     [CSMethod("UpdateMoney")]
@@ -839,7 +920,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
             try
             {
                 var cmd = dbc.CreateCommand();
-                cmd.CommandText = @"update tb_b_shippingnoteinfo_cost set money="+ dbc.ToSqlValue(money) +@" where id=" + dbc.ToSqlValue(id);
+                cmd.CommandText = @"update tb_b_shippingnoteinfo_cost set money=" + dbc.ToSqlValue(money) + @" where id=" + dbc.ToSqlValue(id);
                 dbc.ExecuteNonQuery(cmd);
 
                 return true;
@@ -1638,16 +1719,17 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 {
                     where += " and " + dbc.C_EQ("a.paystatus", paystatus);
                 }
-                string str = @"select a.*,g.shippingnotenumber,g.changjia,g.sjname,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
-                                left join (
-                                    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia,f.username as sjname from tb_b_shippingnoteinfo b
-                                    left join (
-	                                    select c.offerid,d.username from tb_b_sourcegoodsinfo_offer c
-	                                    left join tb_b_user d on c.shipperid=d.userid
-                                    )e on b.offerid=e.offerid
-                                    left join tb_b_user f on b.takegoodsdriver=f.userid
-                                )g on a.shippingnoteid=g.shippingnoteid
-                                where a.status=0 and paytype=1 ";
+                string str = @"select a.*,g.shippingnotenumber,g.changjia,c.username sjname,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
+left join (
+    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia from tb_b_shippingnoteinfo b
+    left join (
+        select c.offerid,d.username from tb_b_sourcegoodsinfo_offer c
+        left join tb_b_user d on c.shipperid=d.userid
+    )e on b.offerid=e.offerid
+)g on a.shippingnoteid=g.shippingnoteid
+inner join tb_b_shippingnoteinfo_cost b on a.costid = b.id
+left join tb_b_user c on b.userid = c.userid
+where a.status=0 and a.paytype in (1,4)";
                 str += where;
 
                 //开始取分页数据
@@ -1670,7 +1752,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
     /// <param name="changjia"></param>
     /// <returns></returns>
     [CSMethod("GetAddOrderList")]
-    public object GetAddOrderList(String shippingnotenumber, String changjia)
+    public object GetAddOrderList(String shippingnotenumber, String changjia, String addsearch_beg, String addsearch_end, String addsearch_are)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1685,13 +1767,31 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
             {
                 where += " and " + dbc.C_Like("d.username", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
             }
+            if (!string.IsNullOrEmpty(addsearch_beg))
+            {
+                where += " and b.consignmentdatetime>='" + Convert.ToDateTime(addsearch_beg).ToString("yyyy-MM-dd") + "'";
+            }
+            if (!string.IsNullOrEmpty(addsearch_end))
+            {
+                where += " and b.consignmentdatetime<='" + Convert.ToDateTime(addsearch_end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+            }
+            if (!string.IsNullOrEmpty(addsearch_are))
+            {
+                where += " and " + dbc.C_Like("f.name", addsearch_are.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+            }
             String sql = @"select (IFNULL(a.money,0)-IFNULL(a.verifymoney,0)) as price,a.shippingnoteid,d.username changjia,b.shippingnotenumber,
-                            e.username carriername,a.money actualwaymoney
-                            from tb_b_shippingnoteinfo_cost a
+                            e.username carriername,a.money actualwaymoney,b.consignmentdatetime,f.name as goodstoroutename,IFNULL(g.paysummoney,0) paysummoney,a.id
+from tb_b_shippingnoteinfo_cost a
                             left join tb_b_shippingnoteinfo b on a.shippingnoteid = b.shippingnoteid
                             left join tb_b_sourcegoodsinfo_offer c on b.offerid = c.offerid
+left join tb_b_area f on c.goodstoroutecode=f.code
                             left join tb_b_user d on c.shipperid = d.userid
                             left join tb_b_user e on a.userid = e.userid
+left join (
+	select shippingnoteid,sum(paymoney) paysummoney from tb_b_shippingnoteinfo_pay 
+	where  (paytype=0 or paytype=3) and paystatus>=10
+	GROUP BY shippingnoteid
+)g on a.shippingnoteid=g.shippingnoteid
                             where a.status = 0 and paytype = 0 " + where + @"
                             order by b.shippingnoteadddatetime desc";
             DataTable dt = dbc.ExecuteDataTable(sql);
@@ -1706,7 +1806,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
     /// <param name="changjia"></param>
     /// <returns></returns>
     [CSMethod("GetAddOrderList2")]
-    public object GetAddOrderList2(String shippingnotenumber, String changjia)
+    public object GetAddOrderList2(String shippingnotenumber, String changjia, String addsearch_beg, String addsearch_end, String addsearch_are)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1721,13 +1821,31 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
             {
                 where += " and " + dbc.C_Like("d.username", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
             }
+            if (!string.IsNullOrEmpty(addsearch_beg))
+            {
+                where += " and b.consignmentdatetime>='" + Convert.ToDateTime(addsearch_beg).ToString("yyyy-MM-dd") + "'";
+            }
+            if (!string.IsNullOrEmpty(addsearch_end))
+            {
+                where += " and b.consignmentdatetime<='" + Convert.ToDateTime(addsearch_end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+            }
+            if (!string.IsNullOrEmpty(addsearch_are))
+            {
+                where += " and " + dbc.C_Like("f.name", addsearch_are.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+            }
             String sql = @"select (IFNULL(a.money,0)-IFNULL(a.verifymoney,0)) as price,a.shippingnoteid,d.username changjia,b.shippingnotenumber,
-                            e.username drivername,a.money actualdrivermoney
+                            e.username drivername,a.money actualdrivermoney,b.consignmentdatetime,f.name as goodstoroutename,IFNULL(g.paysummoney,0) paysummoney,a.id
                             from tb_b_shippingnoteinfo_cost a
                             left join tb_b_shippingnoteinfo b on a.shippingnoteid = b.shippingnoteid
                             left join tb_b_sourcegoodsinfo_offer c on b.offerid = c.offerid
+left join tb_b_area f on c.goodstoroutecode=f.code
                             left join tb_b_user d on c.shipperid = d.userid
                             left join tb_b_user e on a.userid = e.userid
+left join (
+	select shippingnoteid,sum(paymoney) paysummoney from tb_b_shippingnoteinfo_pay 
+	where  (paytype=1 or paytype=2) and paystatus>=10
+	GROUP BY shippingnoteid
+)g on a.shippingnoteid=g.shippingnoteid
                             where a.status = 0 and paytype = 1 and a.money > 0 " + where + @"
                             order by b.shippingnoteadddatetime desc";
             DataTable dt = dbc.ExecuteDataTable(sql);
@@ -1742,7 +1860,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
     /// <param name="jsr"></param>
     /// <returns></returns>
     [CSMethod("SaveOrderPay")]
-    public bool SaveOrderPay(string orderId, JSReader jsr, string yfje)
+    public bool SaveOrderPay(string orderId, JSReader jsr, string yfje,string costid)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1762,7 +1880,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 {
                     sqjeSum = Convert.ToDecimal(jsr["paymoney"].ToString());
                 }
-                if (sqjeSum >= yfjeSum)
+                if (sqjeSum > yfjeSum)
                 {
                     return false;
                 }
@@ -1788,6 +1906,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 dr["addtime"] = ti;
                 dr["updateuser"] = SystemUser.CurrentUser.UserID;
                 dr["updatetime"] = ti;
+                dr["costid"] = costid;
                 dt.Rows.Add(dr);
                 dbc.InsertTable(dt);
 
@@ -1992,16 +2111,17 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 {
                     where += " and " + dbc.C_EQ("a.paystatus", paystatus);
                 }
-                string str = @"select a.*,g.shippingnotenumber,g.changjia,g.carriername,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
-                                left join (
-                                    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia,f.username as carriername from tb_b_shippingnoteinfo b
-                                    left join (
-	                                    select c.offerid,d.username from tb_b_sourcegoodsinfo_offer c
-	                                    left join tb_b_user d on c.shipperid=d.userid
-                                    )e on b.offerid=e.offerid
-                                    left join tb_b_user f on b.carrierid=f.userid
-                                )g on a.shippingnoteid=g.shippingnoteid
-                                where a.status=0 and paytype=0 ";
+                string str = @"select a.*,g.shippingnotenumber,g.changjia,c.username carriername,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
+left join (
+    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia from tb_b_shippingnoteinfo b
+    left join (
+        select c.offerid,d.username from tb_b_sourcegoodsinfo_offer c
+        left join tb_b_user d on c.shipperid=d.userid
+    )e on b.offerid=e.offerid
+)g on a.shippingnoteid=g.shippingnoteid
+inner join tb_b_shippingnoteinfo_cost b on a.costid = b.id
+left join tb_b_user c on b.userid = c.userid
+where a.status=0 and a.paytype in (0,3)";
                 str += where;
 
                 //开始取分页数据
@@ -2025,7 +2145,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
     /// <param name="yfje"></param>
     /// <returns></returns>
     [CSMethod("SaveOrderCarrierPay")]
-    public bool SaveOrderCarrierPay(string orderId, JSReader jsr, string yfje)
+    public bool SaveOrderCarrierPay(string orderId, JSReader jsr, string yfje, string costid)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -2041,7 +2161,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 {
                     sqjeSum = Convert.ToDecimal(sumDt.Rows[0]["summoney"].ToString()) + Convert.ToDecimal(jsr["paymoney"].ToString());
                 }
-                else 
+                else
                 {
                     sqjeSum = Convert.ToDecimal(jsr["paymoney"].ToString());
                 }
@@ -2070,6 +2190,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 dr["addtime"] = ti;
                 dr["updateuser"] = SystemUser.CurrentUser.UserID;
                 dr["updatetime"] = ti;
+                dr["costid"] = costid;
                 dt.Rows.Add(dr);
                 dbc.InsertTable(dt);
 

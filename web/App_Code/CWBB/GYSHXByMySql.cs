@@ -440,20 +440,22 @@ where b.shippingnotenumber=" + dbc.ToSqlValue(shippingnotenumber);
 
                 string str = @"
 select * from (
-SELECT g.money,g.verifymoney as hxmoney,e.descriptionofgoods,c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE shippingnoteid=c.shippingnoteid) AS verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
+SELECT g.id as costid,g.money,h.username AS um,g.verifymoney as hxmoney,e.descriptionofgoods,e.goodsfromroute,e.goodstoroute,e.goodsreceiptplace
+,c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE shippingnoteid=c.shippingnoteid) AS verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
  tb_b_shippingnoteinfo c LEFT JOIN  
 (SELECT a.shippingnoteid,b.totalvaloremtax,b.rate,b.billingtime,b.invoicecode,b.invoicenumber,b.totalamount 
 	FROM tb_b_invoicedetail a LEFT JOIN tb_b_invoice b ON a.billingid=b.billingid
 ) d ON c.shippingnoteid=d.shippingnoteid 
 LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
-INNER JOIN tb_b_user f ON c.carrierid=f.userid  AND f.usertype=2
-left join tb_b_shippingnoteinfo_cost g on c.shippingnoteid=g.shippingnoteid and g.status = 0 and g.usertype = 1
+INNER JOIN tb_b_user h ON e.shipperid=h.userid
+left join tb_b_shippingnoteinfo_cost g on c.shippingnoteid=g.shippingnoteid and g.status = 0 and g.usertype = 2
+INNER JOIN tb_b_user f ON g.userid=f.userid  AND f.usertype=2
 
 WHERE 
-c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode = 30
-ORDER BY c.consignmentdatetime
+c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode >= 30
+
  ";
-                str += where + ")  AS tab ";
+                str += where + " ORDER BY c.consignmentdatetime)  AS tab ";
 
 
                 if (ishx != null && ishx != "")
@@ -494,7 +496,7 @@ ORDER BY c.consignmentdatetime
 
 
     [CSMethod("HXMoney")]
-    public static bool HXMoney(JSReader jsr, string shippingnoteid, string userid, string username, string ye, string actualwaymoney, string offerid)
+    public static bool HXMoney(JSReader jsr, string shippingnoteid, string userid, string username, string ye, string actualwaymoney, string offerid, string costid)
     {
 
         var companyId = SystemUser.CurrentUser.CompanyID;
@@ -506,21 +508,49 @@ ORDER BY c.consignmentdatetime
             try
             {
                 //
+                //if (ye == "0")
+                //{
+                //    dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                //}
+                //else {
+                //    var dts = dbc.ExecuteDataTable("SELECT carrierverifymoney,carrierverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
+                //    if (dts.Rows.Count > 0)
+                //    {
+                //        if (dts.Rows[0][0] != null && dts.Rows[0][0].ToString() != "")
+                //        {
+                //            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+
+                //        }
+                //        else {
+                //            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+
+                //        }
+                //    }
+
+
+                //}
+
                 if (ye == "0")
                 {
-                    dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                    //dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualdrivermoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                    dbc.ExecuteNonQuery("update tb_b_shippingnoteinfo_cost   set verifystatus = 2,verifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  id=" + dbc.ToSqlValue(costid));
+
                 }
-                else {
-                    var dts = dbc.ExecuteDataTable("SELECT carrierverifymoney,carrierverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
+                else
+                {
+                    var dts = dbc.ExecuteDataTable("SELECT verifymoney,verifystatus FROM tb_b_shippingnoteinfo_cost WHERE id=" + dbc.ToSqlValue(costid));
                     if (dts.Rows.Count > 0)
                     {
                         if (dts.Rows[0][0] != null && dts.Rows[0][0].ToString() != "")
                         {
-                            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                            // dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                            dbc.ExecuteNonQuery("update tb_b_shippingnoteinfo_cost   set verifystatus = 1,verifymoney =verifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  id=" + dbc.ToSqlValue(costid));
 
                         }
-                        else {
-                            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                        else
+                        {
+                            // dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                            dbc.ExecuteNonQuery("update tb_b_shippingnoteinfo_cost   set verifystatus = 1,verifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  id=" + dbc.ToSqlValue(costid));
 
                         }
                     }
@@ -602,6 +632,8 @@ ORDER BY c.consignmentdatetime
                     string actualwaymoney = "";
                     string username = "";
                     string verifymoney = "";
+                    string costid = "";
+
                     string[] arr = jsr.ToArray()[i].ToString().Split(',');
                     if (arr.Length > 0)
                     {
@@ -617,34 +649,62 @@ ORDER BY c.consignmentdatetime
                             verifymoney = "0";
                         }
                         username = arr[5].ToString();
+                        costid = arr[6].ToString();
+
                     }
                     string ye = (Convert.ToDouble(actualwaymoney) - Convert.ToDouble(verifymoney)).ToString();
 
 
+                    //if (ye == "0")
+                    //{
+                    //    dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                    //}
+                    //else
+                    //{
+                    //    var dts = dbc.ExecuteDataTable("SELECT carrierverifymoney,carrierverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
+                    //    if (dts.Rows.Count > 0)
+                    //    {
+                    //        if (dts.Rows[0][0] != null && dts.Rows[0][0].ToString() != "")
+                    //        {
+                    //            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
+
+                    //        }
+                    //        else
+                    //        {
+                    //            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
+
+                    //        }
+                    //    }
+
+
+                    //}
                     if (ye == "0")
                     {
-                        dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                        //dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualdrivermoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                        dbc.ExecuteNonQuery("update tb_b_shippingnoteinfo_cost   set verifystatus = 2,verifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  id=" + dbc.ToSqlValue(costid));
+
                     }
                     else
                     {
-                        var dts = dbc.ExecuteDataTable("SELECT carrierverifymoney,carrierverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
+                        var dts = dbc.ExecuteDataTable("SELECT verifymoney,verifystatus FROM tb_b_shippingnoteinfo_cost WHERE id=" + dbc.ToSqlValue(costid));
                         if (dts.Rows.Count > 0)
                         {
                             if (dts.Rows[0][0] != null && dts.Rows[0][0].ToString() != "")
                             {
-                                dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                                // dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                                dbc.ExecuteNonQuery("update tb_b_shippingnoteinfo_cost   set verifystatus = 1,verifymoney =verifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  id=" + dbc.ToSqlValue(costid));
 
                             }
                             else
                             {
-                                dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                                // dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                                dbc.ExecuteNonQuery("update tb_b_shippingnoteinfo_cost   set verifystatus = 1,verifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  id=" + dbc.ToSqlValue(costid));
 
                             }
                         }
 
 
                     }
-
 
                     var dt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_verify");
                     var dr = dt.NewRow();

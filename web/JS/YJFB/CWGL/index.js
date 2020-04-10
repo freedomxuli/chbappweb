@@ -7,15 +7,18 @@ var orderstore = createSFW4Store({
     currentPage: 1,
     fields: [
 
-             { name: 'descriptionofgoods' },
+        { name: 'descriptionofgoods' },
+        { name: 'username' },
 
-    { name: 'shippingnoteid' },
-         { name: 'userid' },
-                           { name: 'actualcompanypay' },
+        { name: 'shippingnoteid' },
+        { name: 'userid' },
+        { name: 'actualcompanypay' },
 
-                  { name: 'invoicestatus' },
-                                   { name: 'actualcompanypay' },
-
+        { name: 'invoicestatus' },
+        { name: 'actualcompanypay' },
+        { name: 'goodsfromroute' },
+        { name: 'goodstoroute' },
+        { name: 'goodsreceiptplace' },
          
        { name: 'shippingnoteadddatetime' },
        { name: 'shippingnotenumber' },
@@ -176,7 +179,36 @@ Ext.onReady(function () {
                                                 menuDisabled: true,
                                                 flex: 1,
                                                 text: '订单时间'
+                                            }, {
+                                                xtype: 'gridcolumn',
+                                                dataIndex: 'username',
+                                                sortable: false,
+                                                menuDisabled: true,
+                                                flex: 1,
+                                                text: '厂家名称'
                                             },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'goodsfromroute',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '起始地'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'goodstoroute',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '目的地'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'goodsreceiptplace',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '收货地址'
+                                                },
                                               {
                                                   xtype: 'gridcolumn',
                                                   dataIndex: 'shippingnotenumber',
@@ -206,14 +238,9 @@ Ext.onReady(function () {
                                                     menuDisabled: true,
                                                     flex: 1,
                                                     text: '应付金额'
-                                                },  {
-                                                xtype: 'gridcolumn',
-                                                dataIndex: 'username',
-                                                sortable: false,
-                                                menuDisabled: true,
-                                                flex: 1,
-                                                text: '企业名称'
-                                            }, 
+                                                },
+                                               
+
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'totalamount',
@@ -259,6 +286,7 @@ Ext.onReady(function () {
                                                     sortable: false,
                                                     menuDisabled: true,
                                                     width: 100,
+                                                    hidden:true,
                                                     text: '订单信息',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                                         return "<div style='color:green;cursor:pointer;' onclick='LookDD(\"" + record.data.shippingnotenumber + "\",\"" + record.data.actualmoney + "\")'>查看</div>";
@@ -272,10 +300,10 @@ Ext.onReady(function () {
                                                     text: '操作',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                                         if (record.data.invoicestatus == 0) {
-                                                            return "<div style='color:green;cursor:pointer;' onclick='ZF(\"" + value + "\",\"" + record.data.actualmoney + "\")'>作废</div>";
+                                                            return "<div style='color:green;cursor:pointer;' onclick='ZF(\"" + value + "\",\"" + record.data.actualcompanypay + "\")'>作废</div>";
 
                                                         } else {
-                                                            return "<div style='color:green;cursor:pointer;' onclick='AddPJ(\"" + value + "\",\"" + record.data.actualmoney + "\")'>开票</div>";
+                                                            return "<div style='color:green;cursor:pointer;' onclick='AddPJ(\"" + value + "\",\"" + record.data.actualcompanypay + "\")'>开票</div>";
                                                         }
                                                     }
                                                 }
@@ -328,7 +356,7 @@ Ext.onReady(function () {
                                                             if (rds.length == 0) {
                                                                 Ext.Msg.show({
                                                                     title: '提示',
-                                                                    msg: '请选择至少一条要核销的记录!',
+                                                                    msg: '请选择至少一条要开票的记录!',
                                                                     buttons: Ext.MessageBox.OK,
                                                                     icon: Ext.MessageBox.INFO
                                                                 });
@@ -718,8 +746,7 @@ function AddPJ(notepid, actualmoney) {
                        allowBlank: false,
                        anchor: '100%'
                    },
-                   ,
-                   {
+                    {
                        xtype: 'textfield',
                        fieldLabel: '发票号码',
                        id: 'invoicenumber',
@@ -728,26 +755,25 @@ function AddPJ(notepid, actualmoney) {
                        allowBlank: false,
                        anchor: '100%'
                    },
-                   ,
-                   {
+                    {
                        xtype: 'textfield',
                        fieldLabel: '价税合计',
                        id: 'totalvaloremtax',
                        name: 'totalvaloremtax',
+                        hidden:true,
                        labelWidth: 70,
-                       allowBlank: false,
-                       anchor: '100%',
+                        anchor: '100%',
                        value: actualmoney
                    },
                    {
                        xtype: 'textfield',
-                       fieldLabel: '合计金额',
+                       fieldLabel: '开票金额',
                        id: 'totalamount',
                        name: 'totalamount',
                        labelWidth: 70,
                        allowBlank: false,
                        anchor: '100%',
-                       value: actualmoney*0.91
+                       value: actualmoney
                    },
                    {
                        xtype: 'textfield',
@@ -1137,7 +1163,7 @@ function AddPJ2(idlist, actualcompanypay) {
                    ,
                    {
                        xtype: 'textfield',
-                       fieldLabel: '企业付款',
+                       fieldLabel: '开票金额',
                        id: 'actualcompanypay',
                        name: 'actualcompanypay',
                        labelWidth: 70,

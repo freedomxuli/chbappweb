@@ -448,9 +448,9 @@ LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
 INNER JOIN tb_b_user f ON e.shipperid=f.userid  AND f.usertype=3
 WHERE 
 c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode = 30
-ORDER BY c.consignmentdatetime
+
  ";
-                str += where + ")  AS tab ";
+                str += where + " ORDER BY c.consignmentdatetime )  AS tab ";
 
 
                 if (ishx != null && ishx != "")
@@ -505,19 +505,19 @@ ORDER BY c.consignmentdatetime
                 //
                 if (ye == "0")
                 {
-                    dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                    dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 2,shipperverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
                 }
                 else {
-                    var dts = dbc.ExecuteDataTable("SELECT carrierverifymoney,carrierverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
+                    var dts = dbc.ExecuteDataTable("SELECT shipperverifymoney,shipperverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
                     if (dts.Rows.Count > 0)
                     {
                         if (dts.Rows[0][0] != null && dts.Rows[0][0].ToString() != "")
                         {
-                            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 1,shipperverifymoney =shipperverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
 
                         }
                         else {
-                            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                            dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 1,shipperverifymoney =" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
 
                         }
                     }
@@ -620,21 +620,21 @@ ORDER BY c.consignmentdatetime
 
                     if (ye == "0")
                     {
-                        dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 2,carrierverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                        dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 2,shipperverifystatus =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
                     }
                     else
                     {
-                        var dts = dbc.ExecuteDataTable("SELECT carrierverifymoney,carrierverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
+                        var dts = dbc.ExecuteDataTable("SELECT shipperverifystatus,shipperverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
                         if (dts.Rows.Count > 0)
                         {
                             if (dts.Rows[0][0] != null && dts.Rows[0][0].ToString() != "")
                             {
-                                dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =carrierverifymoney+" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                                dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 1,shipperverifystatus =shipperverifystatus+" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
 
                             }
                             else
                             {
-                                dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set carrierverifystatus = 1,carrierverifymoney =" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
+                                dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 1,shipperverifystatus =" + dbc.ToSqlValue(ye) + " where  offerid=" + dbc.ToSqlValue(offerid));
 
                             }
                         }

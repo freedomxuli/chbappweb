@@ -645,8 +645,43 @@ public class UserMagByMySqlClass
                     {
                         dr["nooilmoney"] = Convert.ToDecimal(jsr["nooilmoney"].ToString());
                     }
-                     dr["cashrate"] = jsr["cashrate"].ToString();
-  
+
+
+
+
+
+                    if (jsr["advancerate"] != null && jsr["advancerate"].ToString() != "")
+                    {
+                        dr["advancerate"] = Convert.ToDecimal(jsr["advancerate"].ToString());
+                    }
+                    if (jsr["operaterate"] != null && jsr["operaterate"].ToString() != "")
+                    {
+                        dr["operaterate"] = Convert.ToDecimal(jsr["operaterate"].ToString());
+                    }
+                    if (jsr["grossrate"] != null && jsr["grossrate"].ToString() != "")
+                    {
+                        dr["grossrate"] = Convert.ToDecimal(jsr["grossrate"].ToString());
+                    }
+                    if (jsr["oilmoneyrate"] != null && jsr["oilmoneyrate"].ToString() != "")
+                    {
+                        dr["oilmoneyrate"] = Convert.ToDecimal(jsr["oilmoneyrate"].ToString());
+                    }
+                    if (jsr["oilmoneyrate"] != null && jsr["invoicerate"].ToString() != "")
+                    {
+                        dr["invoicerate"] = Convert.ToDecimal(jsr["invoicerate"].ToString());
+                    }
+
+
+
+
+
+
+
+
+                    if (jsr["cashrate"] != null && jsr["cashrate"].ToString() != "")
+                    {
+                        dr["cashrate"] = jsr["cashrate"].ToString();
+                    }
                     if (jsr["isneededit"] != null && jsr["isneededit"].ToString() != "")
                     {
                         dr["isneededit"] = 0;
@@ -744,8 +779,35 @@ public class UserMagByMySqlClass
                     {
                         dr["nooilmoney"] = Convert.ToDecimal(jsr["nooilmoney"].ToString());
                     }
-                    dr["cashrate"] = jsr["cashrate"].ToString();
 
+
+
+                    if (jsr["advancerate"] != null && jsr["advancerate"].ToString() != "")
+                    {
+                        dr["advancerate"] = Convert.ToDecimal(jsr["advancerate"].ToString());
+                    }
+                    if (jsr["operaterate"] != null && jsr["operaterate"].ToString() != "")
+                    {
+                        dr["operaterate"] = Convert.ToDecimal(jsr["operaterate"].ToString());
+                    }
+                    if (jsr["grossrate"] != null && jsr["grossrate"].ToString() != "")
+                    {
+                        dr["grossrate"] = Convert.ToDecimal(jsr["grossrate"].ToString());
+                    }
+                    if (jsr["oilmoneyrate"] != null && jsr["oilmoneyrate"].ToString() != "")
+                    {
+                        dr["oilmoneyrate"] = Convert.ToDecimal(jsr["oilmoneyrate"].ToString());
+                    }
+                    if (jsr["oilmoneyrate"] != null && jsr["invoicerate"].ToString() != "")
+                    {
+                        dr["invoicerate"] = Convert.ToDecimal(jsr["invoicerate"].ToString());
+                    }
+
+
+                    if (jsr["cashrate"] != null && jsr["cashrate"].ToString() != "")
+                    {
+                        dr["cashrate"] = jsr["cashrate"].ToString();
+                    }
                     if (jsr["isneededit"] != null && jsr["isneededit"].ToString() != "")
                     {
                         dr["isneededit"] = 1;

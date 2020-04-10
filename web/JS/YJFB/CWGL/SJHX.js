@@ -7,8 +7,20 @@ var orderstore = createSFW4Store({
     currentPage: 1,
     fields: [
 
+        
+    { name: 'costid' },
+
+         { name: 'goodsfromroute' },
+          { name: 'itemgrossweight' },
+           { name: 'goodstoroute' },
+            { name: 'goodsreceiptplace' },
+             { name: 'vehiclenumber' },
+              { name: 'vehicletype' },
+               { name: 'identitydocumentnumber' },
+              
 
 
+          { name: 'um' },
     { name: 'shippingnoteid' },
          { name: 'userid' },
            { name: 'username' },
@@ -157,15 +169,23 @@ Ext.onReady(function () {
                                                 dataIndex: 'shippingnoteadddatetime',
                                                 sortable: false,
                                                 menuDisabled: true,
-                                                flex: 1,
+                                                width:120,
                                                 text: '订单时间'
                                             },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'um',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                                                                    width:120,
+                                                    text: '厂家'
+                                                },
                                               {
                                                   xtype: 'gridcolumn',
                                                   dataIndex: 'shippingnotenumber',
                                                   sortable: false,
                                                   menuDisabled: true,
-                                                  flex: 1,
+                                                                                                  width:120,
                                                   text: '单号',
                                                   renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
 
@@ -174,38 +194,81 @@ Ext.onReady(function () {
                                               },
                                                 {
                                                     xtype: 'gridcolumn',
+                                                    dataIndex: 'goodsfromroute',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+width:120,
+                                                    text: '起始地'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'goodstoroute',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '目的地'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'goodsreceiptplace',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '收货地址'
+                                                }, {
+                                                    xtype: 'gridcolumn',
                                                     dataIndex: 'descriptionofgoods',
                                                     sortable: false,
                                                     menuDisabled: true,
-                                                    flex: 1,
+                                                    width: 120,
                                                     text: '货名'
                                                 }, {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'username',
                                                     sortable: false,
                                                     menuDisabled: true,
-                                                    flex: 1,
+width:120,
                                                     text: '司机名称'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'vehiclenumber',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '车牌'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'vehicletype',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '车型'
+                                                }, {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'identitydocumentnumber',
+                                                    sortable: false,
+                                                    menuDisabled: true,
+                                                    width: 120,
+                                                    text: '身份证'
                                                 }, {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'actualdrivermoney',
                                                     sortable: false,
                                                     menuDisabled: true,
-                                                    flex: 1,
+                                                    hidden:true,
+                                                                                                    width:120,
                                                     text: '司机金额'
                                                 }, {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'money',
                                                     sortable: false,
                                                     menuDisabled: true,
-                                                    flex: 1,
+                                                                                                    width:120,
                                                     text: '司机总付款'
                                                 }, {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'verifymoney',
                                                     sortable: false,
                                                     menuDisabled: true,
-                                                    flex: 1,
+                                            width:120,
                                                     text: '已核销金额'
                                                 }, {
                                                     xtype: 'gridcolumn',
@@ -215,14 +278,16 @@ Ext.onReady(function () {
                                                     width: 100,
                                                     text: '剩余可核销金额',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                        return record.data.actualdrivermoney - record.data.verifymoney;
+                                                        return record.data.money - record.data.verifymoney;
                                                     }
                                                 }, {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'shippingnoteid',
                                                     sortable: false,
                                                     menuDisabled: true,
-                                                    width: 100,
+                                                    hidden: true,
+
+                                                     width: 100,
                                                     text: '开票信息',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                                         return "<div style='color:green;cursor:pointer;' onclick='LookP(\"" + record.data.userid + "\",\"" + record.data.actualmoney + "\")'>查看</div>";
@@ -232,6 +297,7 @@ Ext.onReady(function () {
                                                     dataIndex: 'shippingnoteid',
                                                     sortable: false,
                                                     menuDisabled: true,
+                                                    hidden:true,
                                                     width: 100,
                                                     text: '订单信息',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
@@ -246,7 +312,7 @@ Ext.onReady(function () {
                                                     width: 100,
                                                     text: '核销记录',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                        return "<div style='color:green;cursor:pointer;' onclick='CKHXJL(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.actualdrivermoney + "\",\"" + record.data.userid + "\")'>查看</div>"; 
+                                                        return "<div style='color:green;cursor:pointer;' onclick='CKHXJL(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.money + "\",\"" + record.data.userid + "\")'>查看</div>";
                                                     }
                                                  },
                                                  {
@@ -257,7 +323,7 @@ Ext.onReady(function () {
                                                     width: 100,
                                                     text: '操作',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                        return "<div style='color:green;cursor:pointer;' onclick='AddPJ(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.actualdrivermoney + "\",\"" + record.data.userid + "\",\"" + record.data.verifymoney + "\",\"" + record.data.offerid + "\")'>单独核销</div>";
+                                                        return "<div style='color:green;cursor:pointer;' onclick='AddPJ(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.money + "\",\"" + record.data.userid + "\",\"" + record.data.verifymoney + "\",\"" + record.data.offerid + "\",\"" + record.data.costid + "\")'>单独核销</div>";
                                                     }
                                                 }
 
@@ -356,7 +422,7 @@ Ext.onReady(function () {
                                                             for (var n = 0, len = rds.length; n < len; n++) {
                                                                 var rd = rds[n];
                                                                 gys += rd.get("username") + ",";
-                                                                idlist.push(rd.get("shippingnoteid") + "," + rd.get("userid") + "," + rd.get("offerid") + "," + rd.get("actualdrivermoney") + "," + rd.get("verifymoney") + "," + rd.get("username"));
+                                                                idlist.push(rd.get("shippingnoteid") + "," + rd.get("userid") + "," + rd.get("offerid") + "," + rd.get("actualdrivermoney") + "," + rd.get("verifymoney") + "," + rd.get("username") + "," + rd.get("costid"));
                                                                
                                                                 actualdrivermoney += (rd.get("actualdrivermoney") - rd.get("verifymoney"))
                                                             }
@@ -545,7 +611,7 @@ function AddPJ2(idlist, gys, actualdrivermoney) {
 
 
 
-function AddPJ(notepid, username, actualdrivermoney, userid, verifymoney, offerid) {
+function AddPJ(notepid, username, actualdrivermoney, userid, verifymoney, offerid,costid) {
 
     if (verifymoney != null && verifymoney != "" && verifymoney != "null") {
 
@@ -671,7 +737,7 @@ function AddPJ(notepid, username, actualdrivermoney, userid, verifymoney, offeri
                                                Ext.getCmp("lmwin44").close();
 
                                             }
-                                       }, CS.onError, values, notepid, userid, username,(actualdrivermoney - verifymoney), actualdrivermoney, offerid);
+                                       }, CS.onError, values, notepid, userid, username, (actualdrivermoney - verifymoney), actualdrivermoney, offerid, costid);
 
                                    }
                                }
@@ -1048,14 +1114,14 @@ function CKHXJL(shippingnoteid) {
                                     {
                                         dataIndex: 'verifymoney',
                                         text: '核销金额',
-                                        flex: 1,
+                                                                                        width:120,
                                         align: "center",
                                         sortable: false,
                                         menuDisabled: true
                                     },
                                     {
                                         dataIndex: 'verifypaytype',
-                                        flex: 1,
+                                                                                        width:120,
                                         text: '付款方式',
                                         align: "center",
                                         sortable: false,
@@ -1080,7 +1146,7 @@ function CKHXJL(shippingnoteid) {
                                         xtype: 'datecolumn',
     
                                         dataIndex: 'verifytime',
-                                        flex: 1,
+                                                                                        width:120,
                                         text: '核销时间',
                                         format: 'Y-m-d H:i:s',
                                         align: "center",

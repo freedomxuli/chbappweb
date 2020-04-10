@@ -11,7 +11,7 @@
     <script src="JS/jquery-1.7.1.min.js"></script>
     <script src="JS/jquery.blockUI.js"></script>
     <script src="JS/jquery.cb.js"></script>
-     <script type="text/javascript" src="js/extjs/ext-all.js"></script>
+    <script type="text/javascript" src="js/extjs/ext-all.js"></script>
     <link rel="Stylesheet" type="text/css" href="js/extjs/resources/css/ext-all.css" />
     <script type="text/javascript" src="js/extjs/ext-lang-zh_CN.js"></script>
 
@@ -28,7 +28,7 @@
         }
 
         body {
-            background: url(Images/login/index_bg.jpg) no-repeat no-repeat center center;
+            background: url(Images/BG1.PNG) no-repeat no-repeat center center;
         }
 
         #username {
@@ -38,12 +38,8 @@
             background-color: transparent;
             height: 60px;
             line-height: 60px;
-            width: 390px;
-            padding: 0px;
-            position: relative;
-            top: 331px;
-            left: 315px;
-            font-size: 24px;
+            width: 100%;
+            font-size: 28px;
         }
 
         #captcha {
@@ -53,12 +49,8 @@
             background-color: transparent;
             height: 60px;
             line-height: 60px;
-            width: 195px;
-            padding: 0px;
-            position: relative;
-            top: 428px;
-            left: 245px;
-            font-size: 24px;
+            width: 100%;
+            font-size: 28px;
         }
 
         #password {
@@ -68,13 +60,8 @@
             background-color: transparent;
             height: 60px;
             line-height: 60px;
-            width: 390px;
-            padding: 0px;
-            position: relative;
-            top: 423px;
-            left: -78px;
-            right: -33px;
-            font-size: 24px;
+            width: 100%;
+            font-size: 28px;
         }
 
         #container {
@@ -92,29 +79,143 @@
             width: 510px;
             height: 64px;
             position: relative;
-            top: 550px;
-            left: -170px;
             cursor: pointer;
         }
 
         #imgcode {
-            width: 187px;
-            height: 62px;
+            height: 60px;
             position: relative;
-            top: 452px;
-            left: 278px;
             cursor: pointer;
+        }
+
+        input {
+            outline: none;
+            background: transparent;
+            border: none;
+            outline: medium;
+        }
+
+        *:focus {
+            outline: none;
+            background-color: transparent;
+        }
+
+        ::selection {
+            background: transparent;
+        }
+
+        ::-moz-selection {
+            background: transparent;
         }
     </style>
 </head>
 <body onkeydown="Send()">
-    <div id="container">
-        <input id="username" type="text" />
-        <input id="password" type="password" />
-        <input id="captcha" type="text" />
-        <img id="imgcode" src="captcha.aspx?vctype=log" style="cursor: pointer; vertical-align: top;" onclick='code(this);' />
-        <img src="Images/login/login_btn.png" id="btnSubmit" />
+
+    <div class="wrapmiddle">
+        <div class="wrapsub">
+            <div class="wrapbox" style="width: 90%; height: 500px; margin: 0 auto;">
+                <div style="width: 59%; height: 100%; float: left; text-align: center;">
+
+                    <img src="images/flogo.png" style="margin: 0 auto; margin-top: 30%; width: 80%">
+                </div>
+                <div style="width: 40%; height: 100%; float: left;">
+
+                    <table border="0" width="100%" align="center" style="margin-top: 250px; background-color: #fff; height: 450px;">
+                        <tr>
+                            <td align="center" valign="top" height="30" style="border: 0px solid #ff0000;"></td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="60">
+
+                                <div style="height: 65px; border: 1px solid #808080; border-radius: 10px; width: 80%; float: left; margin-left: 30px;">
+
+                                    <table border="0" width="100%" align="center" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td align="center" valign="top" height="35" class="auto-style2" width="200" style="background-color: #e2e2e2; line-height: 65px; font-size: 28px;">账&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号</td>
+                                            <td align="left" valign="middle" height="35">
+                                                <input id="username" type="text" />
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="10" style="border: 0px solid #ff0000;"></td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="60">
+                                <div style="height: 65px; border: 1px solid #808080; border-radius: 10px; width: 80%; float: left; margin-left: 30px;">
+
+                                    <table border="0" width="100%" align="center" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td align="center" valign="top" height="60" class="auto-style2" width="200" style="background-color: #e2e2e2; line-height: 65px; font-size: 28px;">密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码</td>
+                                            <td align="left" valign="middle" height="60">
+                                                <input id="password" type="password" />
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                </div>
+
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="10" style="border: 0px solid #ff0000;"></td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="35">
+
+                                <div style="height: 65px; border: 1px solid #808080; border-radius: 10px; width: 60%; float: left; margin-left: 30px;">
+
+                                    <table border="0" width="100%" align="center" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td align="center" valign="top" height="65" width="200" style="background-color: #e2e2e2; line-height: 65px; font-size: 28px;">验&nbsp;&nbsp;证&nbsp;&nbsp;码</td>
+                                            <td align="left" valign="middle" height="65">
+                                                <input id="captcha" type="text" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="height: 35px; border-radius: 10px; width: 20%; float: left">
+                                    <img id="imgcode" src="captcha.aspx?vctype=log" style="cursor: pointer; vertical-align: top; margin-top: 3px;" onclick='code(this);' />
+
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="22" style="border: 0px solid #ff0000;"></td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="top" height="35" style="text-align: left;">
+                                <img src="images/dlbtn.png" onclick="Login()" style="margin-left: 30px;">
+                            </td>
+                        </tr>
+                    </table>
+                     <table border="0" width="100%" align="center" cellpadding="0" cellspacing="0">
+                           <tr>
+                            <td align="center" valign="top" height="30" style="border: 0px solid #ff0000;"></td>
+                        </tr>
+                        <tr>
+                            <td align="left" valign="top" height="35" class="auto-style2"  >
+                            <img src="images/logtel.png"   style="margin-left: 30px;">
+  
+                            </td>
+                            
+                        </tr>
+
+                    </table>
+
+                </div>
+            </div>
+        </div>
     </div>
+
+    <%--  <div id="container">
+        <img src="Images/login/login_btn.png" id="btnSubmit" />
+    </div>--%>
     <script type="text/javascript">
         function Send() {
             if (window.event.keyCode == 13) {

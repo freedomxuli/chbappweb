@@ -63,12 +63,12 @@ public class SourceGoods
                 string str = @"select a.*,b.username,b.carriername,c.name vehiclelengthrequirementname from tb_b_sourcegoodsinfo_offer a
                             left join tb_b_user b on a.shipperid=b.userid
                             left join tb_b_dictionary_detail c on a.vehiclelengthrequirement=c.bm
-                            where a.shipperid in(
+                            where (a.shipperid in(
                                 select d.userid from tb_b_operator_association d
                                 left join tb_b_user e on d.userid=e.userid
                                 inner join tb_b_user f on d.operator=f.userid and f.correlationid=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID) + @"
                                 where d.status = 0
-                            ) or 'D4D659F2-C2AE-4D96-AA87-A5DF0EC3F57C'=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID.ToUpper());
+                            ) or 'D4D659F2-C2AE-4D96-AA87-A5DF0EC3F57C'=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID.ToUpper())+ @")";
                 str += where;
 
                 //开始取分页数据
@@ -81,6 +81,50 @@ public class SourceGoods
             {
                 throw ex;
             }
+        }
+    }
+
+    /// <summary>
+    /// 修改询价
+    /// </summary>
+    /// <param name="offerid"></param>
+    /// <param name="jsr"></param>
+    /// <returns></returns>
+    [CSMethod("UpdateSourceGoods")]
+    public bool UpdateSourceGoods(string offerid, JSReader jsr)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                DateTime ti = DateTime.Now;
+                String estimatemoney = jsr["estimatemoney"].ToString();
+                String totalmonetaryamount = jsr["totalmonetaryamount"].ToString();
+
+                var dt = dbc.GetEmptyDataTable("tb_b_sourcegoodsinfo_offer");
+                var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                var dr = dt.NewRow();
+                dr["offerid"] = offerid;
+                if (!string.IsNullOrEmpty(estimatemoney))
+                {
+                    dr["estimatemoney"] = Convert.ToDecimal(estimatemoney);
+                }
+                if (!string.IsNullOrEmpty(totalmonetaryamount))
+                {
+                    dr["totalmonetaryamount"] = Convert.ToDecimal(totalmonetaryamount);
+                }
+                dr["updateuser"] = SystemUser.CurrentUser.UserID;
+                dr["updatetime"] = ti;
+                dt.Rows.Add(dr);
+                dbc.UpdateTable(dt, dtt);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
     }
 
@@ -167,7 +211,7 @@ public class SourceGoods
         {
             try
             {
-                String sql = @"select a.*,b.isneededit,b.accountrate,b.completerate,b.cashrate,b.nooilmoney,c.shippingnoteid from tb_b_sourcegoodsinfo_offer a
+                String sql = @"select a.*,b.isneededit,b.accountrate,b.completerate,b.cashrate,b.nooilmoney,c.shippingnoteid,b.advancerate,b.operaterate,b.grossrate,b.oilmoneyrate,b.invoicerate from tb_b_sourcegoodsinfo_offer a
             left join tb_b_user b on a.shipperid=b.userid
 left join tb_b_shippingnoteinfo c on a.offerid=c.offerid
 where a.offerid=" + dbc.ToSqlValue(offerid);
@@ -175,22 +219,49 @@ where a.offerid=" + dbc.ToSqlValue(offerid);
                 if (dt.Rows.Count > 0)
                 {
                     decimal estimatemoney = string.IsNullOrEmpty(jsr["estimatemoney"].ToString()) ? 0 : Convert.ToDecimal(jsr["estimatemoney"].ToString());//预估下游成本
-                    decimal estimatenooilmoney = string.IsNullOrEmpty(jsr["estimatenooilmoney"].ToString()) ? 0 : Convert.ToDecimal(jsr["estimatenooilmoney"].ToString());//预估未用油金额
+                    decimal estimateoilmoney = string.IsNullOrEmpty(jsr["estimateoilmoney"].ToString()) ? 0 : Convert.ToDecimal(jsr["estimateoilmoney"].ToString());//用油金额
+                    decimal estimatevotemoney = string.IsNullOrEmpty(jsr["estimatevotemoney"].ToString()) ? 0 : Convert.ToDecimal(jsr["estimatevotemoney"].ToString());//开票金额
+                    /*
+                     * estimateautomoney = （
+                     * estimatemoney
+                     * +（estimatemoney*tb_b_user.advancerate*实际天数）
+                     * + estimatemoney*tb_b_user.operaterate 
+                     * + estimatemoney*tb_b_user.grossrate 
+                     * - estimateoilmoney*tb_b_user.oilmoneyrate 
+                     * - estimatevotemoney*tb_b_user.invoicerate
+                     * ）
+                    */
+
+                    DateTime dateNow = DateTime.Now;
+                    DateTime dateNext = DateTime.Now.AddMonths(1);
+                    int currentDays = DateTime.DaysInMonth(dateNow.Year, dateNow.Month) - DateTime.Today.Day + 1;//这个月还剩几天
+                    int nextDays = DateTime.DaysInMonth(dateNext.Year, dateNext.Month);//下个月天数
+                    int actualDays = currentDays + nextDays;//实际天数
 
                     string shippingnoteid = dt.Rows[0]["shippingnoteid"].ToString();
                     decimal estimateautomoney = 0m;
                     int isneededit = string.IsNullOrEmpty(dt.Rows[0]["isneededit"].ToString()) ? 0 : Convert.ToInt32(dt.Rows[0]["isneededit"].ToString());//是否开启修正（0：开启；1：不开启；）默认为1
                     decimal accountrate = string.IsNullOrEmpty(dt.Rows[0]["accountrate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["accountrate"].ToString());//帐期财务汇率（1-1.5）
+                    decimal advancerate = string.IsNullOrEmpty(dt.Rows[0]["advancerate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["advancerate"].ToString());//垫资比例 ⭐⭐
+                    decimal operaterate = string.IsNullOrEmpty(dt.Rows[0]["operaterate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["operaterate"].ToString());//运营比例 ⭐⭐
+                    decimal grossrate = string.IsNullOrEmpty(dt.Rows[0]["grossrate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["grossrate"].ToString());//毛利比例 ⭐⭐
+                    decimal oilmoneyrate = string.IsNullOrEmpty(dt.Rows[0]["oilmoneyrate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["oilmoneyrate"].ToString());//用油比例 ⭐⭐
+                    decimal invoicerate = string.IsNullOrEmpty(dt.Rows[0]["invoicerate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["invoicerate"].ToString());//开票比例 ⭐⭐
                     decimal completerate = string.IsNullOrEmpty(dt.Rows[0]["completerate"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["completerate"].ToString());//综合成本汇率（0-1）
                     int cashrate = string.IsNullOrEmpty(dt.Rows[0]["cashrate"].ToString()) ? 0 : Convert.ToInt32(dt.Rows[0]["cashrate"].ToString());//押金成本，整数
                     decimal nooilmoney = string.IsNullOrEmpty(dt.Rows[0]["nooilmoney"].ToString()) ? 0 : Convert.ToDecimal(dt.Rows[0]["nooilmoney"].ToString());//未用油汇率（0-1）
-                    estimateautomoney = (estimatemoney * accountrate) / completerate + cashrate + (estimatenooilmoney * nooilmoney);
+                    estimateautomoney = decimal.Round((estimatemoney
+                        + (estimatemoney * advancerate * actualDays)
+                        + estimatemoney * operaterate
+                        + estimatemoney * grossrate
+                        - estimateoilmoney * oilmoneyrate
+                        - estimatevotemoney * invoicerate) / completerate, 2);
 
                     int money = estimateautomoney % 10 > 0 ? (int)(estimateautomoney + 10) / 10 * 10 : (int)(estimateautomoney / 10) * 10;
                     dbc.BeginTransaction();
                     if (isneededit == 0)
                     {
-                        sql = @"update tb_b_sourcegoodsinfo_offer set operatorid=" + dbc.ToSqlValue(SystemUser.CurrentUser.MQUserID) + ",flowstatus = 20,estimateautomoney=" + dbc.ToSqlValue(money) + ",estimatemoney=" + dbc.ToSqlValue(estimatemoney) + ",estimatenooilmoney=" + dbc.ToSqlValue(estimatenooilmoney) + @"
+                        sql = @"update tb_b_sourcegoodsinfo_offer set operatorid=" + dbc.ToSqlValue(SystemUser.CurrentUser.MQUserID) + ",flowstatus = 20,estimateautomoney=" + dbc.ToSqlValue(money) + ",estimatemoney=" + dbc.ToSqlValue(estimatemoney) + @"
     where offerid=" + dbc.ToSqlValue(offerid);
                         dbc.ExecuteNonQuery(sql);
 
@@ -212,7 +283,7 @@ where a.offerid=" + dbc.ToSqlValue(offerid);
                     }
                     else if (isneededit == 1)
                     {
-                        sql = @"update tb_b_sourcegoodsinfo_offer set operatorid=" + dbc.ToSqlValue(SystemUser.CurrentUser.MQUserID) + ",flowstatus = 90,totalmonetaryamount=" + dbc.ToSqlValue(money) + ",estimatemoney=" + dbc.ToSqlValue(estimatemoney) + ",estimatenooilmoney=" + dbc.ToSqlValue(estimatenooilmoney) + @"
+                        sql = @"update tb_b_sourcegoodsinfo_offer set operatorid=" + dbc.ToSqlValue(SystemUser.CurrentUser.MQUserID) + ",flowstatus = 90,totalmonetaryamount=" + dbc.ToSqlValue(money) + ",estimatemoney=" + dbc.ToSqlValue(estimatemoney) + @"
     where offerid=" + dbc.ToSqlValue(offerid);
                         dbc.ExecuteNonQuery(sql);
 

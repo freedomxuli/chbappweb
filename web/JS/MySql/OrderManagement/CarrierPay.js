@@ -30,9 +30,13 @@ var storeAdd = Ext.create('Ext.data.Store', {
         { name: 'actualwaymoney' },
         { name: 'drivername' },
         { name: 'price' },
+        { name: 'actualdrivermoney' },
+        { name: 'consignmentdatetime' },
+        { name: 'goodstoroutename' },
+        { name: 'paysummoney' },
+        { name: 'id' }
 
 
-        { name: 'actualdrivermoney' }
     ]
 });
 //-------------------------------------------------------页面方法----------------------------------------------------------
@@ -51,7 +55,7 @@ function GetCarrierPay(nPage) {
 
 var myWin;
 //新增选择
-function SelOrder(orderid, yfje, price) {
+function SelOrder(orderid, yfje, price, id) {
     if (privilege("一键发包模块_订单管理-承运商付款申请_新增")) {
         myWin = new Ext.Window({
             extend: 'Ext.window.Window',
@@ -113,7 +117,7 @@ function SelOrder(orderid, yfje, price) {
                                             Ext.MessageBox.alert('提示', "申请金额超出应付款，申请失败！");
                                             myWin.close();
                                         }
-                                    }, CS.onError, orderid, values, yfje == 'null' ? 0 : yfje);
+                                    }, CS.onError, orderid, values, yfje == 'null' ? 0 : yfje, id);
                                 }
                             }
                         }
@@ -194,6 +198,23 @@ Ext.define('addDriverOrderPayWin', {
                                 flex: 1
                             },
                             {
+                                xtype: 'datecolumn',
+                                dataIndex: 'consignmentdatetime',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "订单时间",
+                                format: 'Y-m-d H:i:s',
+                                flex: 1
+                            },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'goodstoroutename',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "收货地址",
+                                flex: 1
+                            },
+                            {
                                 xtype: 'gridcolumn',
                                 dataIndex: 'shippingnotenumber',
                                 sortable: false,
@@ -220,6 +241,14 @@ Ext.define('addDriverOrderPayWin', {
                                 text: "承运商金额",
                                 width: 100
                             },
+                            {
+                                xtype: 'gridcolumn',
+                                dataIndex: 'paysummoney',
+                                sortable: false,
+                                menuDisabled: true,
+                                text: "已申请金额",
+                                flex: 1
+                            },
                             /*{
                                 xtype: 'gridcolumn',
                                 dataIndex: 'drivername',
@@ -244,7 +273,7 @@ Ext.define('addDriverOrderPayWin', {
                                 menuDisabled: true,
                                 renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                                     var str;
-                                    str = "<a onclick='SelOrder(\"" + value + "\",\"" + record.data.actualwaymoney + "\",\"" + record.data.price + "\");'>选择</a>";
+                                    str = "<a onclick='SelOrder(\"" + value + "\",\"" + record.data.actualwaymoney + "\",\"" + record.data.price + "\",\"" + record.data.id + "\");'>选择</a>";
                                     return str;
                                 }
                             }
@@ -273,6 +302,29 @@ Ext.define('addDriverOrderPayWin', {
                                             fieldLabel: '厂家'
                                         },
                                         {
+                                            id: 'addsearch_beg',
+                                            xtype: 'datefield',
+                                            fieldLabel: '订单时间',
+                                            format: 'Y-m-d',
+                                            labelWidth: 80,
+                                            width: 200
+                                        },
+                                        {
+                                            id: 'addsearch_end',
+                                            xtype: 'datefield',
+                                            format: 'Y-m-d',
+                                            fieldLabel: '至',
+                                            labelWidth: 20,
+                                            width: 150
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            id: 'addsearch_are',
+                                            labelWidth: 80,
+                                            width: 200,
+                                            fieldLabel: '收货地址'
+                                        },
+                                        {
                                             xtype: 'buttongroup',
                                             title: '',
                                             items: [
@@ -285,7 +337,7 @@ Ext.define('addDriverOrderPayWin', {
                                                             if (retVal) {
                                                                 storeAdd.loadData(retVal);
                                                             }
-                                                        }, CS.onError, Ext.getCmp("cx_addshippingnotenumber").getValue(), Ext.getCmp("cx_addchangjia").getValue());
+                                                        }, CS.onError, Ext.getCmp("cx_addshippingnotenumber").getValue(), Ext.getCmp("cx_addchangjia").getValue(), Ext.getCmp("addsearch_beg").getValue(), Ext.getCmp("addsearch_end").getValue(), Ext.getCmp("addsearch_are").getValue());
                                                     }
                                                 }
                                             ]
