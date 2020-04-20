@@ -188,6 +188,22 @@ var dqtostore = Ext.create('Ext.data.Store', {
 
 
 //-------------------------------------------------------页面方法----------------------------------------------------------
+//作废
+function Abolish(orderid) {
+    if (privilege("一键发包模块_订单管理-订单列表_作废")) {
+        Ext.MessageBox.confirm('作废提示', '是否要作废数据!', function (obj) {
+            if (obj == "yes") {
+                CS('CZCLZ.Order.AbolishOrder', function (retVal) {
+                    if (retVal) {
+                        GetOrder(storeOrder.currentPage);
+                    }
+                }, CS.onError, orderid);
+            }
+            return;
+        });
+    }
+}
+
 function GetOrderModel(orderid) {
     let r = storeOrder.findRecord("shippingnoteid", orderid).data;
     let form = Ext.getCmp('orderForm');
@@ -435,7 +451,7 @@ function GetOrder(nPage) {
             currentPage: retVal.cp
         });
 
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_zcsj").getValue(), Ext.getCmp("cx_cysj").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_zcsj").getValue(), Ext.getCmp("cx_cysj").getValue(), Ext.getCmp("cx_mdd").getValue());
 }
 
 //指定操作员
@@ -2435,6 +2451,7 @@ Ext.define('orderView', {
                     menuDisabled: true,
                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
                         var str = "";
+                        str += "<a onclick='Abolish(\"" + value + "\");'>作废</a> || ";
                         str += "<a onclick='EditOrder(\"" + value + "\");'>修改</a> || ";
                         str += "<a onclick='EditOperatorUser(\"" + value + "\");'>指定操作员</a> || ";
 
@@ -2569,7 +2586,11 @@ Ext.define('orderView', {
                     dataIndex: 'memo',
                     sortable: false,
                     menuDisabled: true,
-                    text: "备注"
+                    text: "备注",
+                    renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+
+                        return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
+                    }
                 },
 				{
 				    xtype: 'gridcolumn',
@@ -2789,6 +2810,9 @@ Ext.define('orderView', {
                         if (record.data.isabnormal != null) {
                             return "x-grid-record-yellow";
                         }
+                        if (record.data.userCZY == null || record.data.userGYS == null || record.data.consignee == null) {
+                            return "x-grid-record-pink";
+                        }
                     }
                 },
                 dockedItems: [
@@ -2828,14 +2852,6 @@ Ext.define('orderView', {
                             },
                             {
                                 xtype: 'textfield',
-                                id: 'cx_gys',
-                                width: 160,
-                                labelWidth: 70,
-                                hidden: true,
-                                fieldLabel: '供应商'
-                            },
-                            {
-                                xtype: 'textfield',
                                 id: 'cx_zcsj',
                                 width: 160,
                                 labelWidth: 70,
@@ -2852,8 +2868,20 @@ Ext.define('orderView', {
 
                                 fieldLabel: '承运司机'
                             },
-                                
-                                     
+                            {
+                                xtype: 'textfield',
+                                id: 'cx_gys',
+                                width: 160,
+                                labelWidth: 70,
+                                fieldLabel: '供应商'
+                            },
+                            {
+                                xtype: 'textfield',
+                                id: 'cx_mdd',
+                                width: 160,
+                                labelWidth: 70,
+                                fieldLabel: '目的地'
+                            },      
                             {
                                 xtype: 'buttongroup',
                                 title: '',
@@ -2865,7 +2893,20 @@ Ext.define('orderView', {
                                         handler: function () {
                                             GetOrder(purPage);
                                         }
-                                    }
+                                    },
+									{
+										xtype: 'buttongroup',
+										title: '',
+										items: [
+											{
+												xtype: 'button',
+												text: '导出',
+												handler: function () {
+													DownloadFile("CZCLZ.Order.ExportOrder2", "订单.xls",Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_zcsj").getValue(), Ext.getCmp("cx_cysj").getValue());
+												}
+											}
+										]
+									}
                                 ]
                             }
                         ]

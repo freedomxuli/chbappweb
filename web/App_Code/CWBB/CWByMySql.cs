@@ -22,8 +22,142 @@ using SmartFramework4v2.Data.MySql;
 [CSClass("CWByMySql")]
 public class CWByMySql
 {
+    
+    [CSMethod("ExportGYSHX", 2)]
+    public byte[] ExportGYSHX(string stime, string etime, string username,string ddbm)
+    {
+		using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                string where = "";
+
+
+                if (!string.IsNullOrEmpty(username))
+                {
+                    where += " and " + dbc.C_Like("f.username", username.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (stime != null && stime != "")
+                {
+                    where += " and c.shippingnoteadddatetim>="+dbc.ToSqlValue(stime);
+                }
+                if (etime != null && etime != "")
+                {
+                    where += " and c.shippingnoteadddatetim<=" + dbc.ToSqlValue(etime);
+                }
+                if (ddbm != null && ddbm != "")
+                {
+                    where += " and c.shippingnotenumber like '%" + ddbm + "%'";
+                }
+
+                string str = @"
+SELECT e.actualcompanypay,e.goodsfromroute,e.goodstoroute,e.goodsreceiptplace,e.descriptionofgoods,d.invoicestatus,d.billingid,e.actualmoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
+ tb_b_shippingnoteinfo c LEFT JOIN  
+(SELECT a.shippingnoteid,b.totalvaloremtax,b.rate,b.billingtime,b.invoicecode,b.invoicenumber,b.totalamount,b.invoicestatus,b.billingid  
+	FROM tb_b_invoicedetail a LEFT JOIN tb_b_invoice b ON a.billingid=b.billingid
+) d ON c.shippingnoteid=d.shippingnoteid 
+LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
+LEFT JOIN tb_b_user f ON e.shipperid=f.userid 
+WHERE 
+(d.invoicestatus=0
+OR c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  )
+)
+
+ AND c.shippingnotestatuscode = 90
+
+ ";
+                str += where + " ORDER BY c.consignmentdatetime";
+
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str);
+
+				Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+
+                String[] ColumnName = { "订单时间", "厂家", "单号", "起始地", "目的地", "收货地址", "货物", "应收金额", "合计金额","开票时间","发票代码","发票号码" };
+                String[] ColumnV = { "shippingnoteadddatetime", "username", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "descriptionofgoods", "actualcompanypay","totalamount","billingtime","invoicecode" ,"invoicenumber"  };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            var ColumnVs = dt.Rows[i][ColumnV[a]].ToString();
+                            cells[i + 1, a].PutValue(ColumnVs);
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+	}
+    
     [CSMethod("GetUserList")]
-    public object GetUserList(int pagnum, int pagesize, string stime, string etime, string username)
+    public object GetUserList(int pagnum, int pagesize, string stime, string etime, string username, string ddbm)
     {
 
 
@@ -50,10 +184,13 @@ public class CWByMySql
                 {
                     where += " and c.shippingnoteadddatetim<=" + dbc.ToSqlValue(etime);
                 }
-               
+                if (ddbm != null && ddbm != "")
+                {
+                    where += " and c.shippingnotenumber like '%" + ddbm + "%'";
+                }
 
                 string str = @"
-SELECT e.actualcompanypay,e.descriptionofgoods,d.invoicestatus,d.billingid,e.actualmoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
+SELECT e.actualcompanypay,e.goodsfromroute,e.goodstoroute,e.goodsreceiptplace,e.descriptionofgoods,d.invoicestatus,d.billingid,e.actualmoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
  tb_b_shippingnoteinfo c LEFT JOIN  
 (SELECT a.shippingnoteid,b.totalvaloremtax,b.rate,b.billingtime,b.invoicecode,b.invoicenumber,b.totalamount,b.invoicestatus,b.billingid  
 	FROM tb_b_invoicedetail a LEFT JOIN tb_b_invoice b ON a.billingid=b.billingid

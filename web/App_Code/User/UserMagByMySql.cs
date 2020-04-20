@@ -684,11 +684,11 @@ public class UserMagByMySqlClass
                     }
                     if (jsr["isneededit"] != null && jsr["isneededit"].ToString() != "")
                     {
-                        dr["isneededit"] = 0;
+                        dr["isneededit"] = 1;
                     }
                     else
                     {
-                        dr["isneededit"] = 1;
+                        dr["isneededit"] = 0;
                     }
 
                     if (jsr["ismonthly"] != null && jsr["ismonthly"].ToString() != "")
@@ -1170,7 +1170,7 @@ public class UserMagByMySqlClass
             try
             {
                 var cmd = dbc.CreateCommand();
-                cmd.CommandText = "SELECT a.goodsid,b.goodsname,b.goodstype FROM tb_b_goods_association a LEFT JOIN tb_b_goods b ON a.goodsid=b.goodsid WHERE a.status=0  and  a.userid=" + dbc.ToSqlValue(UserID);
+                cmd.CommandText = "SELECT a.id,a.goodsid,b.goodsname,b.goodstype FROM tb_b_goods_association a LEFT JOIN tb_b_goods b ON a.goodsid=b.goodsid WHERE a.status=0  and  a.userid=" + dbc.ToSqlValue(UserID);
                 var dt = dbc.ExecuteDataTable(cmd);
 
                 return dt;
@@ -1908,7 +1908,7 @@ LEFT JOIN tb_b_area d ON a.area=d.CODE where a.id=" + dbc.ToSqlValue(id));
             try
             {
                 var cmd = dbc.CreateCommand();
-                cmd.CommandText = "update  tb_b_goods_association set status=1 WHERE goodsid=" + dbc.ToSqlValue(id);
+                cmd.CommandText = "update  tb_b_goods_association set status=1,updateuser=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID) + ",updatetime="+ dbc.ToSqlValue(DateTime.Now) +" WHERE id=" + dbc.ToSqlValue(id);
                 dbc.ExecuteNonQuery(cmd);
 
                 return true;

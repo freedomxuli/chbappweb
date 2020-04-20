@@ -186,7 +186,7 @@ function GetOrder(nPage) {
             currentPage: retVal.cp
         });
 
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_zcsj").getValue(), Ext.getCmp("cx_cysj").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_zcsj").getValue(), Ext.getCmp("cx_cysj").getValue(),'');
 }
 
 //指定操作员
@@ -2484,6 +2484,19 @@ Ext.define('orderView', {
                                         text: '查询',
                                         handler: function () {
                                             GetOrder(purPage);
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'buttongroup',
+                                title: '',
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        text: '导出',
+                                        handler: function () {
+                                            DownloadFile("CZCLZ.Order.ExportOrder2", "财务管理台账.xls",Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_zcsj").getValue(), Ext.getCmp("cx_cysj").getValue());
                                         }
                                     }
                                 ]

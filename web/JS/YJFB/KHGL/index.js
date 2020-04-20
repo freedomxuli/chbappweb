@@ -144,6 +144,8 @@ var Goel_store = createSFW4Store({
 
 var Gel_store = Ext.create('Ext.data.Store', {
     fields: [
+                        { name: 'id' },
+
                 { name: 'goodsid' },
          { name: 'goodsname' },
           { name: 'goodstype' }
@@ -924,8 +926,7 @@ Ext.define('addWin', {
 
                       allowBlank: false,
                       anchor: '100%',
-                      value:1
-
+                   
 
 
                   },
@@ -3241,7 +3242,7 @@ function ShowHW(usid) {
                                         menuDisabled: true
                                     },
                                     {
-                                        dataIndex: 'goodsid',
+                                        dataIndex: 'id',
                                         flex: 1,
                                         text: '操作',
                                         align: "center",

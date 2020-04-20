@@ -44,11 +44,11 @@ public class YSHXByMySql
 
                 if (stime != null && stime != "")
                 {
-                    where += " and c.shippingnoteadddatetim>="+dbc.ToSqlValue(stime);
+                    where += " and c.shippingnoteadddatetime>="+dbc.ToSqlValue(stime);
                 }
                 if (etime != null && etime != "")
                 {
-                    where += " and c.shippingnoteadddatetim<=" + dbc.ToSqlValue(etime);
+                    where += " and c.shippingnoteadddatetime<=" + dbc.ToSqlValue(etime);
                 }
                
 
@@ -61,7 +61,7 @@ SELECT e.actualcompanypay,e.actualmoney,f.username,f.userid,c.shippingnoteid,c.s
 LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
 LEFT JOIN tb_b_user f ON e.shipperid=f.userid 
 WHERE 
-c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode = 90
+c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode = 90 and c.isdeleteflag = 0
 
  ";
                 str += where;
@@ -106,11 +106,11 @@ c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.
 
                 if (stime != null && stime != "")
                 {
-                    where += " and c.shippingnoteadddatetim>=" + dbc.ToSqlValue(stime);
+                    where += " and c.shippingnoteadddatetime>=" + dbc.ToSqlValue(stime);
                 }
                 if (etime != null && etime != "")
                 {
-                    where += " and c.shippingnoteadddatetim<=" + dbc.ToSqlValue(etime);
+                    where += " and c.shippingnoteadddatetime<=" + dbc.ToSqlValue(etime);
                 }
 
 
@@ -167,11 +167,11 @@ d.invoicestatus=0 AND c.shippingnotestatuscode = 90
 
                 if (stime != null && stime != "")
                 {
-                    where += " and c.shippingnoteadddatetim>=" + dbc.ToSqlValue(stime);
+                    where += " and c.shippingnoteadddatetime>=" + dbc.ToSqlValue(stime);
                 }
                 if (etime != null && etime != "")
                 {
-                    where += " and c.shippingnoteadddatetim<=" + dbc.ToSqlValue(etime);
+                    where += " and c.shippingnoteadddatetime<=" + dbc.ToSqlValue(etime);
                 }
 
 
@@ -400,7 +400,154 @@ where b.shippingnotenumber=" + dbc.ToSqlValue(shippingnotenumber);
 
 
 
+	[CSMethod("ExportGYSHX", 2)]
+    public byte[] ExportSourceGoods(string stime, string etime, string username,string ddbm,string ishx)
+    {
+		using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                string where = "";
 
+
+                if (!string.IsNullOrEmpty(username))
+                {
+                    where += " and " + dbc.C_Like("f.username", username.Trim(), LikeStyle.LeftAndRightLike);
+                }
+
+                if (stime != null && stime != "")
+                {
+                    where += " and c.shippingnoteadddatetime>=" + dbc.ToSqlValue(stime);
+                }
+                if (etime != null && etime != "")
+                {
+                    where += " and c.shippingnoteadddatetime<=" + dbc.ToSqlValue(etime);
+                }
+                if (ddbm != null && ddbm != "")
+                {
+                    where += " and c.shippingnotenumber like '%" + ddbm + "%'";
+                }
+
+
+                string str = @"
+select *,(actualcompanypay - verifymoney) symoney from (
+SELECT e.goodsfromroute,e.goodstoroute,e.goodsreceiptplace,e.actualcompanypay,e.descriptionofgoods,c.offerid,case when (SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE verifytype = 0 and shippingnoteid=c.shippingnoteid) is not null then (SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE verifytype = 0 and shippingnoteid=c.shippingnoteid) else 0 end verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
+ tb_b_shippingnoteinfo c LEFT JOIN  
+(SELECT a.shippingnoteid,b.totalvaloremtax,b.rate,b.billingtime,b.invoicecode,b.invoicenumber,b.totalamount 
+	FROM tb_b_invoicedetail a LEFT JOIN tb_b_invoice b ON a.billingid=b.billingid
+) d ON c.shippingnoteid=d.shippingnoteid 
+LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
+INNER JOIN tb_b_user f ON e.shipperid=f.userid  AND f.usertype=3
+WHERE c.shippingnotestatuscode >= 30 and c.isdeleteflag = 0
+
+ ";
+                str += where + " ORDER BY c.consignmentdatetime )  AS tab ";
+
+
+                if (ishx != null && ishx != "")
+                {
+                    if (ishx == "0")
+                    {
+                        str += " where (verifymoney=0 or verifymoney is null)";
+                    }
+                    else if (ishx == "1")
+                    {
+                        str += " where verifymoney<actualcompanypay ";
+                    }
+                    else if (ishx == "2")
+                    {
+                        str += " where verifymoney=actualcompanypay ";
+                    }
+
+
+                 }
+
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str);
+
+				Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+
+                String[] ColumnName = { "订单时间", "厂家", "单号", "起始地", "目的地", "收货地址", "货物", "应收金额","已核销金额","剩余可核销金额" };
+                String[] ColumnV = { "shippingnoteadddatetime", "username", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "descriptionofgoods", "actualcompanypay","verifymoney","symoney" };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            var ColumnVs = dt.Rows[i][ColumnV[a]].ToString();
+                            cells[i + 1, a].PutValue(ColumnVs);
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+	}
 
 
     [CSMethod("GYSHXList")]
@@ -425,29 +572,28 @@ where b.shippingnotenumber=" + dbc.ToSqlValue(shippingnotenumber);
 
                 if (stime != null && stime != "")
                 {
-                    where += " and c.shippingnoteadddatetim>=" + dbc.ToSqlValue(stime);
+                    where += " and c.shippingnoteadddatetime>=" + dbc.ToSqlValue(stime);
                 }
                 if (etime != null && etime != "")
                 {
-                    where += " and c.shippingnoteadddatetim<=" + dbc.ToSqlValue(etime);
+                    where += " and c.shippingnoteadddatetime<=" + dbc.ToSqlValue(etime);
                 }
                 if (ddbm != null && ddbm != "")
                 {
-                    where += " and c.shippingnotenumber like '%" + dbc.ToSqlValue(ddbm) + "%'";
+                    where += " and c.shippingnotenumber like '%" + ddbm + "%'";
                 }
 
 
                 string str = @"
 select * from (
-SELECT e.actualcompanypay,e.descriptionofgoods,c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE shippingnoteid=c.shippingnoteid) AS verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
+SELECT e.actualcompanypay,e.descriptionofgoods,c.offerid,(SELECT SUM(verifymoney) FROM tb_b_shippingnoteinfo_verify WHERE verifytype = 0 and shippingnoteid=c.shippingnoteid) AS verifymoney,e.actualmoney,e.actualwaymoney,f.username,f.userid,c.shippingnoteid,c.shippingnoteadddatetime,c.shippingnotenumber,c.statisticstype,d.totalamount,d.totalvaloremtax,d.rate,d.billingtime,d.invoicecode,d.invoicenumber FROM
  tb_b_shippingnoteinfo c LEFT JOIN  
 (SELECT a.shippingnoteid,b.totalvaloremtax,b.rate,b.billingtime,b.invoicecode,b.invoicenumber,b.totalamount 
 	FROM tb_b_invoicedetail a LEFT JOIN tb_b_invoice b ON a.billingid=b.billingid
 ) d ON c.shippingnoteid=d.shippingnoteid 
 LEFT JOIN tb_b_sourcegoodsinfo_offer e ON c.offerid=e.offerid
 INNER JOIN tb_b_user f ON e.shipperid=f.userid  AND f.usertype=3
-WHERE 
-c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.shippingnotestatuscode = 30
+WHERE c.shippingnotestatuscode >= 30 and c.isdeleteflag = 0
 
  ";
                 str += where + " ORDER BY c.consignmentdatetime )  AS tab ";
@@ -457,15 +603,15 @@ c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.
                 {
                     if (ishx == "0")
                     {
-                        str += " where verifymoney=0 ";
+                        str += " where (verifymoney=0 or verifymoney is null)";
                     }
                     else if (ishx == "1")
                     {
-                        str += " where verifymoney<actualwaymoney ";
+                        str += " where verifymoney<actualcompanypay ";
                     }
                     else if (ishx == "2")
                     {
-                        str += " where verifymoney=actualwaymoney ";
+                        str += " where verifymoney=actualcompanypay ";
                     }
 
 
@@ -505,7 +651,12 @@ c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.
                 //
                 if (ye == "0")
                 {
-                    dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 2,shipperverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+					if(Convert.ToDouble(jsr["verifymoney"].ToString())>0)
+					{
+						dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 2,shipperverifymoney =" + dbc.ToSqlValue(actualwaymoney) + " where  offerid=" + dbc.ToSqlValue(offerid));
+					}else{
+						dbc.ExecuteNonQuery("update tb_b_sourcegoodsinfo_offer   set shipperverifystatus = 1,shipperverifymoney =shipperverifymoney+" + dbc.ToSqlValue(jsr["verifymoney"].ToString()) + " where  offerid=" + dbc.ToSqlValue(offerid));
+					}
                 }
                 else {
                     var dts = dbc.ExecuteDataTable("SELECT shipperverifymoney,shipperverifystatus FROM tb_b_sourcegoodsinfo_offer WHERE offerid=" + dbc.ToSqlValue(offerid));
@@ -704,7 +855,7 @@ c.shippingnoteid NOT IN (SELECT shippingnoteid FROM tb_b_invoicedetail  ) AND c.
             try
             {
                 var dt = dbc.ExecuteDataTable(@"SELECT a.*,b.`username` FROM tb_b_shippingnoteinfo_verify a LEFT JOIN tb_b_user b ON a.`userid`=b.`userid`
-WHERE shippingnoteid=" + dbc.ToSqlValue(shippingnoteid) + @"
+WHERE verifytype = 0 and shippingnoteid=" + dbc.ToSqlValue(shippingnoteid) + @"
 ORDER BY verifytime DESC");
 
                 return dt;

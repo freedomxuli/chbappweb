@@ -141,7 +141,7 @@ function GetOrderByPage(nPage) {
             currentPage: retVal.cp
         });
 
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg2").getValue(), Ext.getCmp("cx_end2").getValue(), Ext.getCmp("cx_changjia2").getValue(),'','','','');
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg2").getValue(), Ext.getCmp("cx_end2").getValue(), Ext.getCmp("cx_changjia2").getValue(),'','','','','');
 }
 
 //获取列表
@@ -476,7 +476,10 @@ Ext.define('orderSumView', {
                                             dataIndex: 'memo',
                                             sortable: false,
                                             menuDisabled: true,
-                                            text: "备注"
+                                            text: "备注",
+                                            renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+                                                 return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
+                                            }
                                         },
                                         {
                                             text: '操作',

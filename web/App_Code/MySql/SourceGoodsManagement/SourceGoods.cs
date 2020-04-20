@@ -1,9 +1,11 @@
-﻿using SmartFramework4v2.Data.MySql;
+﻿using Aspose.Cells;
+using SmartFramework4v2.Data.MySql;
 using SmartFramework4v2.Web.Common.JSON;
 using SmartFramework4v2.Web.WebExecutor;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Web;
 
@@ -83,6 +85,214 @@ public class SourceGoods
             }
         }
     }
+
+    /// <summary>
+    /// 询单列表导出
+    /// </summary>
+    /// <param name="beg"></param>
+    /// <param name="end"></param>
+    /// <param name="changjia"></param>
+    /// <returns></returns>
+    [CSMethod("ExportSourceGoodsSC", 2)]
+    public byte[] ExportSourceGoodsSC(string beg, string end, string changjia, string offerstatus, string flowstatus)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                string where = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(changjia.Trim()))
+                {
+                    where += " and " + dbc.C_Like("b.username", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(offerstatus))
+                {
+                    where += " and " + dbc.C_EQ("a.offerstatus", offerstatus.Trim());
+                }
+                if (!string.IsNullOrEmpty(flowstatus))
+                {
+                    where += " and " + dbc.C_EQ("a.flowstatus", flowstatus.Trim());
+                }
+                string str = @"select a.*,b.username,b.carriername,c.name vehiclelengthrequirementname from tb_b_sourcegoodsinfo_offer a
+                            left join tb_b_user b on a.shipperid=b.userid
+                            left join tb_b_dictionary_detail c on a.vehiclelengthrequirement=c.bm
+                            where (a.shipperid in(
+                                select d.userid from tb_b_operator_association d
+                                left join tb_b_user e on d.userid=e.userid
+                                inner join tb_b_user f on d.operator=f.userid and f.correlationid=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID) + @"
+                                where d.status = 0
+                            ) or 'D4D659F2-C2AE-4D96-AA87-A5DF0EC3F57C'=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID.ToUpper()) + @")";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str + " order by a.offerstatus asc, a.flowstatus asc, a.goodsinsertdatetime desc");
+
+
+                Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+
+                String[] ColumnName = { "厂家", "询价时间", "询价状态", "询价流程状态", "单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积", "车型", "车长", "承运方", "是否提货", "是否送货", "预付运费", "预估企业报价", "预估下游成本", "预估税费成本", "预估资金成本", "备注", "预估用油金额", "预估用票金额" };
+                String[] ColumnV = { "username", "addtime", "offerstatus", "flowstatus", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube", "vehicletyperequirement", "vehiclelengthrequirementname", "carriername", "istakegoods", "isdelivergoods", "actualcompanypay", "totalmonetaryamount", "estimatemoney", "estimatetaxmoney", "estimatecostmoney", "memo", "estimateoilmoney", "estimatevotemoney" };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            var ColumnVs = dt.Rows[i][ColumnV[a]].ToString();
+                            if (ColumnV[a] == "offerstatus")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        ColumnVs = "已咨询";
+                                        break;
+                                    case "1":
+                                        ColumnVs = "已下单";
+                                        break;
+                                
+                                }
+                            }
+                            if (ColumnV[a] == "flowstatus")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        str = "询价单等待市场部转发操作";
+                                        break;
+                                    case "10":
+                                        str = "询价单已发送操作员，等待报价";
+                                        break;
+                                    case "20":
+                                        str = "操作员已报价，等待市场部提交客户报价";
+                                        break;
+                                    case "90":
+                                        str = "市场部已提交客户报价，等待客户下单";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "vehicletyperequirement")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "1":
+                                        str = "栏板车";
+                                        break;
+                                    case "2":
+                                        str = "厢车";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "istakegoods")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        str = "提货";
+                                        break;
+                                    case "1":
+                                        str = "不提货";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "isdelivergoods")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        str = "送货";
+                                        break;
+                                    case "1":
+                                        str = "不送";
+                                        break;
+
+                                }
+                            }
+
+                            cells[i + 1, a].PutValue(ColumnVs);
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+
+
 
     /// <summary>
     /// 修改询价
@@ -547,4 +757,140 @@ where a.offerid=" + dbc.ToSqlValue(offerid);
         dt.Rows.Add(dr);
         dbc.InsertTable(dt);
     }
+
+
+    /// <summary>
+    /// 询单列表导出
+    /// </summary>
+    /// <param name="beg"></param>
+    /// <param name="end"></param>
+    /// <param name="changjia"></param>
+    /// <returns></returns>
+    [CSMethod("ExportSourceGoods", 2)]
+    public byte[] ExportSourceGoods(string beg, string end, string changjia, string offerstatus, string flowstatus)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                #region 获取数据
+                string where = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(changjia.Trim()))
+                {
+                    where += " and " + dbc.C_EQ("b.username", changjia.Trim());
+                }
+                if (!string.IsNullOrEmpty(offerstatus))
+                {
+                    where += " and " + dbc.C_EQ("a.offerstatus", offerstatus.Trim());
+                }
+                if (!string.IsNullOrEmpty(flowstatus))
+                {
+                    where += " and " + dbc.C_EQ("a.flowstatus", flowstatus.Trim());
+                }
+                string str = @"select a.*,b.username,b.carriername,c.name vehiclelengthrequirementname from tb_b_sourcegoodsinfo_offer a
+                            left join tb_b_user b on a.shipperid=b.userid
+                            left join tb_b_dictionary_detail c on a.vehiclelengthrequirement=c.bm
+                            where a.shipperid in(
+                                select d.userid from tb_b_operator_association d
+                                left join tb_b_user e on d.userid=e.userid
+                                inner join tb_b_user f on d.operator=f.userid and f.correlationid=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID) + @"
+                                where d.status = 0
+                            )";
+                str += where;
+                str += " order by addtime desc";
+                #endregion
+                DataTable dt = dbc.ExecuteDataTable(str);
+
+                Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+
+                String[] ColumnName = { "厂家", "询价时间", "询价状态", "询价流程状态", "单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积", "车型", "车长", "承运方", "是否提货", "是否送货", "预付运费", "预估企业报价", "预估下游成本", "预估税费成本", "预估资金成本", "备注" };
+                String[] ColumnV = { "username", "addtime", "offerstatus", "flowstatus", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube", "vehicletyperequirement", "vehiclelengthrequirementname", "carriername", "istakegoods", "isdelivergoods", "actualcompanypay", "totalmonetaryamount", "estimatemoney", "estimatetaxmoney", "estimatecostmoney", "memo" };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            cells[i + 1, a].PutValue(dt.Rows[i][ColumnV[a]].ToString());
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+
+
+
 }

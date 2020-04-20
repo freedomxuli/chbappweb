@@ -1,5 +1,6 @@
-﻿
+
 var pageSize = 15;
+var pagenew = 1;
 var orderstore = createSFW4Store({
     data: [],
     pageSize: pageSize,
@@ -353,7 +354,14 @@ Ext.onReady(function () {
                                                              
                                                             AddPJ2(idlist, gys, actualcompanypay);
                                                         }
-                                                    }
+                                                    },
+													{
+														xtype: 'button',
+														text: '导出',
+														handler: function () {
+															DownloadFile("CZCLZ.YSHXByMySql.ExportGYSHX", "应收核销.xls",Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_name").getValue(), Ext.getCmp("cx_ddbm").getValue(), Ext.getCmp("cx_ishx").getValue());
+														}
+													}
                                                 ]
                                             },
                                             {
@@ -380,7 +388,7 @@ Ext.onReady(function () {
     });
 
     new ConsumeView();
-    getUser(1);
+    getUser(pagenew);
   
 
 
@@ -390,6 +398,7 @@ Ext.onReady(function () {
 function AddPJ2(idlist, gys, actualcompanypay) {
 
     if (actualcompanypay != null && actualcompanypay != "" && actualcompanypay != "null") {
+        actualcompanypay = parseFloat(actualcompanypay).toFixed(2);
 
     } else {
         actualcompanypay = 0;
@@ -430,7 +439,6 @@ function AddPJ2(idlist, gys, actualcompanypay) {
                          id: 'verifymoney',
                          name: 'verifymoney',
                          decimalPrecision: 5,
-                         minValue: 0,
                          maxValue: actualcompanypay,
                          readOnly: true,
                          labelWidth: 90,
@@ -456,6 +464,7 @@ function AddPJ2(idlist, gys, actualcompanypay) {
                                  { 'val': "1", 'txt': '支付宝' },
                                  { 'val': "2", 'txt': '微信' },
                                  { 'val': "3", 'txt': '现金' },
+								 { 'val': "4", 'txt': '油卡' },
                                { 'val': "9", 'txt': '其他' }
                              ]
 
@@ -500,7 +509,7 @@ function AddPJ2(idlist, gys, actualcompanypay) {
                                        var me = this;
                                        CS('CZCLZ.YSHXByMySql.HXMoneyALL', function (retVal) {
                                            if (retVal) {
-                                               getUser(1);
+                                               getUser(pagenew);
                                                Ext.getCmp("lmwin44").close();
 
                                            }
@@ -584,7 +593,6 @@ function AddPJ(notepid, username, actualcompanypay, userid, verifymoney, offerid
                          id: 'verifymoney',
                          name: 'verifymoney',
                          decimalPrecision: 5,
-                         minValue: 0,
                          maxValue: actualcompanypay - verifymoney,
                          labelWidth: 90,
                          allowBlank: false,
@@ -612,6 +620,7 @@ function AddPJ(notepid, username, actualcompanypay, userid, verifymoney, offerid
                                  { 'val': "1", 'txt': '支付宝' },
                                  { 'val': "2", 'txt': '微信' },
                                  { 'val': "3", 'txt': '现金' },
+								 { 'val': "4", 'txt': '油卡' },
                                { 'val': "9", 'txt': '其他' }
                              ]
 
@@ -656,7 +665,7 @@ function AddPJ(notepid, username, actualcompanypay, userid, verifymoney, offerid
                                        var me = this;
                                        CS('CZCLZ.YSHXByMySql.HXMoney', function (retVal) {
                                            if (retVal) {
-                                               getUser(1);
+                                               getUser(pagenew);
                                                Ext.getCmp("lmwin44").close();
 
                                             }
@@ -692,7 +701,7 @@ function AddPJ(notepid, username, actualcompanypay, userid, verifymoney, offerid
 function ZF(billingid, shippingnoteid) {
     CS('CZCLZ.YSHXByMySql.ChangeZF', function (retVal) {
         if (retVal) {
-            getUser(1);
+            getUser(pagenew);
             me.up('window').close();
 
         }
@@ -1060,7 +1069,9 @@ function CKHXJL(shippingnoteid) {
                                                 return "微信";
                                             } else if (value == "3") {
                                                 return "现金";
-                                            } else if (value == "9") {
+                                            } else if (value == "4") {
+                                                return "油卡";
+                                            }else if (value == "9") {
                                                 return "其他";
                                             }
                                          }

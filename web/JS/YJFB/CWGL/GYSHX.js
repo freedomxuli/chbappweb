@@ -1,5 +1,6 @@
-﻿
+
 var pageSize = 15;
+var pagenew = 1;
 var orderstore = createSFW4Store({
     data: [],
     pageSize: pageSize,
@@ -282,7 +283,7 @@ Ext.onReady(function () {
                                                     width: 100,
                                                     text: '核销记录',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                        return "<div style='color:green;cursor:pointer;' onclick='CKHXJL(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.actualwaymoney + "\",\"" + record.data.userid + "\")'>查看</div>"; 
+                                                        return "<div style='color:green;cursor:pointer;' onclick='CKHXJL(\"" + value + "\",\"" + record.data.costid + "\",\"" + record.data.username + "\",\"" + record.data.money + "\",\"" + record.data.userid + "\")'>查看</div>";
                                                     }
                                                 }, {
                                                     xtype: 'gridcolumn',
@@ -292,7 +293,7 @@ Ext.onReady(function () {
                                                     width: 100,
                                                     text: '操作',
                                                     renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
-                                                        return "<div style='color:green;cursor:pointer;' onclick='AddPJ(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.actualwaymoney + "\",\"" + record.data.userid + "\",\"" + record.data.verifymoney + "\",\"" + record.data.offerid + "\",\"" + record.data.costid + "\")'>单独核销</div>";
+                                                        return "<div style='color:green;cursor:pointer;' onclick='AddPJ(\"" + value + "\",\"" + record.data.username + "\",\"" + record.data.money + "\",\"" + record.data.userid + "\",\"" + record.data.verifymoney + "\",\"" + record.data.offerid + "\",\"" + record.data.costid + "\")'>单独核销</div>";
                                                     }
                                                 }
 
@@ -391,14 +392,21 @@ Ext.onReady(function () {
                                                             for (var n = 0, len = rds.length; n < len; n++) {
                                                                 var rd = rds[n];
                                                                 gys += rd.get("username") + ",";
-                                                                idlist.push(rd.get("shippingnoteid") + "," + rd.get("userid") + "," + rd.get("offerid") + "," + rd.get("actualwaymoney") + "," + rd.get("verifymoney") + "," + rd.get("username") + "," + rd.get("costid"));
+                                                                idlist.push(rd.get("shippingnoteid") + "," + rd.get("userid") + "," + rd.get("offerid") + "," + rd.get("money") + "," + rd.get("hxmoney") + "," + rd.get("username") + "," + rd.get("costid"));
                                                                
-                                                                actualwaymoney += (rd.get("actualwaymoney") - rd.get("verifymoney"))
+                                                                actualwaymoney += (rd.get("money") - rd.get("hxmoney"))
                                                             }
                                                              
                                                             AddPJ2(idlist, gys, actualwaymoney);
                                                         }
-                                                    }
+                                                    },
+													{
+														xtype: 'button',
+														text: '导出',
+														handler: function () {
+															DownloadFile("CZCLZ.GYSHXByMySql.ExportGYSHX", "供应商核销.xls",Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_name").getValue(), Ext.getCmp("cx_ddbm").getValue(), Ext.getCmp("cx_ishx").getValue());
+														}
+													}
                                                 ]
                                             },
                                             {
@@ -425,7 +433,7 @@ Ext.onReady(function () {
     });
 
     new ConsumeView();
-    getUser(1);
+    getUser(pagenew);
   
 
 
@@ -435,6 +443,7 @@ Ext.onReady(function () {
 function AddPJ2(idlist, gys, actualwaymoney) {
 
     if (actualwaymoney != null && actualwaymoney != "" && actualwaymoney != "null") {
+        actualwaymoney = parseFloat(actualwaymoney).toFixed(2);
 
     } else {
         actualwaymoney = 0;
@@ -476,7 +485,6 @@ function AddPJ2(idlist, gys, actualwaymoney) {
                          id: 'verifymoney',
                          name: 'verifymoney',
                          decimalPrecision: 5,
-                         minValue: 0,
                          maxValue: actualwaymoney,
                          readOnly: true,
                          labelWidth: 90,
@@ -502,6 +510,7 @@ function AddPJ2(idlist, gys, actualwaymoney) {
                                  { 'val': "1", 'txt': '支付宝' },
                                  { 'val': "2", 'txt': '微信' },
                                  { 'val': "3", 'txt': '现金' },
+								 { 'val': "4", 'txt': '油卡' },
                                { 'val': "9", 'txt': '其他' }
                              ]
 
@@ -546,7 +555,7 @@ function AddPJ2(idlist, gys, actualwaymoney) {
                                        var me = this;
                                        CS('CZCLZ.GYSHXByMySql.HXMoneyALL', function (retVal) {
                                            if (retVal) {
-                                               getUser(1);
+                                               getUser(pagenew);
                                                Ext.getCmp("lmwin44").close();
 
                                            }
@@ -581,7 +590,7 @@ function AddPJ2(idlist, gys, actualwaymoney) {
 
 
 
-function AddPJ(notepid, username, actualwaymoney, userid, verifymoney, offerid) {
+function AddPJ(notepid, username, actualwaymoney, userid, verifymoney, offerid,costid) {
 
     if (verifymoney != null && verifymoney != "" && verifymoney != "null") {
 
@@ -630,7 +639,6 @@ function AddPJ(notepid, username, actualwaymoney, userid, verifymoney, offerid) 
                          id: 'verifymoney',
                          name: 'verifymoney',
                          decimalPrecision: 5,
-                         minValue: 0,
                          maxValue: actualwaymoney - verifymoney,
                          labelWidth: 90,
                          allowBlank: false,
@@ -658,6 +666,7 @@ function AddPJ(notepid, username, actualwaymoney, userid, verifymoney, offerid) 
                                  { 'val': "1", 'txt': '支付宝' },
                                  { 'val': "2", 'txt': '微信' },
                                  { 'val': "3", 'txt': '现金' },
+								 { 'val': "4", 'txt': '油卡' },
                                { 'val': "9", 'txt': '其他' }
                              ]
 
@@ -702,7 +711,7 @@ function AddPJ(notepid, username, actualwaymoney, userid, verifymoney, offerid) 
                                        var me = this;
                                        CS('CZCLZ.GYSHXByMySql.HXMoney', function (retVal) {
                                            if (retVal) {
-                                               getUser(1);
+                                               getUser(pagenew);
                                                Ext.getCmp("lmwin44").close();
 
                                             }
@@ -738,7 +747,7 @@ function AddPJ(notepid, username, actualwaymoney, userid, verifymoney, offerid) 
 function ZF(billingid, shippingnoteid) {
     CS('CZCLZ.GYSHXByMySql.ChangeZF', function (retVal) {
         if (retVal) {
-            getUser(1);
+            getUser(pagenew);
             me.up('window').close();
 
         }
@@ -1016,7 +1025,7 @@ var verifystore = Ext.create('Ext.data.Store', {
 
     ]
 });
-function getStartOREnd(shippingnoteid) {
+function getStartOREnd(shippingnoteid,costid) {
     verifystore.removeAll();
     
     CS('CZCLZ.GYSHXByMySql.GetHXLIST', function (retVals) {
@@ -1024,7 +1033,7 @@ function getStartOREnd(shippingnoteid) {
                 verifystore.loadData(retVals, false);
 
             }
-    }, CS.onError, shippingnoteid);
+    }, CS.onError, shippingnoteid,costid);
    
 
 
@@ -1032,13 +1041,13 @@ function getStartOREnd(shippingnoteid) {
 }
 
 ///起始地或者目的地
-function CKHXJL(shippingnoteid) {
+function CKHXJL(shippingnoteid,costid) {
 
 
 
 
 
-    getStartOREnd(shippingnoteid);
+    getStartOREnd(shippingnoteid,costid);
     var c_window = new Ext.Window({
         extend: 'Ext.window.Window',
         viewModel: {
@@ -1106,7 +1115,9 @@ function CKHXJL(shippingnoteid) {
                                                 return "微信";
                                             } else if (value == "3") {
                                                 return "现金";
-                                            } else if (value == "9") {
+                                            } else if (value == "4") {
+                                                return "油卡";
+                                            }else if (value == "9") {
                                                 return "其他";
                                             }
                                          }

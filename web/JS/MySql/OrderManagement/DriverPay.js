@@ -14,12 +14,16 @@ var storeDriverPay = createSFW4Store({
         { name: 'paymoney' },
         { name: 'paymemo' },
         { name: 'paystatus' },
-        { name: 'tuoyunorder' }
+        { name: 'tuoyunorder' },
+        { name: 'shippingnoteid' }
     ],
     onPageChange: function (sto, nPage, sorters) {
-        GetOrder(nPage);
+        GetDriverPay(nPage);
     }
 });
+
+
+var purPage = 1;
 
 var storeAdd = Ext.create('Ext.data.Store', {
     fields: [
@@ -41,6 +45,8 @@ var storeAdd = Ext.create('Ext.data.Store', {
 //-------------------------------------------------------页面方法----------------------------------------------------------
 //获取订单列表
 function GetDriverPay(nPage) {
+    purPage = nPage;
+
     CS('CZCLZ.Order.GetDriverPayByPage', function (retVal) {
         storeDriverPay.setData({
             data: retVal.dt,
@@ -49,7 +55,7 @@ function GetDriverPay(nPage) {
             currentPage: retVal.cp
         });
 
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_paystatus").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_shippingnotenumber").getValue(), Ext.getCmp("cx_paystatus").getValue(), Ext.getCmp("cx_gys").getValue(), Ext.getCmp("cx_mdd").getValue());
 }
 
 var myWin;
@@ -109,11 +115,11 @@ function SelOrder(orderid, yfje, price, id) {
                                     var values = form.form.getValues(false);
                                     CS('CZCLZ.Order.SaveOrderPay', function (retVal) {
                                         if (retVal) {
-                                            GetDriverPay(1);
+                                            GetDriverPay(purPage);
                                             Ext.MessageBox.alert('提示', "申请成功！");
                                             myWin.close();
                                         } else {
-                                            GetDriverPay(1);
+                                            GetDriverPay(purPage);
                                             Ext.MessageBox.alert('提示', "申请金额超出应付款，申请失败！");
                                             myWin.close();
                                         }
@@ -136,7 +142,7 @@ function SubmitDriverPay(id) {
             if (obj == "yes") {
                 CS('CZCLZ.Order.UpdateOrderPaySubmit', function (retVal) {
                     if (retVal) {
-                        GetDriverPay(1);
+                        GetDriverPay(purPage);
                     }
                 }, CS.onError, [id]);
             } else {
@@ -153,12 +159,106 @@ function ConfirmDriverPay(id) {
             if (obj == "yes") {
                 CS('CZCLZ.Order.UpdateOrderPayConfirm', function (retVal) {
                     if (retVal) {
-                        GetDriverPay(1);
+                        GetDriverPay(purPage);
                     }
                 }, CS.onError, [id]);
             } else {
                 return;
             }
+        });
+    }
+}
+
+//修改
+function ModifyDriverPay(id, orderId) {
+    if (privilege("一键发包模块_订单管理-承运商付款申请_修改")) {
+        let modifyWin = new Ext.Window({
+            extend: 'Ext.window.Window',
+            viewModel: {
+                type: 'mywindow'
+            },
+            autoShow: true,
+            height: 200,
+            id: "modifyWinID",
+            width: 300,
+            layout: 'fit',
+            title: "修改费用",
+            modal: true,
+            items: [
+                {
+                    xtype: 'form',
+                    id: 'modifyFromID',
+                    bodyPadding: 10,
+                    items: [
+                        {
+                            xtype: 'numberfield',
+                            name: 'paymoney',
+                            labelWidth: 100,
+                            fieldLabel: '申请付款金额',
+                            allowBlank: false,
+                            minValue: 0,
+                            anchor: '100%'
+                        },
+                        {
+                            xtype: 'textareafield',
+                            name: 'paymemo',
+                            labelWidth: 100,
+                            fieldLabel: '申请付款备注',
+                            allowBlank: false,
+                            minValue: 0,
+                            anchor: '100%'
+                        }
+                    ],
+                    buttonAlign: 'center',
+                    buttons: [
+                        {
+                            text: '保存',
+                            iconCls: 'dropyes',
+                            handler: function () {
+                                let form = Ext.getCmp('modifyFromID');
+                                if (form.form.isValid()) {
+                                    var values = form.form.getValues(false);
+                                    CS('CZCLZ.Order.UpdateCarrierPay', function (retVal) {
+                                        if (retVal) {
+                                            GetCarrierPay(storeCarrierPay.currentPage);
+                                            Ext.MessageBox.alert('提示', "修改成功！");
+                                            modifyWin.close();
+                                        }
+                                    }, CS.onError, id, orderId, values);
+                                }
+                            }
+                        },
+                        {
+                            text: '取消',
+                            iconCls: 'back',
+                            handler: function () {
+                                this.up('window').close();
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+        modifyWin.show();
+        var r = storeCarrierPay.findRecord("id", id).data;
+
+        var form = Ext.getCmp('modifyFromID');
+        form.form.setValues(r);
+    }
+}
+
+//删除
+function DeleteDriverPay(id, orderid) {
+    if (privilege("一键发包模块_订单管理-承运商付款申请_删除")) {
+        Ext.MessageBox.confirm('删除提示', '是否要删除数据!', function (obj) {
+            if (obj == "yes") {
+                CS('CZCLZ.Order.DelDriverPay', function (retVal) {
+                    if (retVal) {
+                        GetCarrierPay(storeCarrierPay.currentPage);
+                    }
+                }, CS.onError, id, orderid);
+            }
+            return;
         });
     }
 }
@@ -325,6 +425,20 @@ Ext.define('addDriverOrderPayWin', {
                                             fieldLabel: '收货地址'
                                         },
                                         {
+                                            xtype: 'textfield',
+                                            id: 'gys',
+                                            width: 160,
+                                            labelWidth: 70,
+                                            fieldLabel: '供应商'
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            id: 'mdd',
+                                            width: 160,
+                                            labelWidth: 70,
+                                            fieldLabel: '目的地'
+                                        }, 
+                                        {
                                             xtype: 'buttongroup',
                                             title: '',
                                             items: [
@@ -337,7 +451,7 @@ Ext.define('addDriverOrderPayWin', {
                                                             if (retVal) {
                                                                 storeAdd.loadData(retVal);
                                                             } //
-                                                        }, CS.onError, Ext.getCmp("cx_addshippingnotenumber").getValue(), Ext.getCmp("cx_addchangjia").getValue(), Ext.getCmp("addsearch_beg").getValue(), Ext.getCmp("addsearch_end").getValue(), Ext.getCmp("addsearch_are").getValue());
+                                                        }, CS.onError, Ext.getCmp("cx_addshippingnotenumber").getValue(), Ext.getCmp("cx_addchangjia").getValue(), Ext.getCmp("addsearch_beg").getValue(), Ext.getCmp("addsearch_end").getValue(), Ext.getCmp("addsearch_are").getValue(), Ext.getCmp("gys").getValue(), Ext.getCmp("mdd").getValue());
                                                     }
                                                 }
                                             ]
@@ -477,6 +591,7 @@ Ext.define('DriverPayView', {
                             } else if (record.data.paystatus == 20) {
                                 str += "<a onclick='ConfirmDriverPay(\"" + value + "\");'>财务确认付款</a>";
                             }
+                            str += "<a onclick='ModifyDriverPay(\"" + value + "\",\"" + record.data.shippingnoteid + "\");'>修改</a> || <a onclick='DeleteDriverPay(\"" + value + "\",\"" + record.data.shippingnoteid + "\");'>删除</a>";
                             return str;
                         }
                     }
@@ -546,6 +661,20 @@ Ext.define('DriverPayView', {
                                 value: ''
                             },
                             {
+                                xtype: 'textfield',
+                                id: 'cx_gys',
+                                width: 160,
+                                labelWidth: 70,
+                                fieldLabel: '供应商'
+                            },
+                            {
+                                xtype: 'textfield',
+                                id: 'cx_mdd',
+                                width: 160,
+                                labelWidth: 70,
+                                fieldLabel: '目的地'
+                            }, 
+                            {
                                 xtype: 'buttongroup',
                                 title: '',
                                 items: [
@@ -554,7 +683,7 @@ Ext.define('DriverPayView', {
                                         iconCls: 'search',
                                         text: '查询',
                                         handler: function () {
-                                            GetDriverPay(1);
+                                            GetDriverPay(purPage);
                                         }
                                     }
                                 ]
@@ -607,7 +736,7 @@ Ext.define('DriverPayView', {
                                                     if (obj == "yes") {
                                                         CS('CZCLZ.Order.UpdateOrderPaySubmit', function (retVal) {
                                                             if (retVal) {
-                                                                GetDriverPay(1);
+                                                                GetDriverPay(purPage);
                                                             }
                                                         }, CS.onError, lis);
                                                     } else {
@@ -650,7 +779,7 @@ Ext.define('DriverPayView', {
                                                     if (obj == "yes") {
                                                         CS('CZCLZ.Order.UpdateOrderPayConfirm', function (retVal) {
                                                             if (retVal) {
-                                                                GetDriverPay(1);
+                                                                GetDriverPay(purPage);
                                                             }
                                                         }, CS.onError, lis);
                                                     } else {
@@ -681,5 +810,5 @@ Ext.define('DriverPayView', {
 Ext.onReady(function () {
     new DriverPayView();
 
-    GetDriverPay(1);
+    GetDriverPay(purPage);
 })

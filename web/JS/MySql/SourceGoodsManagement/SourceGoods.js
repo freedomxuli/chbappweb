@@ -869,7 +869,11 @@ Ext.define('SourceGoodsView', {
                         dataIndex: 'memo',
                         sortable: false,
                         menuDisabled: true,
-                        text: "备注"
+                        text: "备注",
+                        renderer: function (value, cellmeta, record, rowIndex, columnIndex, store) {
+
+                            return "<input value='" + value + "' style='border:0px;BACKGROUND-COLOR: transparent;'>";
+                        }
                     },
                      {
                          xtype: 'gridcolumn',
@@ -1220,6 +1224,19 @@ Ext.define('SourceGoodsView', {
                                         text: '查询',
                                         handler: function () {
                                             getSourceGoodsListByPage(1);
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'buttongroup',
+                                title: '',
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        text: '导出',
+                                        handler: function () {
+                                            DownloadFile("CZCLZ.SourceGoods.ExportSourceGoodsSC", "询价列表.xls", Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_changjia").getValue(), Ext.getCmp("cx_offerstatus").getValue(), Ext.getCmp("cx_flowstatus").getValue());
                                         }
                                     }
                                 ]

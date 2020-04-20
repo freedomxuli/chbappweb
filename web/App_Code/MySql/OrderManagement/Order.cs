@@ -1,4 +1,5 @@
 ﻿using Aspose.Cells;
+using SmartFramework4v2.Data;
 using SmartFramework4v2.Data.MySql;
 using SmartFramework4v2.Web.Common.JSON;
 using SmartFramework4v2.Web.WebExecutor;
@@ -94,7 +95,7 @@ public class Order
     /// <param name="changjia"></param>
     /// <returns></returns>
     [CSMethod("GetOrderList")]
-    public object GetOrderList(int pagnum, int pagesize, string beg, string end, string changjia, string ordernum, string gys, string zcsj, string cysj)
+    public object GetOrderList(int pagnum, int pagesize, string beg, string end, string changjia, string ordernum, string gys, string zcsj, string cysj, string mudidi)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -131,6 +132,10 @@ public class Order
                 if (!string.IsNullOrEmpty(cysj.Trim()))
                 {
                     where += " and " + dbc.C_Like("h.username", cysj.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(mudidi.Trim()))
+                {
+                    where += " and " + dbc.C_Like("d.goodstoroute", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
                 }
 
                 string str = @"select (SELECT COUNT(*) FROM tb_b_receiptinfo WHERE isdeleteflag=0 AND shippingnoteid=a.shippingnoteid) AS hzcount,e.username as usernamea ,a.operatorid,a.shippingnoteid,d.username,a.shippingnoteadddatetime,a.tuoyunorder,
@@ -182,13 +187,13 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
 
                 //开始取分页数据
                 System.Data.DataTable dtPage = new System.Data.DataTable();
-                dtPage = dbc.GetPagedDataTable(str + " order by a.shippingnoteadddatetime desc", pagesize, ref cp, out ac);
+                dtPage = dbc.GetPagedDataTable(str + " order by a.shippingnotestatuscode asc,a.consignmentdatetime desc", pagesize, ref cp, out ac);
                 dtPage.Columns.Add("userCZY");
                 dtPage.Columns.Add("userGYS");
                 dtPage.Columns.Add("userGYS_username");
                 dtPage.Columns.Add("userGYS_vehiclenumber");
                 dtPage.Columns.Add("userGYS_identitydocumentnumber");
-             
+
                 dtPage.Columns.Add("userZCSJ");
 
                 dtPage.Columns.Add("userZCSJ_username");
@@ -208,7 +213,7 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
 
                     var userGYS = "";
                     dt = dbc.ExecuteDataTable(@"    SELECT b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
- where a.paytype=0 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
+ where a.status=0 and a.paytype=0 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
                     foreach (DataRow dr2 in dt.Rows)
                     {
                         userGYS += dr2["username"].ToString() + "(" + dr2["vehiclenumber"].ToString() + "," + dr2["identitydocumentnumber"].ToString() + ")" + ",";
@@ -216,14 +221,14 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
                         dr["userGYS_username"] = dr2["username"].ToString();
                         dr["userGYS_vehiclenumber"] = dr2["vehiclenumber"].ToString();
                         dr["userGYS_identitydocumentnumber"] = dr2["identitydocumentnumber"].ToString();
-                    
+
                     }
                     dr["userGYS"] = userGYS;
 
 
                     var userZCSJ = "";
                     dt = dbc.ExecuteDataTable(@"    SELECT b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
- where a.paytype=1 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString())); 
+ where a.status=0 and a.paytype=1 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
                     foreach (DataRow dr2 in dt.Rows)
                     {
                         userZCSJ += dr2["username"].ToString() + "(" + dr2["vehiclenumber"].ToString() + "," + dr2["identitydocumentnumber"].ToString() + "," + dr2["usertel"].ToString() + ")" + ",";
@@ -232,7 +237,7 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
                         dr["userZCSJ_identitydocumentnumber"] = dr2["identitydocumentnumber"].ToString();
                         dr["userZCSJ_usertel"] = dr2["usertel"].ToString();
 
-                    
+
                     }
                     dr["userZCSJ"] = userZCSJ;
 
@@ -244,6 +249,41 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
             }
             catch (Exception ex)
             {
+                throw ex;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 作废
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
+    [CSMethod("AbolishOrder")]
+    public bool AbolishOrder(string orderId)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string sql = "update tb_b_shippingnoteinfo set isdeleteflag = 1 where shippingnoteid=" + dbc.ToSqlValue(orderId);
+                dbc.ExecuteNonQuery(sql);
+
+                sql = @"update tb_b_shippingnoteinfo_cost set status = 1 where shippingnoteid=" + dbc.ToSqlValue(orderId);
+                dbc.ExecuteNonQuery(sql);
+
+                sql = @"update tb_b_shippingnoteinfo_pay set status = 1 where shippingnoteid=" + dbc.ToSqlValue(orderId);
+                dbc.ExecuteNonQuery(sql);
+
+                DateTime ti = DateTime.Now;
+                LogByShippingnote(dbc, orderId, "订单作废", ti + "订单作废，操作人:" + SystemUser.CurrentUser.UserName, ti);
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
                 throw ex;
             }
         }
@@ -287,12 +327,12 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
                 dt.Rows.Add(dr);
                 dbc.UpdateTable(dt, dtt);
 
-				var dt1 = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo");
+                var dt1 = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo");
                 var dtt1 = new SmartFramework4v2.Data.DataTableTracker(dt1);
-				var dr1 = dt1.NewRow();
-				dr1["shippingnoteid"] = orderId;
-				dr1["tuoyunorder"] = jsr["tuoyunorder"].ToString();
-				dt1.Rows.Add(dr1);
+                var dr1 = dt1.NewRow();
+                dr1["shippingnoteid"] = orderId;
+                dr1["tuoyunorder"] = jsr["tuoyunorder"].ToString();
+                dt1.Rows.Add(dr1);
                 dbc.UpdateTable(dt1, dtt1);
 
                 dbc.CommitTransaction();
@@ -897,7 +937,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
             {
                 var cmd = dbc.CreateCommand();
                 cmd.CommandText = @"SELECT a.id,a.money,b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
- where a.paytype=" + dbc.ToSqlValue(paytype) + " and a.shippingnoteid=" + dbc.ToSqlValue(shippingnoteid);
+ where a.status = 0 and a.paytype=" + dbc.ToSqlValue(paytype) + " and a.shippingnoteid=" + dbc.ToSqlValue(shippingnoteid);
                 var dt = dbc.ExecuteDataTable(cmd);
 
                 return dt;
@@ -1689,7 +1729,7 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
     /// <param name="paystatus"></param>
     /// <returns></returns>
     [CSMethod("GetDriverPayByPage")]
-    public object GetDriverPayByPage(int pagnum, int pagesize, string changjia, string beg, string end, string shippingnotenumber, string paystatus)
+    public object GetDriverPayByPage(int pagnum, int pagesize, string changjia, string beg, string end, string shippingnotenumber, string paystatus, string gys, string mudidi)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1719,13 +1759,22 @@ where shippingnoteid=" + dbc.ToSqlValue(orderId);//
                 {
                     where += " and " + dbc.C_EQ("a.paystatus", paystatus);
                 }
+                if (!string.IsNullOrEmpty(gys.Trim()))
+                {
+                    where += " and " + dbc.C_Like("c.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(mudidi.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.goodsreceiptplace", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
                 string str = @"select a.*,g.shippingnotenumber,g.changjia,c.username sjname,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
 left join (
-    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia from tb_b_shippingnoteinfo b
+    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia,f.username,e.goodsreceiptplace from tb_b_shippingnoteinfo b
     left join (
-        select c.offerid,d.username from tb_b_sourcegoodsinfo_offer c
+        select c.offerid,d.username,c.goodsreceiptplace from tb_b_sourcegoodsinfo_offer c
         left join tb_b_user d on c.shipperid=d.userid
     )e on b.offerid=e.offerid
+    left join tb_b_user f on b.carrierid=f.userid
 )g on a.shippingnoteid=g.shippingnoteid
 inner join tb_b_shippingnoteinfo_cost b on a.costid = b.id
 left join tb_b_user c on b.userid = c.userid
@@ -1752,7 +1801,7 @@ where a.status=0 and a.paytype in (1,4)";
     /// <param name="changjia"></param>
     /// <returns></returns>
     [CSMethod("GetAddOrderList")]
-    public object GetAddOrderList(String shippingnotenumber, String changjia, String addsearch_beg, String addsearch_end, String addsearch_are)
+    public object GetAddOrderList(String shippingnotenumber, String changjia, String addsearch_beg, String addsearch_end, String addsearch_are, string gys, string mudidi)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1779,6 +1828,14 @@ where a.status=0 and a.paytype in (1,4)";
             {
                 where += " and " + dbc.C_Like("f.name", addsearch_are.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
             }
+            if (!string.IsNullOrEmpty(gys.Trim()))
+            {
+                where += " and " + dbc.C_Like("e.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+            }
+            if (!string.IsNullOrEmpty(mudidi.Trim()))
+            {
+                where += " and " + dbc.C_Like("c.goodsreceiptplace", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+            }
             String sql = @"select (IFNULL(a.money,0)-IFNULL(a.verifymoney,0)) as price,a.shippingnoteid,d.username changjia,b.shippingnotenumber,
                             e.username carriername,a.money actualwaymoney,b.consignmentdatetime,f.name as goodstoroutename,IFNULL(g.paysummoney,0) paysummoney,a.id
 from tb_b_shippingnoteinfo_cost a
@@ -1788,10 +1845,11 @@ left join tb_b_area f on c.goodstoroutecode=f.code
                             left join tb_b_user d on c.shipperid = d.userid
                             left join tb_b_user e on a.userid = e.userid
 left join (
-	select shippingnoteid,sum(paymoney) paysummoney from tb_b_shippingnoteinfo_pay 
+	select shippingnoteid,costid,sum(paymoney) paysummoney from tb_b_shippingnoteinfo_pay 
 	where  (paytype=0 or paytype=3) and paystatus>=10
-	GROUP BY shippingnoteid
-)g on a.shippingnoteid=g.shippingnoteid
+	GROUP BY shippingnoteid,costid
+)g on a.shippingnoteid=g.shippingnoteid and a.id = g.costid
+left join tb_b_user h on b.carrierid=h.userid
                             where a.status = 0 and paytype = 0 " + where + @"
                             order by b.shippingnoteadddatetime desc";
             DataTable dt = dbc.ExecuteDataTable(sql);
@@ -1806,7 +1864,7 @@ left join (
     /// <param name="changjia"></param>
     /// <returns></returns>
     [CSMethod("GetAddOrderList2")]
-    public object GetAddOrderList2(String shippingnotenumber, String changjia, String addsearch_beg, String addsearch_end, String addsearch_are)
+    public object GetAddOrderList2(String shippingnotenumber, String changjia, String addsearch_beg, String addsearch_end, String addsearch_are, string gys, string mudidi)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1833,6 +1891,14 @@ left join (
             {
                 where += " and " + dbc.C_Like("f.name", addsearch_are.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
             }
+            if (!string.IsNullOrEmpty(gys.Trim()))
+            {
+                where += " and " + dbc.C_Like("e.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+            }
+            if (!string.IsNullOrEmpty(mudidi.Trim()))
+            {
+                where += " and " + dbc.C_Like("c.goodsreceiptplace", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+            }
             String sql = @"select (IFNULL(a.money,0)-IFNULL(a.verifymoney,0)) as price,a.shippingnoteid,d.username changjia,b.shippingnotenumber,
                             e.username drivername,a.money actualdrivermoney,b.consignmentdatetime,f.name as goodstoroutename,IFNULL(g.paysummoney,0) paysummoney,a.id
                             from tb_b_shippingnoteinfo_cost a
@@ -1842,10 +1908,11 @@ left join tb_b_area f on c.goodstoroutecode=f.code
                             left join tb_b_user d on c.shipperid = d.userid
                             left join tb_b_user e on a.userid = e.userid
 left join (
-	select shippingnoteid,sum(paymoney) paysummoney from tb_b_shippingnoteinfo_pay 
+	select shippingnoteid,costid,sum(paymoney) paysummoney from tb_b_shippingnoteinfo_pay 
 	where  (paytype=1 or paytype=2) and paystatus>=10
-	GROUP BY shippingnoteid
-)g on a.shippingnoteid=g.shippingnoteid
+	GROUP BY shippingnoteid,costid
+)g on a.shippingnoteid=g.shippingnoteid and a.id = g.costid
+left join tb_b_user h on b.carrierid=h.userid
                             where a.status = 0 and paytype = 1 and a.money > 0 " + where + @"
                             order by b.shippingnoteadddatetime desc";
             DataTable dt = dbc.ExecuteDataTable(sql);
@@ -1860,7 +1927,7 @@ left join (
     /// <param name="jsr"></param>
     /// <returns></returns>
     [CSMethod("SaveOrderPay")]
-    public bool SaveOrderPay(string orderId, JSReader jsr, string yfje,string costid)
+    public bool SaveOrderPay(string orderId, JSReader jsr, string yfje, string costid)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -1870,7 +1937,7 @@ left join (
                 //验证是否能继续申请
                 decimal sqjeSum = 0m;
                 decimal yfjeSum = !string.IsNullOrEmpty(yfje) ? Convert.ToDecimal(yfje) : 0m;
-                String sql = @"select shippingnoteid,sum(paymoney) summoney from tb_b_shippingnoteinfo_pay where status=0 and shippingnoteid=" + dbc.ToSqlValue(orderId) + " group by shippingnoteid";
+                String sql = @"select shippingnoteid,sum(paymoney) summoney from tb_b_shippingnoteinfo_pay where status=0 and shippingnoteid=" + dbc.ToSqlValue(orderId) + " and costid = " + dbc.ToSqlValue(costid) + " group by shippingnoteid";
                 DataTable sumDt = dbc.ExecuteDataTable(sql);
                 if (sumDt.Rows.Count > 0)
                 {
@@ -1941,6 +2008,113 @@ left join (
             }
         }
 
+    }
+
+    /// <summary>
+    /// 修改
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="orderId"></param>
+    /// <param name="jsr"></param>
+    /// <returns></returns>
+    [CSMethod("UpdateDriverPay")]
+    public bool UpdateDriverPay(string id, string orderId, JSReader jsr)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                DateTime ti = DateTime.Now;
+
+                //新增
+                string paymoney = jsr["paymoney"].ToString();
+                string paymemo = jsr["paymemo"].ToString();
+
+                var dt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_pay");
+                var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                var dr = dt.NewRow();
+                dr["id"] = id;
+                dr["paymoney"] = paymoney;
+                dr["paymemo"] = paymemo;
+                dr["updateuser"] = SystemUser.CurrentUser.UserID;
+                dr["updatetime"] = ti;
+                dt.Rows.Add(dr);
+                dbc.UpdateTable(dt, dtt);
+
+                var childDt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_pay_flow");
+                var childDr = childDt.NewRow();
+                childDr["id"] = Guid.NewGuid().ToString();
+                childDr["shippingnoteid"] = orderId;
+                childDr["shippingnotepayid"] = id;
+                childDr["paystatus"] = 10;
+                /*childDr["paytype"] = 1;
+                childDr["paymoney"] = paymoney;
+                childDr["paymemo"] = paymemo;*/
+                childDr["status"] = 0;
+                childDr["adduser"] = SystemUser.CurrentUser.UserID;
+                childDr["addtime"] = ti;
+                childDr["updateuser"] = SystemUser.CurrentUser.UserID;
+                childDr["updatetime"] = ti;
+                childDt.Rows.Add(childDr);
+                dbc.InsertTable(childDt);
+                LogByShippingnote(dbc, orderId, "客服申请司机付款修改", SystemUser.CurrentUser.UserName + "在" + ti + "客服申请司机付款修改金额" + paymoney + "元", ti);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [CSMethod("DelDriverPay")]
+    public bool DelDriverPay(string id, string orderId)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string sql = "update tb_b_shippingnoteinfo_pay set status=1 where id=" + dbc.ToSqlValue(id);
+                dbc.ExecuteNonQuery(sql);
+
+                DateTime ti = DateTime.Now;
+                var childDt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_pay_flow");
+                var childDr = childDt.NewRow();
+                childDr["id"] = Guid.NewGuid().ToString();
+                childDr["shippingnoteid"] = orderId;
+                childDr["shippingnotepayid"] = id;
+                childDr["paystatus"] = 10;
+                /*childDr["paytype"] = 1;
+                childDr["paymoney"] = paymoney;
+                childDr["paymemo"] = paymemo;*/
+                childDr["status"] = 0;
+                childDr["adduser"] = SystemUser.CurrentUser.UserID;
+                childDr["addtime"] = ti;
+                childDr["updateuser"] = SystemUser.CurrentUser.UserID;
+                childDr["updatetime"] = ti;
+                childDt.Rows.Add(childDr);
+                dbc.InsertTable(childDt);
+                LogByShippingnote(dbc, orderId, "客服申请司机付款删除", SystemUser.CurrentUser.UserName + "在" + ti + "删除客服申请司机付款", ti);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
     }
 
     /// <summary>
@@ -2081,7 +2255,7 @@ left join (
     /// <param name="paystatus"></param>
     /// <returns></returns>
     [CSMethod("GetCarrierPayByPage")]
-    public object GetCarrierPayByPage(int pagnum, int pagesize, string changjia, string beg, string end, string shippingnotenumber, string paystatus)
+    public object GetCarrierPayByPage(int pagnum, int pagesize, string changjia, string beg, string end, string shippingnotenumber, string paystatus, string gys, string mudidi)
     {
         using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
         {
@@ -2111,13 +2285,22 @@ left join (
                 {
                     where += " and " + dbc.C_EQ("a.paystatus", paystatus);
                 }
+                if (!string.IsNullOrEmpty(gys.Trim()))
+                {
+                    where += " and " + dbc.C_Like("c.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(mudidi.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.goodsreceiptplace", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
                 string str = @"select a.*,g.shippingnotenumber,g.changjia,c.username carriername,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
 left join (
-    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia from tb_b_shippingnoteinfo b
+    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia,f.username,e.goodsreceiptplace from tb_b_shippingnoteinfo b
     left join (
-        select c.offerid,d.username from tb_b_sourcegoodsinfo_offer c
+        select c.offerid,d.username,c.goodsreceiptplace from tb_b_sourcegoodsinfo_offer c
         left join tb_b_user d on c.shipperid=d.userid
     )e on b.offerid=e.offerid
+    left join tb_b_user f on b.carrierid=f.userid
 )g on a.shippingnoteid=g.shippingnoteid
 inner join tb_b_shippingnoteinfo_cost b on a.costid = b.id
 left join tb_b_user c on b.userid = c.userid
@@ -2155,7 +2338,7 @@ where a.status=0 and a.paytype in (0,3)";
                 //验证是否能继续申请
                 decimal sqjeSum = 0m;
                 decimal yfjeSum = !string.IsNullOrEmpty(yfje) ? Convert.ToDecimal(yfje) : 0m;
-                String sql = @"select shippingnoteid,sum(paymoney) summoney from tb_b_shippingnoteinfo_pay where status=0 and shippingnoteid=" + dbc.ToSqlValue(orderId) + " group by shippingnoteid";
+                String sql = @"select shippingnoteid,sum(paymoney) summoney from tb_b_shippingnoteinfo_pay where status=0 and shippingnoteid=" + dbc.ToSqlValue(orderId) + " and costid = " + dbc.ToSqlValue(costid) + " group by shippingnoteid";
                 DataTable sumDt = dbc.ExecuteDataTable(sql);
                 if (sumDt.Rows.Count > 0)
                 {
@@ -2225,6 +2408,113 @@ where a.status=0 and a.paytype in (0,3)";
             }
         }
 
+    }
+
+    /// <summary>
+    /// 修改
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="orderId"></param>
+    /// <param name="jsr"></param>
+    /// <returns></returns>
+    [CSMethod("UpdateCarrierPay")]
+    public bool UpdateCarrierPay(string id, string orderId, JSReader jsr)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                DateTime ti = DateTime.Now;
+
+                //新增
+                string paymoney = jsr["paymoney"].ToString();
+                string paymemo = jsr["paymemo"].ToString();
+
+                var dt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_pay");
+                var dtt = new SmartFramework4v2.Data.DataTableTracker(dt);
+                var dr = dt.NewRow();
+                dr["id"] = id;
+                dr["paymoney"] = paymoney;
+                dr["paymemo"] = paymemo;
+                dr["updateuser"] = SystemUser.CurrentUser.UserID;
+                dr["updatetime"] = ti;
+                dt.Rows.Add(dr);
+                dbc.UpdateTable(dt, dtt);
+
+                var childDt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_pay_flow");
+                var childDr = childDt.NewRow();
+                childDr["id"] = Guid.NewGuid().ToString();
+                childDr["shippingnoteid"] = orderId;
+                childDr["shippingnotepayid"] = id;
+                childDr["paystatus"] = 10;
+                /*childDr["paytype"] = 1;
+                childDr["paymoney"] = paymoney;
+                childDr["paymemo"] = paymemo;*/
+                childDr["status"] = 0;
+                childDr["adduser"] = SystemUser.CurrentUser.UserID;
+                childDr["addtime"] = ti;
+                childDr["updateuser"] = SystemUser.CurrentUser.UserID;
+                childDr["updatetime"] = ti;
+                childDt.Rows.Add(childDr);
+                dbc.InsertTable(childDt);
+                LogByShippingnote(dbc, orderId, "客服申请承运商付款修改", SystemUser.CurrentUser.UserName + "在" + ti + "客服申请承运商付款修改金额" + paymoney + "元", ti);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [CSMethod("DelCarrierPay")]
+    public bool DelCarrierPay(string id, string orderId)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            dbc.BeginTransaction();
+            try
+            {
+                string sql = "update tb_b_shippingnoteinfo_pay set status=1 where id=" + dbc.ToSqlValue(id);
+                dbc.ExecuteNonQuery(sql);
+
+                DateTime ti = DateTime.Now;
+                var childDt = dbc.GetEmptyDataTable("tb_b_shippingnoteinfo_pay_flow");
+                var childDr = childDt.NewRow();
+                childDr["id"] = Guid.NewGuid().ToString();
+                childDr["shippingnoteid"] = orderId;
+                childDr["shippingnotepayid"] = id;
+                childDr["paystatus"] = 10;
+                /*childDr["paytype"] = 1;
+                childDr["paymoney"] = paymoney;
+                childDr["paymemo"] = paymemo;*/
+                childDr["status"] = 0;
+                childDr["adduser"] = SystemUser.CurrentUser.UserID;
+                childDr["addtime"] = ti;
+                childDr["updateuser"] = SystemUser.CurrentUser.UserID;
+                childDr["updatetime"] = ti;
+                childDt.Rows.Add(childDr);
+                dbc.InsertTable(childDt);
+                LogByShippingnote(dbc, orderId, "客服申请承运商付款删除", SystemUser.CurrentUser.UserName + "在" + ti + "删除客服申请承运商付款", ti);
+
+                dbc.CommitTransaction();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dbc.RoolbackTransaction();
+                throw ex;
+            }
+        }
     }
 
     /// <summary>
@@ -2709,7 +2999,6 @@ where a.status=0 and a.paytype in (0,3)";
         {
             try
             {
-                #region 获取数据
                 string where = "";
                 if (!string.IsNullOrEmpty(beg))
                 {
@@ -2721,7 +3010,7 @@ where a.status=0 and a.paytype in (0,3)";
                 }
                 if (!string.IsNullOrEmpty(changjia.Trim()))
                 {
-                    where += " and " + dbc.C_EQ("b.username", changjia.Trim());
+                    where += " and " + dbc.C_Like("b.username", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
                 }
                 if (!string.IsNullOrEmpty(offerstatus))
                 {
@@ -2734,16 +3023,18 @@ where a.status=0 and a.paytype in (0,3)";
                 string str = @"select a.*,b.username,b.carriername,c.name vehiclelengthrequirementname from tb_b_sourcegoodsinfo_offer a
                             left join tb_b_user b on a.shipperid=b.userid
                             left join tb_b_dictionary_detail c on a.vehiclelengthrequirement=c.bm
-                            where a.shipperid in(
+                            where (a.shipperid in(
                                 select d.userid from tb_b_operator_association d
                                 left join tb_b_user e on d.userid=e.userid
                                 inner join tb_b_user f on d.operator=f.userid and f.correlationid=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID) + @"
                                 where d.status = 0
-                            )";
+                            ) or 'D4D659F2-C2AE-4D96-AA87-A5DF0EC3F57C'=" + dbc.ToSqlValue(SystemUser.CurrentUser.UserID.ToUpper()) + @")";
                 str += where;
-                str += " order by addtime desc";
-                #endregion
-                DataTable dt = dbc.ExecuteDataTable(str);
+
+                //开始取分页数据
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str + " order by a.offerstatus asc, a.flowstatus asc, a.goodsinsertdatetime desc");
+
 
                 Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
                 Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
@@ -2794,8 +3085,8 @@ where a.status=0 and a.paytype in (0,3)";
                 style4.Font.IsBold = false;//粗体
                 #endregion
 
-                String[] ColumnName = { "厂家", "询价时间", "询价状态", "询价流程状态", "单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积", "车型", "车长", "承运方", "是否提货", "是否送货", "预付运费", "预估企业报价", "预估下游成本", "预估税费成本", "预估资金成本", "备注" };
-                String[] ColumnV = { "username", "addtime", "offerstatus", "flowstatus", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube", "vehicletyperequirement", "vehiclelengthrequirementname", "carriername", "istakegoods", "isdelivergoods", "actualcompanypay", "totalmonetaryamount", "estimatemoney", "estimatetaxmoney", "estimatecostmoney", "memo" };
+                String[] ColumnName = { "厂家", "询价时间", "询价状态", "询价流程状态", "单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积", "车型", "车长", "承运方", "是否提货", "是否送货", "预付运费", "预估企业报价", "预估下游成本", "预估税费成本", "预估资金成本", "备注", "预估用油金额", "预估用票金额" };
+                String[] ColumnV = { "username", "addtime", "offerstatus", "flowstatus", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube", "vehicletyperequirement", "vehiclelengthrequirementname", "carriername", "istakegoods", "isdelivergoods", "actualcompanypay", "totalmonetaryamount", "estimatemoney", "estimatetaxmoney", "estimatecostmoney", "memo", "estimateoilmoney", "estimatevotemoney" };
                 for (int i = 0; i < ColumnName.Length; i++)
                 {
                     cells.SetColumnWidth(i, 30);
@@ -2809,7 +3100,80 @@ where a.status=0 and a.paytype in (0,3)";
                     {
                         for (int a = 0; a < ColumnV.Length; a++)
                         {
-                            cells[i + 1, a].PutValue(dt.Rows[i][ColumnV[a]].ToString());
+                            var ColumnVs = dt.Rows[i][ColumnV[a]].ToString();
+                            if (ColumnV[a] == "offerstatus")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        ColumnVs = "已咨询";
+                                        break;
+                                    case "1":
+                                        ColumnVs = "已下单";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "flowstatus")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        str = "询价单等待市场部转发操作";
+                                        break;
+                                    case "10":
+                                        str = "询价单已发送操作员，等待报价";
+                                        break;
+                                    case "20":
+                                        str = "操作员已报价，等待市场部提交客户报价";
+                                        break;
+                                    case "90":
+                                        str = "市场部已提交客户报价，等待客户下单";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "vehicletyperequirement")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "1":
+                                        str = "栏板车";
+                                        break;
+                                    case "2":
+                                        str = "厢车";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "istakegoods")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        str = "提货";
+                                        break;
+                                    case "1":
+                                        str = "不提货";
+                                        break;
+
+                                }
+                            }
+                            if (ColumnV[a] == "isdelivergoods")
+                            {
+                                switch (dt.Rows[i][ColumnV[a]].ToString())
+                                {
+                                    case "0":
+                                        str = "送货";
+                                        break;
+                                    case "1":
+                                        str = "不送";
+                                        break;
+
+                                }
+                            }
+
+                            cells[i + 1, a].PutValue(ColumnVs);
                             cells[i + 1, a].SetStyle(style2);
                         }
                     }
@@ -2882,7 +3246,7 @@ where a.status=0 and a.paytype in (0,3)";
 		                                '不送'
                                 END AS isdelivergoodsname,
                                 d.actualcompanypay,d.actualmoney,d.totalmonetaryamount,d.memo,a.isabnormal,a.abnormalmemo,a.gpscompany,a.gpsdenno,
-								(select count(*) from tb_b_shippingnoteinfo_doublepay where tb_b_shippingnoteinfo_doublepay.shippingnoteid=a.shippingnoteid) doublepaynum,d.vehiclelengthrequirementname,
+								(select count(*) from tb_b_shippingnoteinfo_doublepay where tb_b_shippingnoteinfo_doublepay.shippingnoteid=a.shippingnoteid) doublepaynum,d.vehiclelengthrequirementname,d.vehicleamount,
 a.carrierid,f.username AS carriername,h.driverid,a.takegoodsdriver,g.username AS takegoodsdrivername,a.offerid,a.actualmoneystatus
                                 from tb_b_shippingnoteinfo a
                                 left join (
@@ -2957,8 +3321,8 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
                 /*username,'carriername','takegoodsdrivername',shippingnoteadddatetime,shippingnotestatusname,shippingnotenumber,goodsfromroute,goodstoroute,goodsreceiptplace,consignee,
                  * consicontactname,consitelephonenumber,descriptionofgoods,totalnumberofpackages,itemgrossweight,cube,vehicletyperequirement,vehiclelengthrequirementname,istakegoodsname,isdelivergoodsname,
                  * totalmonetaryamount,actualmoney,"actualcompanypay",memo*/
-                String[] ColumnName = { "厂家", "供应商", "装车司机", "订单时间", "订单状态", "订单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积", "车型", "车长", "是否提货", "是否送货", "预付运费", "实际运费", "企业实际运费", "备注" };
-                String[] ColumnV = { "username", "carriername", "takegoodsdrivername", "shippingnoteadddatetime", "shippingnotestatusname", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube", "vehicletyperequirement", "vehiclelengthrequirementname", "istakegoodsname", "isdelivergoodsname", "totalmonetaryamount", "actualmoney", "actualcompanypay", "memo" };
+                String[] ColumnName = { "厂家", "供应商", "装车司机", "订单时间", "订单状态", "订单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积", "运输车辆", "车型", "车长", "是否提货", "是否送货", "预付运费", "实际运费", "企业实际运费", "备注" };
+                String[] ColumnV = { "username", "carriername", "takegoodsdrivername", "shippingnoteadddatetime", "shippingnotestatusname", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube", "vehicleamount", "vehicletyperequirement", "vehiclelengthrequirementname", "istakegoodsname", "isdelivergoodsname", "totalmonetaryamount", "actualmoney", "actualcompanypay", "memo" };
                 for (int i = 0; i < ColumnName.Length; i++)
                 {
                     cells.SetColumnWidth(i, 30);
@@ -3013,6 +3377,523 @@ left join tb_b_user g on a.takegoodsdriver=g.userid
         dr["updatetime"] = ti;
         dt.Rows.Add(dr);
         dbc.InsertTable(dt);
+    }
+
+
+
+
+    /// <summary>
+    /// 订单列表导出
+    /// </summary>
+    /// <param name="beg"></param>
+    /// <param name="end"></param>
+    /// <param name="changjia"></param>
+    /// <returns></returns>
+    [CSMethod("ExportOrder2", 2)]
+    public byte[] ExportOrder2(string beg, string end, string changjia, string ordernum, string gys, string zcsj, string cysj)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                string where = "";
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and  a.shippingnoteadddatetime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.shippingnoteadddatetime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(changjia.Trim()))
+                {
+                    where += " and " + dbc.C_Like("d.username", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(ordernum.Trim()))
+                {
+                    where += " and " + dbc.C_Like("a.shippingnotenumber", ordernum.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(gys.Trim()))
+                {
+                    where += " and " + dbc.C_Like("f.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(zcsj.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.username", zcsj.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(cysj.Trim()))
+                {
+                    where += " and " + dbc.C_Like("h.username", cysj.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+
+                string str = @"select (SELECT COUNT(*) FROM tb_b_receiptinfo WHERE isdeleteflag=0 AND shippingnoteid=a.shippingnoteid) AS hzcount,e.username as usernamea ,a.operatorid,a.shippingnoteid,d.username,a.shippingnoteadddatetime,a.tuoyunorder,
+                                a.shippingnotestatuscode,
+                                CASE a.shippingnotestatuscode
+	                                WHEN 0 THEN '已下单'
+	                                WHEN 10 THEN '提货中'
+	                                WHEN 20 THEN '待出发'
+	                                WHEN 30 THEN '在途'
+	                                WHEN 40 THEN '待验收付款'
+	                                WHEN 90 THEN '订单完成'
+	                                ELSE '差额待确认'
+                                END AS shippingnotestatusname,
+                                a.shippingnotenumber,d.goodsfromroute,d.goodstoroute,d.descriptionofgoods,d.totalnumberofpackages,d.itemgrossweight,d.cube,
+                                d.vehicletyperequirement,d.vehiclelengthrequirement,d.istakegoods,d.estimatemoney,d.vehicletype,d.vehiclelength,d.actualoilmoney,d.actualvotemoney,
+ d.actualnooilmoney,
+d.actualcompletemoney,d.actualtaxmoney,d.actualcostmoney,
+                                CASE d.istakegoods
+	                                WHEN 0 THEN
+		                                '提货'
+	                                ELSE
+		                                '不提'
+                                END AS istakegoodsname,
+                                d.isdelivergoods,
+                                CASE d.isdelivergoods
+	                                WHEN 0 THEN
+		                                '送货'
+	                                ELSE
+		                                '不送'
+                                END AS isdelivergoodsname,
+                                d.actualcompanypay,d.actualmoney,d.totalmonetaryamount,d.memo,a.isabnormal,a.abnormalmemo,a.gpscompany,a.gpsdenno,
+								(select count(*) from tb_b_shippingnoteinfo_doublepay where tb_b_shippingnoteinfo_doublepay.shippingnoteid=a.shippingnoteid) doublepaynum,d.vehiclelengthrequirementname,d.vehicleamount,
+a.carrierid,f.username AS carriername,h.driverid,h.username cysj,a.takegoodsdriver,g.username AS takegoodsdrivername,a.offerid,a.actualmoneystatus,a.consignmentdatetime,d.goodsfromroutecode,d.goodstoroutecode,d.consignee,d.consicontactname,d.consitelephonenumber,d.placeofloading,d.goodsreceiptplace
+                                from tb_b_shippingnoteinfo a
+                                left join (
+	                                select c.username,c.carriername,b.*,e.name vehiclelengthrequirementname from tb_b_sourcegoodsinfo_offer b
+	                                left join tb_b_user c on b.shipperid=c.userid
+                                    left join tb_b_dictionary_detail e on b.vehiclelengthrequirement=e.bm
+                                ) d on a.offerid=d.offerid
+                                left join tb_b_user e on a.operatorid=e.userid
+left join tb_b_user f on a.carrierid=f.userid
+left join (
+    select h1.shippingnotenumber,h1.driverid,h2.username from tb_b_joborderinfo h1
+    left join tb_b_user h2 on h1.driverid=h2.userid
+) h on a.shippingnotenumber=h.shippingnotenumber
+left join tb_b_user g on a.takegoodsdriver=g.userid
+                                where a.isdeleteflag=0 ";
+                str += where;
+
+                //开始取分页数据
+                System.Data.DataTable dtPage = new System.Data.DataTable();
+                dtPage = dbc.ExecuteDataTable(str + " order by a.shippingnoteadddatetime desc");
+                dtPage.Columns.Add("userCZY");
+                dtPage.Columns.Add("userGYS");
+                dtPage.Columns.Add("userGYS_username");
+                dtPage.Columns.Add("userGYS_vehiclenumber");
+                dtPage.Columns.Add("userGYS_identitydocumentnumber");
+
+                dtPage.Columns.Add("userZCSJ");
+
+                dtPage.Columns.Add("userZCSJ_username");
+                dtPage.Columns.Add("userZCSJ_vehiclenumber");
+                dtPage.Columns.Add("userZCSJ_identitydocumentnumber");
+                dtPage.Columns.Add("userZCSJ_usertel");
+                foreach (DataRow dr in dtPage.Rows)
+                {
+                    var userCZY = "";
+                    var dt = dbc.ExecuteDataTable("SELECT username FROM tb_b_shippingnoteinfo_operator a LEFT JOIN tb_b_user b ON a.userid=b.userid where a.status=0 and shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
+                    foreach (DataRow dr2 in dt.Rows)
+                    {
+                        userCZY += dr2[0].ToString() + ",";
+                    }
+                    dr["userCZY"] = userCZY;
+
+
+                    var userGYS = "";
+                    dt = dbc.ExecuteDataTable(@"    SELECT b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
+ where a.paytype=0 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
+                    foreach (DataRow dr2 in dt.Rows)
+                    {
+                        userGYS += dr2["username"].ToString() + "(" + dr2["vehiclenumber"].ToString() + "," + dr2["identitydocumentnumber"].ToString() + ")" + ",";
+
+                        dr["userGYS_username"] = dr2["username"].ToString();
+                        dr["userGYS_vehiclenumber"] = dr2["vehiclenumber"].ToString();
+                        dr["userGYS_identitydocumentnumber"] = dr2["identitydocumentnumber"].ToString();
+
+                    }
+                    dr["userGYS"] = userGYS;
+
+
+                    var userZCSJ = "";
+                    dt = dbc.ExecuteDataTable(@"    SELECT b.vehiclenumber,b.username,b.usertel,b.identitydocumentnumber FROM tb_b_shippingnoteinfo_cost a LEFT JOIN tb_b_user b ON a.userid=b.userid
+ where a.paytype=1 and a.shippingnoteid=" + dbc.ToSqlValue(dr["shippingnoteid"].ToString()));
+                    foreach (DataRow dr2 in dt.Rows)
+                    {
+                        userZCSJ += dr2["username"].ToString() + "(" + dr2["vehiclenumber"].ToString() + "," + dr2["identitydocumentnumber"].ToString() + "," + dr2["usertel"].ToString() + ")" + ",";
+                        dr["userZCSJ_username"] = dr2["username"].ToString();
+                        dr["userZCSJ_vehiclenumber"] = dr2["vehiclenumber"].ToString();
+                        dr["userZCSJ_identitydocumentnumber"] = dr2["identitydocumentnumber"].ToString();
+                        dr["userZCSJ_usertel"] = dr2["usertel"].ToString();
+
+
+                    }
+                    dr["userZCSJ"] = userZCSJ;
+
+
+
+                }
+                var dts = dtPage;
+                Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+                /*"厂家","供应商","装车司机","订单时间","订单状态","订单号","起始地","目的地","收货地址","收货方",
+                 * "收货联系人","收货联系方式","货物","数量","重量","体积","车型","车长","是否提货","是否送货",
+                 * "预付运费","实际运费","企业实际运费","备注"*/
+                /*username,'carriername','takegoodsdrivername',shippingnoteadddatetime,shippingnotestatusname,shippingnotenumber,goodsfromroute,goodstoroute,goodsreceiptplace,consignee,
+                 * consicontactname,consitelephonenumber,descriptionofgoods,totalnumberofpackages,itemgrossweight,cube,vehicletyperequirement,vehiclelengthrequirementname,istakegoodsname,isdelivergoodsname,
+                 * totalmonetaryamount,actualmoney,"actualcompanypay",memo*/
+                String[] ColumnName = { "厂家", "订单时间", "订单状态", "订单号", "起始地", "目的地", "收货地址", "收货方", "收货联系人", "收货联系方式", "货物", "数量", "重量", "体积","运输车辆", "车型", "车长", "是否提货", "是否送货", "预付运费", "实际运费", "企业实际运费", "备注",
+                                          "供应商", "车牌", "身份证", "承运司机", "装车司机", "车牌", "身份证", "司机电话", "实际未用票", "实际下游成本", "企业实际运费","操作员" };
+                String[] ColumnV = { "username",   "shippingnoteadddatetime", "shippingnotestatusname", "shippingnotenumber", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "consignee", "consicontactname", "consitelephonenumber", "descriptionofgoods", "totalnumberofpackages", "itemgrossweight", "cube","vehicleamount", "vehicletyperequirement", "vehiclelengthrequirementname", "istakegoodsname", "isdelivergoodsname", "totalmonetaryamount", "actualmoney", "actualcompanypay", "memo"
+                                   , "userGYS_username" , "userGYS_vehiclenumber" , "userGYS_identitydocumentnumber" , "cysj" , "userZCSJ_username" , "userZCSJ_vehiclenumber" ,
+                                   "userZCSJ_identitydocumentnumber" , "userZCSJ_usertel" , "totalmonetaryamount" , "actualnooilmoney" , "actualmoney"
+                                    , "actualcompanypay" , "userCZY"
+                                   };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dts.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dts.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            cells[i + 1, a].PutValue(dts.Rows[i][ColumnV[a]].ToString());
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("ExportSJ", 2)]
+    public byte[] ExportSJ(string changjia, string beg, string end, string shippingnotenumber, string paystatus, string gys, string mudidi)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                string where = "";
+                if (!string.IsNullOrEmpty(changjia.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.changjia", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(shippingnotenumber.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.shippingnotenumber", shippingnotenumber.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(paystatus))
+                {
+                    where += " and " + dbc.C_EQ("a.paystatus", paystatus);
+                }
+                if (!string.IsNullOrEmpty(gys.Trim()))
+                {
+                    where += " and " + dbc.C_Like("c.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(mudidi.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.goodsreceiptplace", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                string str = @"select a.*,g.goodsfromroute,g.goodstoroute,g.goodsreceiptplace,g.actualcompanypay,g.descriptionofgoods,case paystatus when 0 then '未付款，客服未申请' when 10 then '未付款，客服已申请' when 11 then '未付款，总经理审核' when 20 then '未付款，操作已提交财务' else '财务已付款' end paystatusstr,g.shippingnotenumber,g.changjia,c.username sjname,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
+left join (
+    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia,f.username,e.goodstoroute,e.goodsfromroute,e.goodsreceiptplace,e.actualcompanypay,e.descriptionofgoods from tb_b_shippingnoteinfo b
+    left join (
+        select c.offerid,d.username,c.goodstoroute,c.goodsfromroute,c.goodsreceiptplace,c.actualcompanypay,c.descriptionofgoods from tb_b_sourcegoodsinfo_offer c
+        left join tb_b_user d on c.shipperid=d.userid
+    )e on b.offerid=e.offerid
+    left join tb_b_user f on b.carrierid=f.userid
+)g on a.shippingnoteid=g.shippingnoteid
+inner join tb_b_shippingnoteinfo_cost b on a.costid = b.id
+left join tb_b_user c on b.userid = c.userid
+where a.status=0 and a.paytype in (1,4)";
+                str += where + " order by a.addtime desc";
+
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str);
+
+                Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+
+                String[] ColumnName = { "厂家", "单号", "托运协议编号", "起始地", "目的地", "收货地址", "货物", "司机姓名", "司机申请付款金额", "申请备注", "司机付款状态" };
+                String[] ColumnV = { "changjia", "shippingnotenumber", "tuoyunorder", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "descriptionofgoods", "sjname", "paymoney", "paymemo", "paystatusstr" };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            var ColumnVs = dt.Rows[i][ColumnV[a]].ToString();
+                            cells[i + 1, a].PutValue(ColumnVs);
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    [CSMethod("ExportCarrier", 2)]
+    public byte[] ExportCarrier(string changjia, string beg, string end, string shippingnotenumber, string paystatus, string gys, string mudidi)
+    {
+        using (MySqlDbConnection dbc = MySqlConnstr.GetDBConnection())
+        {
+            try
+            {
+                string where = "";
+                if (!string.IsNullOrEmpty(changjia.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.changjia", changjia.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(beg))
+                {
+                    where += " and a.addtime>='" + Convert.ToDateTime(beg).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(end))
+                {
+                    where += " and a.addtime<='" + Convert.ToDateTime(end).AddDays(1).ToString("yyyy-MM-dd") + "'";
+                }
+                if (!string.IsNullOrEmpty(shippingnotenumber.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.shippingnotenumber", shippingnotenumber.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(paystatus))
+                {
+                    where += " and " + dbc.C_EQ("a.paystatus", paystatus);
+                }
+                if (!string.IsNullOrEmpty(gys.Trim()))
+                {
+                    where += " and " + dbc.C_Like("c.username", gys.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                if (!string.IsNullOrEmpty(mudidi.Trim()))
+                {
+                    where += " and " + dbc.C_Like("g.goodsreceiptplace", mudidi.Trim(), SmartFramework4v2.Data.LikeStyle.LeftAndRightLike);
+                }
+                string str = @"select a.*,g.goodsfromroute,g.goodstoroute,g.goodsreceiptplace,g.actualcompanypay,g.descriptionofgoods,case paystatus when 0 then '未付款，客服未申请' when 10 then '未付款，客服已申请' when 11 then '未付款，总经理审核' when 20 then '未付款，操作已提交财务' else '财务已付款' end paystatusstr,g.shippingnotenumber,g.changjia,c.username carriername,g.tuoyunorder from tb_b_shippingnoteinfo_pay a
+left join (
+    select b.shippingnoteid,b.shippingnotenumber,b.tuoyunorder,e.username as changjia,f.username,e.goodstoroute,e.goodsfromroute,e.goodsreceiptplace,e.actualcompanypay,e.descriptionofgoods from tb_b_shippingnoteinfo b
+    left join (
+        select c.offerid,d.username,c.goodstoroute,c.goodsfromroute,c.goodsreceiptplace,c.actualcompanypay,c.descriptionofgoods from tb_b_sourcegoodsinfo_offer c
+        left join tb_b_user d on c.shipperid=d.userid
+    )e on b.offerid=e.offerid
+    left join tb_b_user f on b.carrierid=f.userid
+)g on a.shippingnoteid=g.shippingnoteid
+inner join tb_b_shippingnoteinfo_cost b on a.costid = b.id
+left join tb_b_user c on b.userid = c.userid
+where a.status=0 and a.paytype in (0,3)";
+                str += where + " order by a.addtime desc";
+
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt = dbc.ExecuteDataTable(str);
+
+                Aspose.Cells.Workbook workbook = new Aspose.Cells.Workbook(); //工作簿
+                Aspose.Cells.Worksheet sheet = workbook.Worksheets[0]; //工作表
+                Aspose.Cells.Cells cells = sheet.Cells;//单元格
+
+                #region 样式
+                //样式1
+                Aspose.Cells.Style style1 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style1.HorizontalAlignment = TextAlignmentType.Center;//文字居中
+                style1.Font.Name = "宋体";//文字字体
+                style1.Font.Size = 12;//文字大小
+                style1.IsTextWrapped = true;//单元格内容自动换行
+                style1.Font.IsBold = true;//粗体
+                style1.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style1.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式2
+                Aspose.Cells.Style style2 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style2.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style2.Font.Name = "宋体";//文字字体
+                style2.Font.Size = 12;//文字大小
+                style2.IsTextWrapped = true;//单元格内容自动换行
+                style2.Font.IsBold = false;//粗体
+                style2.Borders[Aspose.Cells.BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.RightBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.TopBorder].LineStyle = CellBorderType.Thin;
+                style2.Borders[Aspose.Cells.BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+
+                //样式3
+                Aspose.Cells.Style style3 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style3.HorizontalAlignment = TextAlignmentType.Center;//文字居左
+                style3.Font.Name = "宋体";//文字字体
+                style3.Font.Size = 20;//文字大小
+                style3.IsTextWrapped = true;//单元格内容自动换行
+                style3.Font.IsBold = true;//粗体
+
+
+                //样式4
+                Aspose.Cells.Style style4 = workbook.Styles[workbook.Styles.Add()];//新增样式    
+                style4.HorizontalAlignment = TextAlignmentType.Left;//文字居左
+                style4.Font.Name = "宋体";//文字字体
+                style4.Font.Size = 10;//文字大小
+                style4.Font.Color = Color.Red;//文字大小
+
+                style4.IsTextWrapped = true;//单元格内容自动换行
+                style4.Font.IsBold = false;//粗体
+                #endregion
+
+                String[] ColumnName = { "厂家", "单号", "托运协议编号", "起始地", "目的地", "收货地址", "货物", "承运商姓名", "承运商申请付款金额", "申请备注", "承运商付款状态" };
+                String[] ColumnV = { "changjia", "shippingnotenumber", "tuoyunorder", "goodsfromroute", "goodstoroute", "goodsreceiptplace", "descriptionofgoods", "carriername", "paymoney", "paymemo", "paystatusstr" };
+                for (int i = 0; i < ColumnName.Length; i++)
+                {
+                    cells.SetColumnWidth(i, 30);
+                    cells[0, i].PutValue(ColumnName[i]);
+                    cells[0, i].SetStyle(style1);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        for (int a = 0; a < ColumnV.Length; a++)
+                        {
+                            var ColumnVs = dt.Rows[i][ColumnV[a]].ToString();
+                            cells[i + 1, a].PutValue(ColumnVs);
+                            cells[i + 1, a].SetStyle(style2);
+                        }
+                    }
+                }
+
+
+                System.IO.MemoryStream ms = workbook.SaveToStream();
+                byte[] bt = ms.ToArray();
+                return bt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 
     public static string ToJson(DataTable dt)

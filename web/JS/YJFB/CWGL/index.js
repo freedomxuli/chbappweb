@@ -1,5 +1,6 @@
-﻿
+
 var pageSize = 15;
+var pagenew = 1;
 var orderstore = createSFW4Store({
     data: [],
     pageSize: pageSize,
@@ -36,6 +37,7 @@ var orderstore = createSFW4Store({
       
     ],
     onPageChange: function (sto, nPage, sorters) {
+		pagenew = nPage;
         getUser(nPage);
     }
 });
@@ -111,7 +113,7 @@ function getUser(nPage) {
             currentPage: retVal.cp
         });
 
-    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_name").getValue());
+    }, CS.onError, nPage, pageSize, Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_name").getValue(),Ext.getCmp("cx_ddbm").getValue());
 }
 function getUser2(nPage) {
     CS('CZCLZ.CWByMySql.GetUserList2', function (retVal) {
@@ -336,7 +338,13 @@ Ext.onReady(function () {
                                                         width: 160,
                                                         labelWidth: 70,
                                                         fieldLabel: '厂家'
-                                                    },
+                                                    },{
+                                                          xtype: 'textfield',
+                                                          id: 'cx_ddbm',
+                                                          width: 160,
+                                                          labelWidth: 70,
+                                                          fieldLabel: '订单号'
+                                                      },
                                                     {
                                                         xtype: 'button',
                                                         iconCls: 'search',
@@ -374,7 +382,14 @@ Ext.onReady(function () {
 
                                                             AddPJ2(idlist,  actualwaymoney);
                                                         }
-                                                    }
+                                                    },
+													{
+														xtype: 'button',
+														text: '导出',
+														handler: function () {
+															DownloadFile("CZCLZ.CWByMySql.ExportGYSHX", "财务管理.xls",Ext.getCmp("cx_beg").getValue(), Ext.getCmp("cx_end").getValue(), Ext.getCmp("cx_name").getValue(),Ext.getCmp("cx_ddbm").getValue());
+														}
+													}
                                                 ]
                                             },
                                             {
@@ -683,7 +698,7 @@ Ext.onReady(function () {
     });
 
     new ConsumeView();
-    getUser(1);
+    getUser(pagenew);
     //getUser2(1);
     //getUser3(1);
  
@@ -798,7 +813,7 @@ function AddPJ(notepid, actualmoney) {
                                var me = this;
                                CS('CZCLZ.CWByMySql.SaveKP', function (retVal) {
                                    if (retVal) {
-                                       getUser(1);
+                                       getUser(pagenew);
                                        me.up('window').close();
 
                                    }
@@ -829,7 +844,7 @@ function ZF(billingid, shippingnoteid)
 {
     CS('CZCLZ.CWByMySql.ChangeZF', function (retVal) {
         if (retVal) {
-            getUser(1);
+            getUser(pagenew);
             me.up('window').close();
 
         }
@@ -1203,7 +1218,7 @@ function AddPJ2(idlist, actualcompanypay) {
 
                                        CS('CZCLZ.CWByMySql.SaveKPALL', function (retVal) {
                                            if (retVal) {
-                                               getUser(1);
+                                               getUser(pagenew);
                                                me.up('window').close();
 
                                            }
